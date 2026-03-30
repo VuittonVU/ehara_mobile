@@ -59,13 +59,13 @@ class LoginTextField extends StatelessWidget {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: AppColors.textPrimary.withOpacity(0.08),
+            color: AppColors.textPrimary.withOpacity(0.4),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(
-            color: AppColors.textPrimary.withOpacity(0.08),
+            color: AppColors.textPrimary.withOpacity(0.4),
           ),
         ),
         focusedBorder: OutlineInputBorder(

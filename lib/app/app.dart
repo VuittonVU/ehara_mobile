@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/signup_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/walkthrough/presentation/screens/walkthrough_screen.dart';
 import 'routes/app_routes.dart';
@@ -54,6 +55,10 @@ class EHaraApp extends StatelessWidget {
               );
             },
           ),
+        ),
+        GoRoute(
+          path: AppRoutes.signup,
+          builder: (context, state) => const SignUpScreen(),
         ),
       ],
     );

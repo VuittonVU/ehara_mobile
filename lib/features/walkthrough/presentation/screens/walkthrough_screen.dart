@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../../../../app/routes/app_routes.dart';
 import '../../data/walkthrough_data.dart';
 import '../widgets/walkthrough_page.dart';
@@ -17,18 +19,28 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
   int currentIndex = 0;
 
   void nextPage() {
-    if (currentIndex < walkthroughData.length - 1) {
+    final isLastPage = currentIndex == walkthroughData.length - 1;
+
+    if (isLastPage) {
+      context.go(AppRoutes.login);
+    } else {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
-    } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool isLastPage = currentIndex == walkthroughData.length - 1;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -50,15 +62,13 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
               ),
             ),
 
-            // BUTTON
             WalkthroughButton(
-              text: currentIndex == 0 ? "Mulai Sekarang" : "Berikutnya",
+              text: isLastPage ? "Masuk Sekarang" : "Berikutnya",
               onTap: nextPage,
             ),
 
             const SizedBox(height: 16),
 
-            // INDICATOR
             WalkthroughIndicator(
               currentIndex: currentIndex,
               total: walkthroughData.length,
