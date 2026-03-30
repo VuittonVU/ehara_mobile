@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/routes/app_routes.dart';
+import '../../../../../app/routes/app_routes.dart';
 import '../../data/walkthrough_data.dart';
 import '../widgets/walkthrough_page.dart';
 import '../widgets/walkthrough_indicator.dart';

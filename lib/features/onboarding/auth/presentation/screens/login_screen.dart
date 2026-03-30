@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../app/routes/app_routes.dart';
+import '../../../../../app/routes/app_routes.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/theme/app_text_styles.dart';
 import '../widgets/login_text_field.dart';
 import '../widgets/social_login_button.dart';
-import '../../../../core/widgets/app_background.dart';
+import '../../../../../core/widgets/app_background.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
