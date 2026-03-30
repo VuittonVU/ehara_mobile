@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
-import '../features/splash/presentation/pages/splash_screen.dart';
+import '../features/splash/presentation/screens/splash_screen.dart';
+import '../features/walkthrough/presentation/screens/walkthrough_screen.dart';
 import 'routes/app_routes.dart';
 
 class EHaraApp extends StatelessWidget {
@@ -15,7 +16,7 @@ class EHaraApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
       routes: {
         AppRoutes.splash: (_) => const SplashScreen(),
-        AppRoutes.onboarding: (_) => const Placeholder(),
+        AppRoutes.walkthrough: (_) => const WalkthroughScreen(),
       },
     );
   }

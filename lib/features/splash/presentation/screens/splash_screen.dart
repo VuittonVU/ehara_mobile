@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/routes/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +13,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   // Timer? _timer;
 
   @override
@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
   // }
 
   void _goNext() {
-    Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+    Navigator.pushReplacementNamed(context, AppRoutes.walkthrough);
   }
 
   @override
@@ -50,7 +50,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-
             /// Background
             Image.asset(
               'assets/images/splash/background.png',
@@ -63,7 +62,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   children: [
-
                     const Spacer(flex: 3),
 
                     /// Logo
@@ -85,7 +83,6 @@ class _SplashScreenState extends State<SplashScreen> {
                       padding: const EdgeInsets.only(bottom: 32),
                       child: Column(
                         children: [
-
                           /// Tagline
                           Image.asset(
                             'assets/images/splash/tagline.png',
@@ -105,15 +102,13 @@ class _SplashScreenState extends State<SplashScreen> {
                           const SizedBox(height: 10),
 
                           /// Text bawah
-                          const Text(
+                          Text(
                             'Pusat Penelitian Kelapa Sawit',
-                            style: TextStyle(
+                            style: AppTextStyles.regular(
                               fontSize: 16,
                               color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
-
                         ],
                       ),
                     ),
