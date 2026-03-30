@@ -15,7 +15,7 @@ class AppBackground extends StatelessWidget {
         /// FULL BACKGROUND IMAGE
         Positioned.fill(
           child: Image.asset(
-            'assets/images/splash/background.png',
+            'assets/background/bg.png',
             fit: BoxFit.cover,
           ),
         ),

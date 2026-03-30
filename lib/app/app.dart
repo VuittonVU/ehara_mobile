@@ -1,3 +1,4 @@
+import 'package:ehara_mobile/features/main_feature/dashboard/presentation/screens/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -60,6 +61,10 @@ class EHaraApp extends StatelessWidget {
           path: AppRoutes.signup,
           builder: (context, state) => const SignUpScreen(),
         ),
+        GoRoute(
+          path: AppRoutes.dashboard,
+          builder: (context, state) => const DashboardPage(),
+        )
       ],
     );
 

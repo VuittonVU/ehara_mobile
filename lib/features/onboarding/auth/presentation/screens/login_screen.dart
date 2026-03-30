@@ -44,11 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login button pressed'),
-      ),
-    );
+    context.go(AppRoutes.dashboard);
   }
 
   @override
@@ -109,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           SocialLoginButton(
                             text: 'Sign in dengan Google',
-                            iconPath: 'assets/images/icons/google.png',
+                            iconPath: 'assets/icons/google.png',
                             onTap: () {},
                           ),
 
@@ -150,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           LoginTextField(
                             controller: emailController,
                             hintText: 'Email / Username',
-                            iconPath: 'assets/images/icons/email.png',
+                            iconPath: 'assets/icons/email.png',
                             keyboardType: TextInputType.emailAddress,
                           ),
 
@@ -159,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           LoginTextField(
                             controller: passwordController,
                             hintText: 'Password',
-                            iconPath: 'assets/images/icons/lock.png',
+                            iconPath: 'assets/icons/lock.png',
                             obscureText: isPasswordHidden,
                             suffixIcon: IconButton(
                               onPressed: () {

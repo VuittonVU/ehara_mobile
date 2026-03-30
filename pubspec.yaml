@@ -65,10 +65,12 @@ flutter:
 
   assets:
     - assets/images/ehara/
-    - assets/images/icons/
+    - assets/images/articles/
     - assets/images/logo/
-    - assets/images/maskot/
-    - assets/images/splash/
+    - assets/maskot/
+    - assets/splash/
+    - assets/icons/
+    - assets/background/bg.png
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

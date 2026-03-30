@@ -130,7 +130,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                           SocialLoginButton(
                             text: 'Sign up dengan Google',
-                            iconPath: 'assets/images/icons/google.png',
+                            iconPath: 'assets/icons/google.png',
                             onTap: () {},
                           ),
 
@@ -171,7 +171,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: fullNameController,
                             hintText: 'Nama Lengkap',
-                            iconPath: 'assets/images/icons/user.png',
+                            iconPath: 'assets/icons/user.png',
                           ),
 
                           const SizedBox(height: 16),
@@ -179,7 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: usernameController,
                             hintText: 'Username',
-                            iconPath: 'assets/images/icons/at.png',
+                            iconPath: 'assets/icons/at.png',
                           ),
 
                           const SizedBox(height: 16),
@@ -187,7 +187,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: addressController,
                             hintText: 'Alamat',
-                            iconPath: 'assets/images/icons/location.png',
+                            iconPath: 'assets/icons/location.png',
                           ),
 
                           const SizedBox(height: 16),
@@ -195,7 +195,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: emailController,
                             hintText: 'Email',
-                            iconPath: 'assets/images/icons/email.png',
+                            iconPath: 'assets/icons/email.png',
                             keyboardType: TextInputType.emailAddress,
                           ),
 
@@ -204,7 +204,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: phoneController,
                             hintText: 'Nomor Handphone',
-                            iconPath: 'assets/images/icons/phone.png',
+                            iconPath: 'assets/icons/phone.png',
                             keyboardType: TextInputType.phone,
                           ),
 
@@ -219,7 +219,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: passwordController,
                             hintText: 'Password',
-                            iconPath: 'assets/images/icons/lock.png',
+                            iconPath: 'assets/icons/lock.png',
                             obscureText: isPasswordHidden,
                             suffixIcon: IconButton(
                               onPressed: () {
@@ -242,7 +242,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: confirmPasswordController,
                             hintText: 'Konfirmasi Password',
-                            iconPath: 'assets/images/icons/lock.png',
+                            iconPath: 'assets/icons/lock.png',
                             obscureText: isConfirmPasswordHidden,
                             suffixIcon: IconButton(
                               onPressed: () {

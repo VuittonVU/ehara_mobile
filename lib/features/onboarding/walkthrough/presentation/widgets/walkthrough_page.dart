@@ -73,7 +73,7 @@ class WalkthroughPage extends StatelessWidget {
                 left: -10,
                 bottom: 10,
                 child: Image.asset(
-                  'assets/images/maskot/cloud.png',
+                  'assets/maskot/cloud.png',
                   width: 160,
                   fit: BoxFit.contain,
                 ),
@@ -87,7 +87,7 @@ class WalkthroughPage extends StatelessWidget {
                   alignment: Alignment.center,
                   transform: Matrix4.identity()..scale(-1.0, 1.0),
                   child: Image.asset(
-                    'assets/images/maskot/cloud.png',
+                    'assets/maskot/cloud.png',
                     width: 230,
                     fit: BoxFit.contain,
                   ),
