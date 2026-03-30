@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/routes/app_routes.dart';
 import '../../data/walkthrough_data.dart';
 import '../widgets/walkthrough_page.dart';
 import '../widgets/walkthrough_indicator.dart';
@@ -22,7 +23,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         curve: Curves.ease,
       );
     } else {
-      // TODO: navigate ke login
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }
 

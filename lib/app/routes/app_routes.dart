@@ -1,4 +1,5 @@
 class AppRoutes {
-  static const splash = '/';
+  static const String splash = '/';
   static const String walkthrough = '/walkthrough';
+  static const String login = '/login';
 }

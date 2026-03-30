@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../core/theme/app_theme.dart';
+import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/walkthrough/presentation/screens/walkthrough_screen.dart';
 import 'routes/app_routes.dart';
@@ -9,15 +12,57 @@ class EHaraApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final GoRouter router = GoRouter(
+      initialLocation: AppRoutes.splash,
+      routes: [
+        GoRoute(
+          path: AppRoutes.splash,
+          builder: (context, state) => const SplashScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.walkthrough,
+          builder: (context, state) => const WalkthroughScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.login,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const LoginScreen(),
+            transitionDuration: const Duration(milliseconds: 450),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              final fadeAnimation = Tween<double>(
+                begin: 0.0,
+                end: 1.0,
+              ).animate(animation);
+
+              final slideAnimation = Tween<Offset>(
+                begin: const Offset(0.0, 0.08),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ),
+              );
+
+              return FadeTransition(
+                opacity: fadeAnimation,
+                child: SlideTransition(
+                  position: slideAnimation,
+                  child: child,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'E-Hara',
       theme: AppTheme.lightTheme,
-      initialRoute: AppRoutes.splash,
-      routes: {
-        AppRoutes.splash: (_) => const SplashScreen(),
-        AppRoutes.walkthrough: (_) => const WalkthroughScreen(),
-      },
+      routerConfig: router,
     );
   }
 }
