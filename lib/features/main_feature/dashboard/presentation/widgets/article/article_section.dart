@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/theme/app_text_styles.dart';
-import '../../models/article_model.dart';
+import '../../../../../../core/constants/app_colors.dart';
+import '../../../../../../core/theme/app_text_styles.dart';
+import '../../../models/article_model.dart';
 import 'article_card.dart';
 
 class ArticleSection extends StatelessWidget {
   final List<ArticleModel> articles;
   final VoidCallback onSeeMoreTap;
+  final ValueChanged<ArticleModel> onArticleTap;
 
   const ArticleSection({
     super.key,
     required this.articles,
     required this.onSeeMoreTap,
+    required this.onArticleTap,
   });
 
   @override
@@ -54,7 +56,10 @@ class ArticleSection extends StatelessWidget {
           ...articles.map(
                 (article) => Padding(
               padding: const EdgeInsets.only(bottom: 18),
-              child: ArticleCard(article: article),
+              child: ArticleCard(
+                article: article,
+                onTap: () => onArticleTap(article),
+              ),
             ),
           ),
           Align(

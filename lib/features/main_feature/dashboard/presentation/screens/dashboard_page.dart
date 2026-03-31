@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/widgets/app_background.dart';
-import '../../../../../../core/widgets/app_bottom_navbar.dart';
+import '../../../../../core/widgets/app_bottom_navbar.dart';
+
+import '../../data/article_data.dart';
 import '../../models/article_model.dart';
 import '../../models/dashboard_menu_model.dart';
-import '../widgets/article_section.dart';
+
+import 'article/article_detail_page.dart';
+import 'article/article_list_page.dart';
+
+import '../widgets/article/article_section.dart';
 import '../widgets/dashboard_greeting_card.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_menu_section.dart';
@@ -13,26 +19,8 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<ArticleModel> articles = [
-      const ArticleModel(
-        title:
-        'Performa Random Forest Untuk Klasifikasi Penyakit Busuk Pangkal Batang Yang Disebabkan Oleh Ganoderma Boninense Pada Perkebunan Kelapa Sawit',
-        imagePath: 'assets/images/articles/img1.png',
-        date: '11 Nov 2024',
-      ),
-      const ArticleModel(
-        title:
-        'Eksplorasi Pendugaan Hara Daun Tanaman Kelapa Sawit Menggunakan Pesawat Tanpa Awak Dan Kamera Multispektral',
-        imagePath: 'assets/images/articles/img2.png',
-        date: '04 Nov 2024',
-      ),
-      const ArticleModel(
-        title:
-        'Pemetaan Kandungan Hara Daun Kelapa Sawit Menggunakan Citra Multispektral Berbasis Unmanned Aerial Vehicle',
-        imagePath: 'assets/images/articles/img3.png',
-        date: '04 Nov 2024',
-      ),
-    ];
+    final List<ArticleModel> allArticles = ArticleData.allArticles;
+    final List<ArticleModel> dashboardArticles = ArticleData.dashboardArticles;
 
     final List<DashboardMenuModel> menus = [
       DashboardMenuModel(
@@ -59,7 +47,7 @@ class DashboardPage extends StatelessWidget {
 
     return Scaffold(
       bottomNavigationBar: AppBottomNavbar(
-        currentIndex: 0, // dashboard
+        currentIndex: 0,
         onTapHome: () {},
         onTapRiwayat: () {
           Navigator.pushNamed(context, '/riwayat');
@@ -95,8 +83,23 @@ class DashboardPage extends StatelessWidget {
                       DashboardMenuSection(menus: menus),
                       const SizedBox(height: 20),
                       ArticleSection(
-                        articles: articles,
-                        onSeeMoreTap: () {},
+                        articles: dashboardArticles,
+                        onArticleTap: (article) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ArticleDetailPage(article: article),
+                            ),
+                          );
+                        },
+                        onSeeMoreTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ArticleListPage(articles: allArticles),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
