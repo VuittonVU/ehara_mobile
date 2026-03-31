@@ -56,7 +56,7 @@ class DashboardPage extends StatelessWidget {
           Navigator.pushNamed(context, '/riwayat');
         },
         onTapTambahAnalisis: () {
-          Navigator.pushNamed(context, '/tambah-analisis');
+          context.push(AppRoutes.form1);
         },
         onTapPembayaran: () {
           Navigator.pushNamed(context, '/pembayaran');

@@ -10,6 +10,11 @@ import '../features/onboarding/walkthrough/presentation/screens/walkthrough_scre
 
 import 'package:ehara_mobile/features/main_feature/dashboard/presentation/screens/dashboard_page.dart';
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
+import '../features/main_feature/form/presentation/screens/form1.dart';
+import '../features/main_feature/form/presentation/screens/form2.dart';
+import '../features/main_feature/form/presentation/screens/form3.dart';
+import '../features/main_feature/form/presentation/screens/form3_map.dart';
+
 
 class EHaraApp extends StatelessWidget {
   const EHaraApp({super.key});
@@ -70,6 +75,29 @@ class EHaraApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.notifikasi,
           builder: (context, state) => const NotificationPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.form1,
+          builder: (context, state) => const Form1Page(),
+        ),
+        GoRoute(
+          path: AppRoutes.form2,
+          builder: (context, state) => const Form2Page(),
+        ),
+        GoRoute(
+          path: AppRoutes.form3Map,
+          builder: (context, state) => const Form3MapPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.form3,
+          builder: (context, state) {
+            final data = state.extra as Map<String, double>;
+
+            return Form3Page(
+              selectedLatitude: data['lat']!,
+              selectedLongitude: data['lng']!,
+            );
+          },
         ),
       ],
     );

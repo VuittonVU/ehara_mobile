@@ -37,9 +37,19 @@ dependencies:
 
   #Flutter tidak support SVG secara native, jadi perlu package:
   flutter_svg: ^2.0.10
+  #Untuk font Poppins
   google_fonts: ^8.0.2
+  #Untuk navigasi antar screen yang lebih rapi dan terstruktur
   go_router: ^14.8.1
+  #Untuk bisa tap link external
   url_launcher: ^6.2.5
+  #Untuk akses web
+  http: ^1.2.1
+  #Untuk akses map
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  #Untuk GPS
+  geolocator: ^11.0.0
 
 dev_dependencies:
   flutter_test:
