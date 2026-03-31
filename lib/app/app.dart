@@ -1,13 +1,15 @@
-import 'package:ehara_mobile/features/main_feature/dashboard/presentation/screens/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'routes/app_routes.dart';
 
 import '../core/theme/app_theme.dart';
 import '../features/onboarding/auth/presentation/screens/login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/signup_screen.dart';
 import '../features/onboarding/splash/presentation/screens/splash_screen.dart';
 import '../features/onboarding/walkthrough/presentation/screens/walkthrough_screen.dart';
-import 'routes/app_routes.dart';
+
+import 'package:ehara_mobile/features/main_feature/dashboard/presentation/screens/dashboard_page.dart';
+import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
 
 class EHaraApp extends StatelessWidget {
   const EHaraApp({super.key});
@@ -64,7 +66,11 @@ class EHaraApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.dashboard,
           builder: (context, state) => const DashboardPage(),
-        )
+        ),
+        GoRoute(
+          path: AppRoutes.notifikasi,
+          builder: (context, state) => const NotificationPage(),
+        ),
       ],
     );
 
