@@ -28,7 +28,7 @@ class FormDropdownField<T> extends StatelessWidget {
           hintText: hintText,
           hintStyle: const TextStyle(
             color: Color(0xFFB0B0B0),
-            fontSize: 15,
+            fontSize: 13,
           ),
           filled: true,
           fillColor: Colors.white,
@@ -52,7 +52,7 @@ class FormDropdownField<T> extends StatelessWidget {
           ),
         ),
         style: const TextStyle(
-          fontSize: 15,
+          fontSize: 13,
           color: Color(0xFF4A4A4A),
         ),
         dropdownColor: Colors.white,

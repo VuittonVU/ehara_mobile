@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_background.dart';
+import '../../../../../core/widgets/app_status_dialog.dart';
+
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
@@ -142,207 +144,24 @@ class _Form3PageState extends State<Form3Page> {
   }
 
   void _showFailedDialog() {
-    showDialog(
+    AppStatusDialog.show(
       context: context,
-      barrierDismissible: true,
-      builder: (_) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: const Color(0xFF3E7F69),
-                width: 2,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 14,
-                  offset: Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  alignment: Alignment.topLeft,
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        'assets/images/ehara_robot_failed.png',
-                        height: 170,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.smart_toy_rounded,
-                          size: 120,
-                          color: Color(0xFF3E7F69),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFFF4D4F),
-                          width: 4,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Color(0xFFFF4D4F),
-                        size: 28,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Data Gagal Disimpan!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF4A4A4A),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                SizedBox(
-                  width: 190,
-                  height: 46,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3E7F69),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Coba Ulang',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      title: 'Data Gagal Disimpan!',
+      message: 'Mohon lengkapi data yang wajib diisi terlebih dahulu.',
+      imagePath: 'assets/maskot/maskot3.png',
+      buttonText: 'Coba Ulang',
+      onPressed: () => Navigator.pop(context),
     );
   }
 
   void _showSuccessDialog() {
-    showDialog(
+    AppStatusDialog.show(
       context: context,
-      barrierDismissible: true,
-      builder: (_) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: const Color(0xFF3E7F69),
-                width: 2,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x22000000),
-                  blurRadius: 14,
-                  offset: Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Image.asset(
-                    'assets/images/ehara_robot_success.png',
-                    height: 170,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.smart_toy_rounded,
-                      size: 120,
-                      color: Color(0xFF3E7F69),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                const Text(
-                  'Data Berhasil Disimpan!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF4A4A4A),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 46,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF6B10A),
-                            foregroundColor: const Color(0xFF333333),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Nanti Saja',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SizedBox(
-                        height: 46,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3E7F69),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Lanjut Ke Pembayaran',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      title: 'Data Berhasil Disimpan!',
+      message: 'Data analisis hara sudah berhasil disimpan.',
+      imagePath: 'assets/maskot/maskot2.png',
+      buttonText: 'OK',
+      onPressed: () => Navigator.pop(context),
     );
   }
 

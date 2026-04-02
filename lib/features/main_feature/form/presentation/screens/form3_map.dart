@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
+import 'full_screen_map_page.dart';
 
 class Form3MapPage extends StatefulWidget {
   const Form3MapPage({super.key});
@@ -19,7 +22,14 @@ class _Form3MapPageState extends State<Form3MapPage> {
   final MapController _mapController = MapController();
 
   LatLng? selectedLocation;
-  final LatLng initialCenter = const LatLng(3.5952, 98.6722); // Medan
+  final LatLng initialCenter = const LatLng(3.5952, 98.6722); // fallback Medan
+
+  bool _isGettingLocation = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Widget _buildHeader() {
     return Padding(
@@ -56,6 +66,105 @@ class _Form3MapPageState extends State<Form3MapPage> {
     );
   }
 
+  Future<void> _getCurrentLocation() async {
+    if (_isGettingLocation) return;
+
+    setState(() {
+      _isGettingLocation = true;
+    });
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('GPS perangkat belum aktif')),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Izin lokasi ditolak')),
+        );
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Izin lokasi ditolak permanen. Aktifkan dari pengaturan perangkat.'),
+          ),
+        );
+        return;
+      }
+
+      Position? position = await Geolocator.getLastKnownPosition();
+
+      position ??= await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 8),
+      );
+
+      final currentLatLng = LatLng(position.latitude, position.longitude);
+
+      if (!mounted) return;
+
+      setState(() {
+        selectedLocation = currentLatLng;
+      });
+
+      _mapController.move(currentLatLng, 16);
+    } on TimeoutException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal mengambil lokasi. Coba lagi atau pilih manual di map.'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lokasi tidak tersedia. Pilih manual di map dulu ya.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGettingLocation = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _openFullScreenMap() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FullScreenMapPage(
+          initialLocation: selectedLocation ?? initialCenter,
+        ),
+      ),
+    );
+
+    if (result != null && result is LatLng) {
+      setState(() {
+        selectedLocation = result;
+      });
+
+      _mapController.move(result, 16);
+    }
+  }
+
   void _goToForm3() {
     if (selectedLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,6 +181,106 @@ class _Form3MapPageState extends State<Form3MapPage> {
         'lat': selectedLocation!.latitude,
         'lng': selectedLocation!.longitude,
       },
+    );
+  }
+
+  Widget _buildMapPreview() {
+    return GestureDetector(
+      onTap: _openFullScreenMap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          children: [
+            SizedBox(
+              height: 185,
+              width: double.infinity,
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: selectedLocation ?? initialCenter,
+                  initialZoom: 14,
+                  onTap: (tapPosition, point) {
+                    setState(() {
+                      selectedLocation = point;
+                    });
+                  },
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.ehara_mobile',
+                  ),
+                  if (selectedLocation != null)
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: selectedLocation!,
+                          width: 44,
+                          height: 44,
+                          child: const Icon(
+                            Icons.location_on,
+                            size: 36,
+                            color: Color(0xFF2F7D69),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'Perbesar',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _getCurrentLocation,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Ink(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: _isGettingLocation
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                        : const Icon(
+                      Icons.my_location,
+                      size: 18,
+                      color: Color(0xFF2F7D69),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -94,48 +303,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            height: 185,
-                            width: double.infinity,
-                            child: FlutterMap(
-                              mapController: _mapController,
-                              options: MapOptions(
-                                initialCenter: initialCenter,
-                                initialZoom: 14,
-                                onTap: (tapPosition, point) {
-                                  setState(() {
-                                    selectedLocation = point;
-                                  });
-                                },
-                              ),
-                              children: [
-                                TileLayer(
-                                  urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                  userAgentPackageName:
-                                  'com.example.ehara_mobile',
-                                ),
-                                if (selectedLocation != null)
-                                  MarkerLayer(
-                                    markers: [
-                                      Marker(
-                                        point: selectedLocation!,
-                                        width: 44,
-                                        height: 44,
-                                        child: const Icon(
-                                          Icons.location_on,
-                                          size: 36,
-                                          color: Color(0xFF2F7D69),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        _buildMapPreview(),
                         const SizedBox(height: 22),
                         const Center(
                           child: Text(
@@ -148,6 +316,20 @@ class _Form3MapPageState extends State<Form3MapPage> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        if (selectedLocation != null)
+                          Center(
+                            child: Text(
+                              'Lat: ${selectedLocation!.latitude.toStringAsFixed(6)}  •  '
+                                  'Lng: ${selectedLocation!.longitude.toStringAsFixed(6)}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF6A6A6A),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 22),
                         Row(
                           children: [

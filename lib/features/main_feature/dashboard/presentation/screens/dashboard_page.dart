@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/routes/app_routes.dart';
 
 import '../../../../../core/widgets/app_background.dart';
-import '../../../../../core/widgets/app_bottom_navbar.dart';
 
 import '../../data/article_data.dart';
 import '../../models/article_model.dart';
@@ -49,22 +48,6 @@ class DashboardPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      bottomNavigationBar: AppBottomNavbar(
-        currentIndex: 0,
-        onTapHome: () {},
-        onTapRiwayat: () {
-          Navigator.pushNamed(context, '/riwayat');
-        },
-        onTapTambahAnalisis: () {
-          context.push(AppRoutes.form1);
-        },
-        onTapPembayaran: () {
-          Navigator.pushNamed(context, '/pembayaran');
-        },
-        onTapProfile: () {
-          Navigator.pushNamed(context, '/profile');
-        },
-      ),
       body: AppBackground(
         child: SafeArea(
           child: CustomScrollView(

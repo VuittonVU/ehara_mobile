@@ -64,20 +64,21 @@ class ArticleDetailPage extends StatelessWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                  child: Row(
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context),
-                        borderRadius: BorderRadius.circular(20),
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 20,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Image.asset(
+                            'assets/icons/arrow_back.png',
+                            width: 28,
+                            height: 30,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+
                       Text(
                         'Detail Artikel',
                         style: AppTextStyles.semiBold(

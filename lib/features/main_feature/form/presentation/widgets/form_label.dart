@@ -13,8 +13,8 @@ class FormLabel extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
         color: Color(0xFF4A4A4A),
       ),
     );

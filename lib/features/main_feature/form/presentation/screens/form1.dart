@@ -173,7 +173,7 @@ class _Form1PageState extends State<Form1Page> {
           text,
           style: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w900,
             color: Color(0xFF2F2F2F),
           ),
         ),
@@ -396,7 +396,7 @@ class _Form1PageState extends State<Form1Page> {
                                   ),
                                 ),
                                 child: const Text(
-                                  'Lanjut ke Form 2',
+                                  'Lanjutkan',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,

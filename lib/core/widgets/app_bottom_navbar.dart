@@ -4,20 +4,12 @@ import '../theme/app_text_styles.dart';
 
 class AppBottomNavbar extends StatelessWidget {
   final int currentIndex;
-  final VoidCallback onTapHome;
-  final VoidCallback onTapRiwayat;
-  final VoidCallback onTapTambahAnalisis;
-  final VoidCallback onTapPembayaran;
-  final VoidCallback onTapProfile;
+  final ValueChanged<int> onTap;
 
   const AppBottomNavbar({
     super.key,
     required this.currentIndex,
-    required this.onTapHome,
-    required this.onTapRiwayat,
-    required this.onTapTambahAnalisis,
-    required this.onTapPembayaran,
-    required this.onTapProfile,
+    required this.onTap,
   });
 
   @override
@@ -43,7 +35,7 @@ class AppBottomNavbar extends StatelessWidget {
                   iconPath: 'assets/icons/house.png',
                   label: 'Dashboard',
                   isActive: currentIndex == 0,
-                  onTap: onTapHome,
+                  onTap: () => onTap(0),
                 ),
               ),
               Expanded(
@@ -51,18 +43,16 @@ class AppBottomNavbar extends StatelessWidget {
                   iconPath: 'assets/icons/riwayat.png',
                   label: 'Riwayat',
                   isActive: currentIndex == 1,
-                  onTap: onTapRiwayat,
+                  onTap: () => onTap(1),
                 ),
               ),
-
               const SizedBox(width: 76),
-
               Expanded(
                 child: _BottomNavItem(
                   iconPath: 'assets/icons/cart.png',
                   label: 'Pembayaran',
                   isActive: currentIndex == 3,
-                  onTap: onTapPembayaran,
+                  onTap: () => onTap(3),
                 ),
               ),
               Expanded(
@@ -70,16 +60,15 @@ class AppBottomNavbar extends StatelessWidget {
                   iconPath: 'assets/icons/circle_user.png',
                   label: 'Profile',
                   isActive: currentIndex == 4,
-                  onTap: onTapProfile,
+                  onTap: () => onTap(4),
                 ),
               ),
             ],
           ),
-
           Positioned(
             top: -28,
             child: GestureDetector(
-              onTap: onTapTambahAnalisis,
+              onTap: () => onTap(2),
               child: Column(
                 children: [
                   Container(
@@ -109,7 +98,6 @@ class AppBottomNavbar extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned(
             bottom: 8,
             child: Text(
@@ -143,9 +131,8 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color itemColor = isActive
-        ? const Color(0xFF387867)
-        : AppColors.textPrimary;
+    final Color itemColor =
+    isActive ? const Color(0xFF387867) : AppColors.textPrimary;
 
     return InkWell(
       onTap: onTap,

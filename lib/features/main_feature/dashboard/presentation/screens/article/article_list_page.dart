@@ -130,16 +130,12 @@ class _ArticleHeader extends StatelessWidget {
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: InkWell(
-            onTap: onBackTap,
-            borderRadius: BorderRadius.circular(24),
-            child: const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                size: 34,
-                color: Colors.black,
-              ),
+          child: IconButton(
+            onPressed: onBackTap,
+            icon: Image.asset(
+              'assets/icons/arrow_back.png',
+              width: 28,
+              height: 30,
             ),
           ),
         ),
