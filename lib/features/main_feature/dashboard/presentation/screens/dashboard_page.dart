@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../../app/routes/app_routes.dart';
-
 import '../../../../../core/widgets/app_background.dart';
-
-import '../../data/article_data.dart';
-import '../../models/article_model.dart';
-import '../../models/dashboard_menu_model.dart';
-
-import 'article/article_detail_page.dart';
-import 'article/article_list_page.dart';
-
+import '../../providers/dashboard_provider.dart';
 import '../widgets/article/article_section.dart';
 import '../widgets/dashboard_greeting_card.dart';
 import '../widgets/dashboard_header.dart';
@@ -21,31 +15,17 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<ArticleModel> allArticles = ArticleData.allArticles;
-    final List<ArticleModel> dashboardArticles = ArticleData.dashboardArticles;
+    final provider = context.read<DashboardProvider>();
 
-    final List<DashboardMenuModel> menus = [
-      DashboardMenuModel(
-        title: 'e-Hara',
-        iconPath: 'assets/icons/leaf.png',
-        onTap: () {},
-      ),
-      DashboardMenuModel(
-        title: 'Rekomendasi\nPemupukan',
-        iconPath: 'assets/icons/sprout.png',
-        onTap: () {},
-      ),
-      DashboardMenuModel(
-        title: 'Ganoderma',
-        iconPath: 'assets/icons/map.png',
-        onTap: () {},
-      ),
-      DashboardMenuModel(
-        title: 'Sertifikasi',
-        iconPath: 'assets/icons/badge_check.png',
-        onTap: () {},
-      ),
-    ];
+    final allArticles = provider.allArticles;
+    final dashboardArticles = provider.dashboardArticles;
+
+    final menus = provider.buildMenus(
+      onEHaraTap: () {},
+      onRekomendasiTap: () {},
+      onGanodermaTap: () {},
+      onSertifikasiTap: () {},
+    );
 
     return Scaffold(
       body: AppBackground(
@@ -64,28 +44,22 @@ class DashboardPage extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 20),
-                      const DashboardGreetingCard(
-                        userName: 'User',
-                      ),
+                      const DashboardGreetingCard(userName: 'User'),
                       const SizedBox(height: 20),
                       DashboardMenuSection(menus: menus),
                       const SizedBox(height: 20),
                       ArticleSection(
                         articles: dashboardArticles,
                         onArticleTap: (article) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ArticleDetailPage(article: article),
-                            ),
+                          context.push(
+                            AppRoutes.articleDetail,
+                            extra: article,
                           );
                         },
                         onSeeMoreTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ArticleListPage(articles: allArticles),
-                            ),
+                          context.push(
+                            AppRoutes.articleList,
+                            extra: allArticles,
                           );
                         },
                       ),

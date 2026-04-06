@@ -9,6 +9,9 @@ class AboutAppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double size = MediaQuery.of(context).size.width * 0.75;
+    size = size.clamp(80.0, 150.0);
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -66,20 +69,13 @@ class AboutAppPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-
-                        Container(
-                          width: 128,
-                          height: 128,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0xFF14A01A),
-                              width: 3,
-                            ),
-                          ),
+                        SizedBox(
+                          width: size,
+                          height: size,
                           child: Padding(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(4),
                             child: Image.asset(
-                              'assets/images/logo/logo_ehara_text.png',
+                              'assets/images/logo/logo_ehara.png',
                               fit: BoxFit.contain,
                               errorBuilder: (_, __, ___) {
                                 return const Center(
@@ -97,7 +93,6 @@ class AboutAppPage extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 22),
                         const Text(
                           'Copyright © 2026 PPKS',
@@ -107,7 +102,6 @@ class AboutAppPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 28),
-
                         _AboutButton(
                           label: 'Syarat & Ketentuan',
                           onTap: () => context.push(AppRoutes.termsPlaceholder),

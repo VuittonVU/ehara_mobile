@@ -1,12 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../providers/form_provider.dart';
 import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
 import 'full_screen_map_page.dart';
@@ -20,16 +23,9 @@ class Form3MapPage extends StatefulWidget {
 
 class _Form3MapPageState extends State<Form3MapPage> {
   final MapController _mapController = MapController();
-
-  LatLng? selectedLocation;
-  final LatLng initialCenter = const LatLng(3.5952, 98.6722); // fallback Medan
+  final LatLng initialCenter = const LatLng(3.5952, 98.6722);
 
   bool _isGettingLocation = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   Widget _buildHeader() {
     return Padding(
@@ -101,7 +97,9 @@ class _Form3MapPageState extends State<Form3MapPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Izin lokasi ditolak permanen. Aktifkan dari pengaturan perangkat.'),
+            content: Text(
+              'Izin lokasi ditolak permanen. Aktifkan dari pengaturan perangkat.',
+            ),
           ),
         );
         return;
@@ -118,22 +116,25 @@ class _Form3MapPageState extends State<Form3MapPage> {
 
       if (!mounted) return;
 
-      setState(() {
-        selectedLocation = currentLatLng;
-      });
+      context.read<FormProvider>().setLocation(
+        lat: currentLatLng.latitude,
+        lng: currentLatLng.longitude,
+      );
 
       _mapController.move(currentLatLng, 16);
     } on TimeoutException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal mengambil lokasi. Coba lagi atau pilih manual di map.'),
+          content: Text(
+            'Gagal mengambil lokasi. Coba lagi atau pilih manual di map.',
+          ),
         ),
       );
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Lokasi tidak tersedia. Pilih manual di map dulu ya.'),
         ),
       );
@@ -146,27 +147,29 @@ class _Form3MapPageState extends State<Form3MapPage> {
     }
   }
 
-  Future<void> _openFullScreenMap() async {
-    final result = await Navigator.push(
+  Future<void> _openFullScreenMap(LatLng selectedLocation) async {
+    final result = await Navigator.push<LatLng>(
       context,
       MaterialPageRoute(
         builder: (_) => FullScreenMapPage(
-          initialLocation: selectedLocation ?? initialCenter,
+          initialLocation: selectedLocation,
         ),
       ),
     );
 
-    if (result != null && result is LatLng) {
-      setState(() {
-        selectedLocation = result;
-      });
-
+    if (result != null && mounted) {
+      context.read<FormProvider>().setLocation(
+        lat: result.latitude,
+        lng: result.longitude,
+      );
       _mapController.move(result, 16);
     }
   }
 
-  void _goToForm3() {
-    if (selectedLocation == null) {
+  Future<void> _goToForm3() async {
+    final provider = context.read<FormProvider>();
+
+    if (provider.latitude == null || provider.longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pilih lokasi kebun dulu ya'),
@@ -175,18 +178,13 @@ class _Form3MapPageState extends State<Form3MapPage> {
       return;
     }
 
-    context.push(
-      AppRoutes.form3,
-      extra: {
-        'lat': selectedLocation!.latitude,
-        'lng': selectedLocation!.longitude,
-      },
-    );
+    if (!mounted) return;
+    context.push(AppRoutes.form3);
   }
 
-  Widget _buildMapPreview() {
+  Widget _buildMapPreview(LatLng selectedLocation) {
     return GestureDetector(
-      onTap: _openFullScreenMap,
+      onTap: () => _openFullScreenMap(selectedLocation),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Stack(
@@ -197,12 +195,13 @@ class _Form3MapPageState extends State<Form3MapPage> {
               child: FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: selectedLocation ?? initialCenter,
+                  initialCenter: selectedLocation,
                   initialZoom: 14,
                   onTap: (tapPosition, point) {
-                    setState(() {
-                      selectedLocation = point;
-                    });
+                    context.read<FormProvider>().setLocation(
+                      lat: point.latitude,
+                      lng: point.longitude,
+                    );
                   },
                 ),
                 children: [
@@ -210,21 +209,20 @@ class _Form3MapPageState extends State<Form3MapPage> {
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.ehara_mobile',
                   ),
-                  if (selectedLocation != null)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: selectedLocation!,
-                          width: 44,
-                          height: 44,
-                          child: const Icon(
-                            Icons.location_on,
-                            size: 36,
-                            color: Color(0xFF2F7D69),
-                          ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: selectedLocation,
+                        width: 44,
+                        height: 44,
+                        child: const Icon(
+                          Icons.location_on,
+                          size: 36,
+                          color: Color(0xFF2F7D69),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -286,6 +284,9 @@ class _Form3MapPageState extends State<Form3MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FormProvider>();
+    final selectedLocation = provider.selectedLatLng ?? initialCenter;
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -303,7 +304,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildMapPreview(),
+                        _buildMapPreview(selectedLocation),
                         const SizedBox(height: 22),
                         const Center(
                           child: Text(
@@ -317,11 +318,12 @@ class _Form3MapPageState extends State<Form3MapPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (selectedLocation != null)
+                        if (provider.latitude != null &&
+                            provider.longitude != null)
                           Center(
                             child: Text(
-                              'Lat: ${selectedLocation!.latitude.toStringAsFixed(6)}  •  '
-                                  'Lng: ${selectedLocation!.longitude.toStringAsFixed(6)}',
+                              'Lat: ${provider.latitude!.toStringAsFixed(6)}  •  '
+                                  'Lng: ${provider.longitude!.toStringAsFixed(6)}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 12,
@@ -363,7 +365,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
                                 child: ElevatedButton(
                                   onPressed: _goToForm3,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3E7F69),
+                                    backgroundColor: const Color(0xFF2F7D69),
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
@@ -371,7 +373,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
                                     ),
                                   ),
                                   child: const Text(
-                                    'Lanjutkan',
+                                    'Lanjut',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,

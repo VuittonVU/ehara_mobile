@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../../app/routes/app_routes.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../providers/form_provider.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
@@ -33,17 +35,81 @@ class _Form2PageState extends State<Form2Page> {
   final TextEditingController _nilaiCaController = TextEditingController();
   final TextEditingController _nilaiMgController = TextEditingController();
 
-  String? _selectedGanoderma = 'Ya';
-  String? _selectedAdaNilaiHara = 'Ada Nilai Hara Tanah';
+  bool _hasBoundListeners = false;
 
-  final List<String> _ganodermaOptions = const ['Ya', 'Tidak'];
-  final List<String> _nilaiHaraOptions = const [
-    'Ada Nilai Hara Tanah',
-    'Tidak Ada Nilai Hara Tanah',
-  ];
+  @override
+  void initState() {
+    super.initState();
 
-  bool get _showSoilFields =>
-      _selectedAdaNilaiHara == 'Ada Nilai Hara Tanah';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<FormProvider>();
+      _fillControllersFromProvider(provider);
+      _bindControllerListeners();
+    });
+  }
+
+  void _fillControllersFromProvider(FormProvider provider) {
+    _tahunTanamController.text = provider.tahunTanam;
+    _nomorKcdController.text = provider.nomorKcd;
+    _blokController.text = provider.blok;
+    _luasHaController.text = provider.luasHa;
+    _jumlahPohonHaController.text = provider.jumlahPohonHa;
+    _protasController.text = provider.protas;
+    _proyeksiProtasController.text = provider.proyeksiProtasStep2;
+
+    _nilaiNController.text = provider.nilaiNStep2;
+    _nilaiPController.text = provider.nilaiPStep2;
+    _nilaiKController.text = provider.nilaiKStep2;
+    _nilaiCaController.text = provider.nilaiCaStep2;
+    _nilaiMgController.text = provider.nilaiMgStep2;
+  }
+
+  void _bindControllerListeners() {
+    if (_hasBoundListeners) return;
+    _hasBoundListeners = true;
+
+    _tahunTanamController.addListener(() {
+      context.read<FormProvider>().setTahunTanam(_tahunTanamController.text);
+    });
+    _nomorKcdController.addListener(() {
+      context.read<FormProvider>().setNomorKcd(_nomorKcdController.text);
+    });
+    _blokController.addListener(() {
+      context.read<FormProvider>().setBlok(_blokController.text);
+    });
+    _luasHaController.addListener(() {
+      context.read<FormProvider>().setLuasHa(_luasHaController.text);
+    });
+    _jumlahPohonHaController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setJumlahPohonHa(_jumlahPohonHaController.text);
+    });
+    _protasController.addListener(() {
+      context.read<FormProvider>().setProtas(_protasController.text);
+    });
+    _proyeksiProtasController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setProyeksiProtasStep2(_proyeksiProtasController.text);
+    });
+
+    _nilaiNController.addListener(() {
+      context.read<FormProvider>().setNilaiNStep2(_nilaiNController.text);
+    });
+    _nilaiPController.addListener(() {
+      context.read<FormProvider>().setNilaiPStep2(_nilaiPController.text);
+    });
+    _nilaiKController.addListener(() {
+      context.read<FormProvider>().setNilaiKStep2(_nilaiKController.text);
+    });
+    _nilaiCaController.addListener(() {
+      context.read<FormProvider>().setNilaiCaStep2(_nilaiCaController.text);
+    });
+    _nilaiMgController.addListener(() {
+      context.read<FormProvider>().setNilaiMgStep2(_nilaiMgController.text);
+    });
+  }
 
   @override
   void dispose() {
@@ -63,8 +129,24 @@ class _Form2PageState extends State<Form2Page> {
     super.dispose();
   }
 
+  Future<void> _goNext() async {
+    final provider = context.read<FormProvider>();
+
+    if (!provider.validateStep2()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lengkapi dulu data Form 2 ya')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    context.push(AppRoutes.form3Map);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FormProvider>();
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -109,7 +191,6 @@ class _Form2PageState extends State<Form2Page> {
                     children: [
                       const FormStepper(currentStep: 2),
                       const SizedBox(height: 18),
-
                       FormSectionCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,9 +256,9 @@ class _Form2PageState extends State<Form2Page> {
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: _selectedGanoderma,
+                              value: provider.ganodermaStep2,
                               hintText: 'Pilih',
-                              items: _ganodermaOptions
+                              items: const ['Ya', 'Tidak']
                                   .map(
                                     (item) => DropdownMenuItem<String>(
                                   value: item,
@@ -186,44 +267,24 @@ class _Form2PageState extends State<Form2Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  _selectedGanoderma = value;
-                                });
+                                if (value != null) {
+                                  context
+                                      .read<FormProvider>()
+                                      .setGanodermaStep2(value);
+                                }
                               },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      FormSectionCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Input Data Tanah',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF444444),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Silahkan isi data hara tanah untuk hasil yang lebih akurat',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF666666),
-                                fontWeight: FontWeight.w500,
-                              ),
                             ),
                             const SizedBox(height: 18),
 
+                            const FormLabel(text: 'Status Hara Tanah'),
+                            const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: _selectedAdaNilaiHara,
+                              value: provider.statusHaraTanahStep2,
                               hintText: 'Pilih',
-                              items: _nilaiHaraOptions
+                              items: const [
+                                'Ada Nilai Hara Tanah',
+                                'Tidak Ada Nilai Hara Tanah',
+                              ]
                                   .map(
                                     (item) => DropdownMenuItem<String>(
                                   value: item,
@@ -232,12 +293,13 @@ class _Form2PageState extends State<Form2Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  _selectedAdaNilaiHara = value;
-                                });
+                                if (value != null) {
+                                  context
+                                      .read<FormProvider>()
+                                      .setStatusHaraTanahStep2(value);
+                                }
                               },
                             ),
-
                             const SizedBox(height: 16),
                             Container(
                               width: double.infinity,
@@ -246,7 +308,7 @@ class _Form2PageState extends State<Form2Page> {
                             ),
                             const SizedBox(height: 16),
 
-                            if (_showSoilFields) ...[
+                            if (provider.showSoilFieldsStep2) ...[
                               const FormLabel(text: 'Nilai Hara Tanah (N)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -311,7 +373,6 @@ class _Form2PageState extends State<Form2Page> {
                             ],
 
                             const SizedBox(height: 18),
-
                             Row(
                               children: [
                                 Expanded(
@@ -333,24 +394,22 @@ class _Form2PageState extends State<Form2Page> {
                                       child: const Text(
                                         'Kembali',
                                         style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: SizedBox(
                                     height: 48,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        context.push(AppRoutes.form3Map);
-                                      },
+                                      onPressed: _goNext,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
-                                        const Color(0xFF3E7F69),
+                                        const Color(0xFF2F7D69),
                                         foregroundColor: Colors.white,
                                         elevation: 0,
                                         shape: RoundedRectangleBorder(
@@ -359,9 +418,9 @@ class _Form2PageState extends State<Form2Page> {
                                         ),
                                       ),
                                       child: const Text(
-                                        'Lanjutkan',
+                                        'Selanjutnya',
                                         style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),

@@ -4,7 +4,7 @@ class FormDropdownField<T> extends StatelessWidget {
   final T? value;
   final String hintText;
   final List<DropdownMenuItem<T>> items;
-  final ValueChanged<T?> onChanged;
+  final ValueChanged<T?>? onChanged;
 
   const FormDropdownField({
     super.key,

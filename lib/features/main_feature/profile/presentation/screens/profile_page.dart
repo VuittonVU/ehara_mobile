@@ -1,69 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../../../app/routes/app_routes.dart';
-
 import '../../../../../core/widgets/app_background.dart';
-import '../../data/profile_placeholder_repository.dart';
-import '../../models/profile_model.dart';
-
+import '../../providers/profile_provider.dart';
 import '../widgets/profile_action_button.dart';
 import '../widgets/profile_avatar_card.dart';
 import '../widgets/profile_menu_tile.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  final ProfilePlaceholderRepository _repository =
-  ProfilePlaceholderRepository();
-
-  late Future<ProfileModel> _profileFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileFuture = _repository.getProfile();
-  }
-
-  Future<void> _refreshProfile() async {
-    setState(() {
-      _profileFuture = _repository.getProfile();
-    });
-  }
-
-  void _onDetailProfileTap() {
-    debugPrint('Go to Detail Page');
+  void _onDetailProfileTap(BuildContext context) {
     context.push(AppRoutes.detailProfil);
   }
 
-  void _onChangePasswordTap() {
-    debugPrint('Go to Change Password');
+  void _onChangePasswordTap(BuildContext context) {
     context.push(AppRoutes.changePassword);
   }
 
-  void _onNotificationTap() {
-    debugPrint('Go to Notification Settings');
+  void _onNotificationTap(BuildContext context) {
     context.push(AppRoutes.notifikasiSettings);
   }
 
-  void _onAboutTap() {
-    debugPrint('Go to About App');
+  void _onAboutTap(BuildContext context) {
     context.push(AppRoutes.aboutApp);
   }
 
-  void _onLogoutTap() {
-    _showLogoutConfirmationDialog();
-  }
-
-  void _confirmLogout() {
-    debugPrint('Perform logout');
-  }
-
-  void _showLogoutConfirmationDialog() {
+  void _onLogoutTap(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -125,7 +90,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundColor: const Color(0xFFE95B59),
                         onTap: () {
                           Navigator.pop(context);
-                          _confirmLogout();
                         },
                       ),
                     ),
@@ -151,26 +115,33 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ProfileProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: RefreshIndicator(
-            onRefresh: _refreshProfile,
-            child: FutureBuilder<ProfileModel>(
-              future: _profileFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            onRefresh: provider.refreshProfile,
+            child: Builder(
+              builder: (context) {
+                if (provider.isLoading && provider.profile == null) {
                   return const _ProfileLoadingView();
                 }
 
-                if (snapshot.hasError) {
+                if (provider.errorMessage != null && provider.profile == null) {
                   return _ProfileErrorView(
-                    onRetry: _refreshProfile,
+                    onRetry: provider.loadProfile,
                   );
                 }
 
-                final profile = snapshot.data ?? ProfileModel.placeholder();
+                final profile = provider.profile;
+
+                if (profile == null) {
+                  return _ProfileErrorView(
+                    onRetry: provider.loadProfile,
+                  );
+                }
 
                 return CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -191,39 +162,37 @@ class _ProfilePageState extends State<ProfilePage> {
                             const SizedBox(height: 12),
                             ProfileAvatarCard(
                               profile: profile,
-                              onAvatarTap: () {
-                                debugPrint('Change avatar');
-                              },
+                              onAvatarTap: () {},
                             ),
                             const SizedBox(height: 24),
                             ProfileMenuTile(
                               iconPath: 'assets/icons/profile.png',
                               title: 'Detail Profil',
-                              onTap: _onDetailProfileTap,
+                              onTap: () => _onDetailProfileTap(context),
                             ),
                             const SizedBox(height: 12),
                             ProfileMenuTile(
                               iconPath: 'assets/icons/lock.png',
                               title: 'Ganti Password',
-                              onTap: _onChangePasswordTap,
+                              onTap: () => _onChangePasswordTap(context),
                             ),
                             const SizedBox(height: 12),
                             ProfileMenuTile(
                               iconPath: 'assets/icons/notification.png',
                               title: 'Notifikasi',
-                              onTap: _onNotificationTap,
+                              onTap: () => _onNotificationTap(context),
                             ),
                             const SizedBox(height: 12),
                             ProfileMenuTile(
                               iconPath: 'assets/icons/info.png',
                               title: 'Tentang Aplikasi',
-                              onTap: _onAboutTap,
+                              onTap: () => _onAboutTap(context),
                             ),
                             const SizedBox(height: 14),
                             ProfileActionButton(
                               label: 'Keluar',
                               iconPath: 'assets/icons/logout.png',
-                              onTap: _onLogoutTap,
+                              onTap: () => _onLogoutTap(context),
                             ),
                             const SizedBox(height: 12),
                           ],

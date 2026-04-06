@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_status_dialog.dart';
-
+import '../../providers/form_provider.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
@@ -11,14 +13,7 @@ import '../widgets/form_stepper.dart';
 import '../widgets/form_text_field.dart';
 
 class Form3Page extends StatefulWidget {
-  final double selectedLatitude;
-  final double selectedLongitude;
-
-  const Form3Page({
-    super.key,
-    required this.selectedLatitude,
-    required this.selectedLongitude,
-  });
+  const Form3Page({super.key});
 
   @override
   State<Form3Page> createState() => _Form3PageState();
@@ -36,20 +31,83 @@ class _Form3PageState extends State<Form3Page> {
   final TextEditingController caController = TextEditingController();
   final TextEditingController mgController = TextEditingController();
 
-  String? selectedBandRed;
-  String? selectedBandGreen;
-  String? selectedBandNir;
-  String? selectedGanoderma;
-  String? selectedHasSoilData;
+  bool _hasBoundListeners = false;
 
   final List<String> bandOptions = const ['Red', 'Green', 'NIR'];
   final List<String> yesNoOptions = const ['Ya', 'Tidak'];
+  final List<String> soilOptions = const [
+    'Ada Nilai Hara Tanah',
+    'Tidak Ada Nilai Hara Tanah',
+  ];
 
   @override
   void initState() {
     super.initState();
-    xController.text = widget.selectedLongitude.toStringAsFixed(6);
-    yController.text = widget.selectedLatitude.toStringAsFixed(6);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<FormProvider>();
+      _fillControllersFromProvider(provider);
+      _bindControllerListeners();
+      _syncCoordinateControllers(provider);
+    });
+  }
+
+  void _fillControllersFromProvider(FormProvider provider) {
+    idController.text = provider.idTitik;
+    proyeksiController.text = provider.proyeksiProtasStep3;
+
+    nController.text = provider.nilaiNStep3;
+    pController.text = provider.nilaiPStep3;
+    kController.text = provider.nilaiKStep3;
+    caController.text = provider.nilaiCaStep3;
+    mgController.text = provider.nilaiMgStep3;
+  }
+
+  void _syncCoordinateControllers(FormProvider provider) {
+    final nextX = provider.longitude?.toStringAsFixed(6) ?? '';
+    final nextY = provider.latitude?.toStringAsFixed(6) ?? '';
+
+    if (xController.text != nextX) {
+      xController.text = nextX;
+    }
+    if (yController.text != nextY) {
+      yController.text = nextY;
+    }
+  }
+
+  void _bindControllerListeners() {
+    if (_hasBoundListeners) return;
+    _hasBoundListeners = true;
+
+    idController.addListener(() {
+      context.read<FormProvider>().setIdTitik(idController.text);
+    });
+
+    proyeksiController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setProyeksiProtasStep3(proyeksiController.text);
+    });
+
+    nController.addListener(() {
+      context.read<FormProvider>().setNilaiNStep3(nController.text);
+    });
+
+    pController.addListener(() {
+      context.read<FormProvider>().setNilaiPStep3(pController.text);
+    });
+
+    kController.addListener(() {
+      context.read<FormProvider>().setNilaiKStep3(kController.text);
+    });
+
+    caController.addListener(() {
+      context.read<FormProvider>().setNilaiCaStep3(caController.text);
+    });
+
+    mgController.addListener(() {
+      context.read<FormProvider>().setNilaiMgStep3(mgController.text);
+    });
   }
 
   @override
@@ -161,28 +219,37 @@ class _Form3PageState extends State<Form3Page> {
       message: 'Data analisis hara sudah berhasil disimpan.',
       imagePath: 'assets/maskot/maskot2.png',
       buttonText: 'OK',
-      onPressed: () => Navigator.pop(context),
+      onPressed: () async {
+        Navigator.pop(context);
+        await context.read<FormProvider>().resetAndClearDraft();
+        if (!mounted) return;
+        context.go(AppRoutes.dashboard);
+      },
     );
   }
 
-  void _submitForm() {
-    if (idController.text.trim().isEmpty ||
-        xController.text.trim().isEmpty ||
-        yController.text.trim().isEmpty ||
-        selectedBandRed == null ||
-        selectedBandGreen == null ||
-        selectedBandNir == null ||
-        proyeksiController.text.trim().isEmpty ||
-        selectedGanoderma == null) {
+  Future<void> _submitForm() async {
+    final provider = context.read<FormProvider>();
+
+    if (!provider.validateStep3()) {
       _showFailedDialog();
       return;
     }
 
+    final payload = provider.buildSubmissionPayload();
+    debugPrint('FORM SUBMISSION PAYLOAD: $payload');
+
+    await provider.clearDraft();
+
+    if (!mounted) return;
     _showSuccessDialog();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FormProvider>();
+    _syncCoordinateControllers(provider);
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -231,7 +298,8 @@ class _Form3PageState extends State<Form3Page> {
                             const FormLabel(text: 'BAND Red (Merah)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: selectedBandRed,
+                              value:
+                              provider.bandRed.isEmpty ? null : provider.bandRed,
                               hintText: 'Red',
                               items: bandOptions
                                   .map(
@@ -242,9 +310,9 @@ class _Form3PageState extends State<Form3Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  selectedBandRed = value;
-                                });
+                                if (value != null) {
+                                  context.read<FormProvider>().setBandRed(value);
+                                }
                               },
                             ),
                             const SizedBox(height: 16),
@@ -252,7 +320,9 @@ class _Form3PageState extends State<Form3Page> {
                             const FormLabel(text: 'BAND Green (Hijau)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: selectedBandGreen,
+                              value: provider.bandGreen.isEmpty
+                                  ? null
+                                  : provider.bandGreen,
                               hintText: 'Green',
                               items: bandOptions
                                   .map(
@@ -263,9 +333,11 @@ class _Form3PageState extends State<Form3Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  selectedBandGreen = value;
-                                });
+                                if (value != null) {
+                                  context
+                                      .read<FormProvider>()
+                                      .setBandGreen(value);
+                                }
                               },
                             ),
                             const SizedBox(height: 16),
@@ -273,7 +345,8 @@ class _Form3PageState extends State<Form3Page> {
                             const FormLabel(text: 'BAND NIR (Inframerah)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: selectedBandNir,
+                              value:
+                              provider.bandNir.isEmpty ? null : provider.bandNir,
                               hintText: 'NIR',
                               items: bandOptions
                                   .map(
@@ -284,9 +357,9 @@ class _Form3PageState extends State<Form3Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  selectedBandNir = value;
-                                });
+                                if (value != null) {
+                                  context.read<FormProvider>().setBandNir(value);
+                                }
                               },
                             ),
                             const SizedBox(height: 16),
@@ -304,7 +377,9 @@ class _Form3PageState extends State<Form3Page> {
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: selectedGanoderma,
+                              value: provider.ganodermaStep3.isEmpty
+                                  ? null
+                                  : provider.ganodermaStep3,
                               hintText: 'Ya',
                               items: yesNoOptions
                                   .map(
@@ -315,9 +390,11 @@ class _Form3PageState extends State<Form3Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  selectedGanoderma = value;
-                                });
+                                if (value != null) {
+                                  context
+                                      .read<FormProvider>()
+                                      .setGanodermaStep3(value);
+                                }
                               },
                             ),
                           ],
@@ -334,9 +411,11 @@ class _Form3PageState extends State<Form3Page> {
                               'Silahkan isi data hara tanah untuk hasil yang lebih akurat',
                             ),
                             FormDropdownField<String>(
-                              value: selectedHasSoilData,
+                              value: provider.statusHaraTanahStep3.isEmpty
+                                  ? null
+                                  : provider.statusHaraTanahStep3,
                               hintText: 'Ada Nilai Hara Tanah',
-                              items: yesNoOptions
+                              items: soilOptions
                                   .map(
                                     (item) => DropdownMenuItem<String>(
                                   value: item,
@@ -345,113 +424,105 @@ class _Form3PageState extends State<Form3Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  selectedHasSoilData = value;
-                                });
+                                if (value != null) {
+                                  context
+                                      .read<FormProvider>()
+                                      .setStatusHaraTanahStep3(value);
+                                }
                               },
                             ),
                             _buildDivider(),
 
-                            const FormLabel(text: 'Nilai Hara Tanah (N)'),
-                            const SizedBox(height: 8),
-                            FormTextField(
-                              controller: nController,
-                              hintText: 'Nilai Hara Tanah (N)',
-                              keyboardType: TextInputType.number,
-                            ),
-                            const SizedBox(height: 16),
+                            if (provider.showSoilFieldsStep3) ...[
+                              const FormLabel(text: 'Nilai Hara Tanah (N)'),
+                              const SizedBox(height: 8),
+                              FormTextField(
+                                controller: nController,
+                                hintText: 'Nilai Hara Tanah (N)',
+                                keyboardType: TextInputType.number,
+                              ),
+                              const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Nilai Hara Tanah (P)'),
-                            const SizedBox(height: 8),
-                            FormTextField(
-                              controller: pController,
-                              hintText: 'Nilai Hara Tanah (P)',
-                              keyboardType: TextInputType.number,
-                            ),
-                            const SizedBox(height: 16),
+                              const FormLabel(text: 'Nilai Hara Tanah (P)'),
+                              const SizedBox(height: 8),
+                              FormTextField(
+                                controller: pController,
+                                hintText: 'Nilai Hara Tanah (P)',
+                                keyboardType: TextInputType.number,
+                              ),
+                              const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Nilai Hara Tanah (K)'),
-                            const SizedBox(height: 8),
-                            FormTextField(
-                              controller: kController,
-                              hintText: 'Nilai Hara Tanah (K)',
-                              keyboardType: TextInputType.number,
-                            ),
-                            const SizedBox(height: 16),
+                              const FormLabel(text: 'Nilai Hara Tanah (K)'),
+                              const SizedBox(height: 8),
+                              FormTextField(
+                                controller: kController,
+                                hintText: 'Nilai Hara Tanah (K)',
+                                keyboardType: TextInputType.number,
+                              ),
+                              const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Nilai Hara Tanah (Ca)'),
-                            const SizedBox(height: 8),
-                            FormTextField(
-                              controller: caController,
-                              hintText: 'Nilai Hara Tanah (Ca)',
-                              keyboardType: TextInputType.number,
-                            ),
-                            const SizedBox(height: 16),
+                              const FormLabel(text: 'Nilai Hara Tanah (Ca)'),
+                              const SizedBox(height: 8),
+                              FormTextField(
+                                controller: caController,
+                                hintText: 'Nilai Hara Tanah (Ca)',
+                                keyboardType: TextInputType.number,
+                              ),
+                              const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Nilai Hara Tanah (Mg)'),
-                            const SizedBox(height: 8),
-                            FormTextField(
-                              controller: mgController,
-                              hintText: 'Nilai Hara Tanah (Mg)',
-                              keyboardType: TextInputType.number,
-                            ),
+                              const FormLabel(text: 'Nilai Hara Tanah (Mg)'),
+                              const SizedBox(height: 8),
+                              FormTextField(
+                                controller: mgController,
+                                hintText: 'Nilai Hara Tanah (Mg)',
+                                keyboardType: TextInputType.number,
+                              ),
+                            ] else ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFFD3D3D3),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Input nilai hara tanah dilewati.',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF777777),
+                                  ),
+                                ),
+                              ),
+                            ],
+
                             const SizedBox(height: 24),
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 48,
-                                    child: ElevatedButton(
-                                      onPressed: () => context.pop(),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                        const Color(0xFFD9D9D9),
-                                        foregroundColor:
-                                        const Color(0xFF555555),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                          BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Kembali',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: _submitForm,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF3E7F69),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 48,
-                                    child: ElevatedButton(
-                                      onPressed: _submitForm,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                        const Color(0xFF3E7F69),
-                                        foregroundColor: Colors.white,
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                          BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Lanjutkan',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
+                                child: const Text(
+                                  'Simpan Data',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
                           ],
                         ),

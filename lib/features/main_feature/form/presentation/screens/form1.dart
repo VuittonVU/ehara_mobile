@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../../app/routes/app_routes.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../data/sensor_options.dart';
+import '../../models/wilayah_item.dart';
+import '../../providers/form_provider.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
@@ -19,33 +23,107 @@ class Form1Page extends StatefulWidget {
 
 class _Form1PageState extends State<Form1Page> {
   final TextEditingController _namaProjekController = TextEditingController();
-  final TextEditingController _namaPerusahaanController = TextEditingController();
+  final TextEditingController _namaPerusahaanController =
+  TextEditingController();
   final TextEditingController _namaKebunController = TextEditingController();
   final TextEditingController _detailLokasiController = TextEditingController();
-  final TextEditingController _tanggalPengambilanController = TextEditingController();
-  final TextEditingController _tanggalAnalisisController = TextEditingController();
+  final TextEditingController _tanggalPengambilanController =
+  TextEditingController();
+  final TextEditingController _tanggalAnalisisController =
+  TextEditingController();
 
-  String? _selectedProvinsi;
-  String? _selectedKabupaten;
-  String? _selectedKecamatan;
-  String? _selectedSensor;
-  String? _selectedGanoderma;
+  bool _hasBoundListeners = false;
+  bool _hasCheckedDraftDialog = false;
 
-  final List<String> _provinsiOptions = const [];
-  final List<String> _kabupatenOptions = const [];
-  final List<String> _kecamatanOptions = const [];
+  @override
+  void initState() {
+    super.initState();
 
-  final List<String> _sensorOptions = const [
-    'MicaSense',
-    'Mapir',
-    'DJI',
-    'Lainnya',
-  ];
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<FormProvider>();
 
-  final List<String> _ganodermaOptions = const [
-    'Ya',
-    'Tidak',
-  ];
+      _fillControllersFromProvider(provider);
+      _bindControllerListeners();
+
+      if (!_hasCheckedDraftDialog && provider.hasDraft) {
+        _hasCheckedDraftDialog = true;
+
+        final shouldLoad = await showDialog<bool>(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: const Text('Lanjutkan Draft?'),
+              content: const Text(
+                'Ditemukan draft form sebelumnya. Mau lanjutkan?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Tidak'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Ya'),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (!mounted) return;
+
+        if (shouldLoad == true) {
+          await provider.loadDraft();
+          if (!mounted) return;
+          _fillControllersFromProvider(provider);
+        }
+      }
+    });
+  }
+
+  void _bindControllerListeners() {
+    if (_hasBoundListeners) return;
+    _hasBoundListeners = true;
+
+    _namaProjekController.addListener(() {
+      context.read<FormProvider>().setNamaProjek(_namaProjekController.text);
+    });
+
+    _namaPerusahaanController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setNamaPerusahaan(_namaPerusahaanController.text);
+    });
+
+    _namaKebunController.addListener(() {
+      context.read<FormProvider>().setNamaKebun(_namaKebunController.text);
+    });
+
+    _detailLokasiController.addListener(() {
+      context.read<FormProvider>().setDetailLokasi(_detailLokasiController.text);
+    });
+
+    _tanggalPengambilanController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setTanggalPengambilan(_tanggalPengambilanController.text);
+    });
+
+    _tanggalAnalisisController.addListener(() {
+      context
+          .read<FormProvider>()
+          .setTanggalAnalisis(_tanggalAnalisisController.text);
+    });
+  }
+
+  void _fillControllersFromProvider(FormProvider provider) {
+    _namaProjekController.text = provider.namaProjek;
+    _namaPerusahaanController.text = provider.namaPerusahaan;
+    _namaKebunController.text = provider.namaKebun;
+    _detailLokasiController.text = provider.detailLokasi;
+    _tanggalPengambilanController.text = provider.tanggalPengambilan;
+    _tanggalAnalisisController.text = provider.tanggalAnalisis;
+  }
 
   @override
   void dispose() {
@@ -74,6 +152,22 @@ class _Form1PageState extends State<Form1Page> {
       final year = pickedDate.year.toString();
       controller.text = '$day/$month/$year';
     }
+  }
+
+  Future<void> _goNext() async {
+    final provider = context.read<FormProvider>();
+
+    if (!provider.validateStep1()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lengkapi dulu data Form 1 ya'),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    context.push(AppRoutes.form2);
   }
 
   Widget _buildHeader() {
@@ -111,6 +205,23 @@ class _Form1PageState extends State<Form1Page> {
     );
   }
 
+  Widget _buildSectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF2F2F2F),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoCard() {
     return Container(
       width: double.infinity,
@@ -136,9 +247,7 @@ class _Form1PageState extends State<Form1Page> {
           ),
           SizedBox(height: 6),
           Text(
-            'Silakan unggah file sampel untuk proses analisis hara. '
-                'Bagian wilayah masih disiapkan, jadi untuk sementara dropdown lokasi '
-                'dibiarkan sebagai placeholder terlebih dahulu.',
+            'Silakan isi data dengan lengkap sebelum lanjut ke tahap berikutnya.',
             style: TextStyle(
               fontSize: 13,
               height: 1.45,
@@ -151,42 +260,10 @@ class _Form1PageState extends State<Form1Page> {
     );
   }
 
-  Widget _buildEmptyDropdown({
-    required String hintText,
-    required String? value,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return FormDropdownField<String>(
-      value: value,
-      hintText: hintText,
-      items: const [],
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _buildSectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF2F2F2F),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _goNext() {
-    context.push(AppRoutes.form2);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FormProvider>();
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -208,11 +285,15 @@ class _Form1PageState extends State<Form1Page> {
 
                             _buildSectionTitle('Unggah File'),
                             UploadBox(
-                              title: 'Unggah File Sampel',
+                              title: provider.fileName.isEmpty
+                                  ? 'Unggah File Sampel'
+                                  : provider.fileName,
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Fitur upload file masih placeholder'),
+                                    content: Text(
+                                      'Fitur upload file masih placeholder',
+                                    ),
                                   ),
                                 );
                               },
@@ -258,42 +339,79 @@ class _Form1PageState extends State<Form1Page> {
 
                             const FormLabel(text: 'Provinsi'),
                             const SizedBox(height: 8),
-                            _buildEmptyDropdown(
-                              hintText: 'Pilih Provinsi',
-                              value: _selectedProvinsi,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedProvinsi = value;
-                                  _selectedKabupaten = null;
-                                  _selectedKecamatan = null;
-                                });
+                            FormDropdownField<WilayahItem>(
+                              value: provider.selectedProvinsi,
+                              hintText: provider.isLoadingProvinsi
+                                  ? 'Memuat provinsi...'
+                                  : 'Pilih Provinsi',
+                              items: provider.provinsiList
+                                  .map(
+                                    (item) => DropdownMenuItem<WilayahItem>(
+                                  value: item,
+                                  child: Text(item.name),
+                                ),
+                              )
+                                  .toList(),
+                              onChanged: provider.isLoadingProvinsi
+                                  ? null
+                                  : (value) {
+                                if (value == null) return;
+                                context
+                                    .read<FormProvider>()
+                                    .selectProvinsi(value);
                               },
                             ),
                             const SizedBox(height: 12),
 
                             const FormLabel(text: 'Kota / Kabupaten'),
                             const SizedBox(height: 8),
-                            _buildEmptyDropdown(
-                              hintText: 'Pilih Kota / Kabupaten',
-                              value: _selectedKabupaten,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedKabupaten = value;
-                                  _selectedKecamatan = null;
-                                });
+                            FormDropdownField<WilayahItem>(
+                              value: provider.selectedKabupaten,
+                              hintText: provider.isLoadingKabupaten
+                                  ? 'Memuat kabupaten...'
+                                  : 'Pilih Kota / Kabupaten',
+                              items: provider.kabupatenList
+                                  .map(
+                                    (item) => DropdownMenuItem<WilayahItem>(
+                                  value: item,
+                                  child: Text(item.name),
+                                ),
+                              )
+                                  .toList(),
+                              onChanged: provider.selectedProvinsi == null ||
+                                  provider.isLoadingKabupaten
+                                  ? null
+                                  : (value) {
+                                if (value == null) return;
+                                context
+                                    .read<FormProvider>()
+                                    .selectKabupaten(value);
                               },
                             ),
                             const SizedBox(height: 12),
 
                             const FormLabel(text: 'Kecamatan'),
                             const SizedBox(height: 8),
-                            _buildEmptyDropdown(
-                              hintText: 'Pilih Kecamatan',
-                              value: _selectedKecamatan,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedKecamatan = value;
-                                });
+                            FormDropdownField<WilayahItem>(
+                              value: provider.selectedKecamatan,
+                              hintText: provider.isLoadingKecamatan
+                                  ? 'Memuat kecamatan...'
+                                  : 'Pilih Kecamatan',
+                              items: provider.kecamatanList
+                                  .map(
+                                    (item) => DropdownMenuItem<WilayahItem>(
+                                  value: item,
+                                  child: Text(item.name),
+                                ),
+                              )
+                                  .toList(),
+                              onChanged: provider.selectedKabupaten == null ||
+                                  provider.isLoadingKecamatan
+                                  ? null
+                                  : (value) {
+                                context
+                                    .read<FormProvider>()
+                                    .selectKecamatan(value);
                               },
                             ),
                             const SizedBox(height: 12),
@@ -314,7 +432,8 @@ class _Form1PageState extends State<Form1Page> {
                               controller: _tanggalPengambilanController,
                               hintText: 'Pilih tanggal',
                               readOnly: true,
-                              onTap: () => _pickDate(_tanggalPengambilanController),
+                              onTap: () =>
+                                  _pickDate(_tanggalPengambilanController),
                               suffixIcon: const Icon(
                                 Icons.calendar_today_outlined,
                                 size: 20,
@@ -323,7 +442,7 @@ class _Form1PageState extends State<Form1Page> {
                             ),
                             const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Tanggal Analisis Data'),
+                            const FormLabel(text: 'Tanggal Analisis'),
                             const SizedBox(height: 8),
                             FormTextField(
                               controller: _tanggalAnalisisController,
@@ -338,12 +457,13 @@ class _Form1PageState extends State<Form1Page> {
                             ),
                             const SizedBox(height: 16),
 
-                            const FormLabel(text: 'Jenis Sensor'),
+                            const FormLabel(text: 'Sensor'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: _selectedSensor,
+                              value:
+                              provider.sensor.isEmpty ? null : provider.sensor,
                               hintText: 'Pilih sensor',
-                              items: _sensorOptions
+                              items: SensorOptions.items
                                   .map(
                                     (item) => DropdownMenuItem<String>(
                                   value: item,
@@ -352,9 +472,8 @@ class _Form1PageState extends State<Form1Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  _selectedSensor = value;
-                                });
+                                if (value == null) return;
+                                context.read<FormProvider>().setSensor(value);
                               },
                             ),
                             const SizedBox(height: 16),
@@ -364,9 +483,11 @@ class _Form1PageState extends State<Form1Page> {
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: _selectedGanoderma,
+                              value: provider.ganodermaStep1.isEmpty
+                                  ? null
+                                  : provider.ganodermaStep1,
                               hintText: 'Pilih opsi',
-                              items: _ganodermaOptions
+                              items: const ['Ya', 'Tidak']
                                   .map(
                                     (item) => DropdownMenuItem<String>(
                                   value: item,
@@ -375,9 +496,10 @@ class _Form1PageState extends State<Form1Page> {
                               )
                                   .toList(),
                               onChanged: (value) {
-                                setState(() {
-                                  _selectedGanoderma = value;
-                                });
+                                if (value == null) return;
+                                context
+                                    .read<FormProvider>()
+                                    .setGanodermaStep1(value);
                               },
                             ),
 
@@ -388,17 +510,17 @@ class _Form1PageState extends State<Form1Page> {
                               child: ElevatedButton(
                                 onPressed: _goNext,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF3E7F69),
+                                  backgroundColor: const Color(0xFF2F7D69),
                                   foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                                 child: const Text(
-                                  'Lanjutkan',
+                                  'Selanjutnya',
                                   style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),

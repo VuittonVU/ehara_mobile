@@ -15,7 +15,8 @@ class AppBottomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 88,
+      height: 98,
+      padding: const EdgeInsets.only(top: 4, bottom: 6),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -46,7 +47,7 @@ class AppBottomNavbar extends StatelessWidget {
                   onTap: () => onTap(1),
                 ),
               ),
-              const SizedBox(width: 76),
+              const SizedBox(width: 82),
               Expanded(
                 child: _BottomNavItem(
                   iconPath: 'assets/icons/cart.png',
@@ -66,40 +67,36 @@ class AppBottomNavbar extends StatelessWidget {
             ],
           ),
           Positioned(
-            top: -28,
+            top: -34,
             child: GestureDetector(
               onTap: () => onTap(2),
-              child: Column(
-                children: [
-                  Container(
-                    width: 74,
-                    height: 74,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+              child: Container(
+                width: 74,
+                height: 74,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/icons/palm.png',
-                        width: 32,
-                        height: 32,
-                        color: Colors.white,
-                      ),
-                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Image.asset(
+                    'assets/icons/palm.png',
+                    width: 32,
+                    height: 32,
+                    color: Colors.white,
                   ),
-                ],
+                ),
               ),
             ),
           ),
           Positioned(
-            bottom: 8,
+            bottom: 12,
             child: Text(
               'Tambah\nAnalisis',
               textAlign: TextAlign.center,
@@ -138,7 +135,7 @@ class _BottomNavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.only(top: 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

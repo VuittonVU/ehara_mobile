@@ -9,7 +9,11 @@ class AppRoutes {
   static const String pembayaran = '/pembayaran';
   static const String profile = '/profile';
 
+  static const articleList = '/article-list';
+  static const articleDetail = '/article-detail';
+
   static const String notifikasi = '/notifikasi';
+
   static const String form1 = '/form1';
   static const String form2 = '/form2';
   static const String form3 = '/form3';
@@ -21,4 +25,6 @@ class AppRoutes {
   static const String aboutApp = '/about-app';
   static const String termsPlaceholder = '/terms-placeholder';
   static const String privacyPlaceholder = '/privacy-placeholder';
+
+  static const String detailRiwayat = '/riwayat/detail';
 }
