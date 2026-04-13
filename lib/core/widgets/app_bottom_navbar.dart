@@ -68,42 +68,22 @@ class AppBottomNavbar extends StatelessWidget {
           ),
           Positioned(
             top: -34,
-            child: GestureDetector(
+            child: _CenterNavButton(
+              isActive: currentIndex == 2,
               onTap: () => onTap(2),
-              child: Container(
-                width: 74,
-                height: 74,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/icons/palm.png',
-                    width: 32,
-                    height: 32,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ),
           ),
           Positioned(
             bottom: 12,
-            child: Text(
-              'Tambah\nAnalisis',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.caption(
-                color: currentIndex == 2
-                    ? AppColors.primary
-                    : AppColors.textPrimary,
+            child: IgnorePointer(
+              child: Text(
+                'Tambah\nAnalisis',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.caption(
+                  color: currentIndex == 2
+                      ? AppColors.primary
+                      : AppColors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -113,7 +93,7 @@ class AppBottomNavbar extends StatelessWidget {
   }
 }
 
-class _BottomNavItem extends StatelessWidget {
+class _BottomNavItem extends StatefulWidget {
   final String iconPath;
   final String label;
   final bool isActive;
@@ -127,33 +107,144 @@ class _BottomNavItem extends StatelessWidget {
   });
 
   @override
+  State<_BottomNavItem> createState() => _BottomNavItemState();
+}
+
+class _BottomNavItemState extends State<_BottomNavItem> {
+  bool _isPressed = false;
+
+  void _setPressed(bool value) {
+    if (_isPressed == value) return;
+    setState(() {
+      _isPressed = value;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color itemColor =
-    isActive ? const Color(0xFF387867) : AppColors.textPrimary;
+    widget.isActive ? AppColors.primary : AppColors.textPrimary;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              iconPath,
-              width: 22,
-              height: 22,
-              color: itemColor,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.caption(
-                color: itemColor,
+    return AnimatedScale(
+      scale: _isPressed ? 0.96 : 1,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _isPressed ? 1.5 : 0, 0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            onTapDown: (_) => _setPressed(true),
+            onTapUp: (_) => _setPressed(false),
+            onTapCancel: () => _setPressed(false),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    widget.iconPath,
+                    width: 22,
+                    height: 22,
+                    color: itemColor,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.label,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.caption(
+                      color: itemColor,
+                    ),
+                  ),
+                ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CenterNavButton extends StatefulWidget {
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _CenterNavButton({
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  State<_CenterNavButton> createState() => _CenterNavButtonState();
+}
+
+class _CenterNavButtonState extends State<_CenterNavButton> {
+  bool _isPressed = false;
+
+  void _setPressed(bool value) {
+    if (_isPressed == value) return;
+    setState(() {
+      _isPressed = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _isPressed ? 0.96 : 1,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _isPressed ? 2 : -2, 0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(_isPressed ? 0.10 : 0.18),
+              blurRadius: _isPressed ? 10 : 16,
+              offset: Offset(0, _isPressed ? 4 : 8),
+            ),
           ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            onTapDown: (_) => _setPressed(true),
+            onTapUp: (_) => _setPressed(false),
+            onTapCancel: () => _setPressed(false),
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 74,
+              height: 74,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Image.asset(
+                  'assets/icons/palm.png',
+                  width: 32,
+                  height: 32,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

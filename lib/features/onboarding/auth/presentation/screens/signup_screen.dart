@@ -293,7 +293,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           LoginTextField(
                             controller: usernameController,
                             hintText: 'Username',
-                            iconPath: 'assets/icons/at.png',
+                            iconPath: 'assets/icons/id.png',
                             errorText: _usernameError,
                             onChanged: _validateUsername,
                           ),

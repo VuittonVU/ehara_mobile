@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/constants/app_colors.dart';
 import '../../models/dashboard_menu_model.dart';
 import 'dashboard_menu_item.dart';
 
@@ -13,32 +12,19 @@ class DashboardMenuSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: AppColors.textPrimary.withValues(alpha: 0.18),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: menus.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 18,
+        childAspectRatio: 1.18,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: menus
-            .map(
-              (menu) => Expanded(
-            child: DashboardMenuItem(menu: menu),
-          ),
-        )
-            .toList(),
-      ),
+      itemBuilder: (context, index) {
+        return DashboardMenuItem(menu: menus[index]);
+      },
     );
   }
 }

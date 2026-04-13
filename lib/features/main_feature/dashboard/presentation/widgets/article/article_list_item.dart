@@ -18,7 +18,6 @@ class ArticleListItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: AspectRatio(
@@ -30,9 +29,7 @@ class ArticleListItem extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 14),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(
@@ -45,32 +42,33 @@ class ArticleListItem extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                article.date,
-                style: AppTextStyles.bodySmall(
-                  color: AppColors.textPrimary.withValues(alpha: 0.45),
-                ).copyWith(
-                  fontSize: 10,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: InkWell(
-                  onTap: onTapReadMore,
-                  child: Text(
-                    'Baca Artikel Selengkapnya ->',
-                    style: AppTextStyles.medium(
-                      fontSize: 13,
-                      color: AppColors.accent,
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      article.date,
+                      style: AppTextStyles.bodySmall(
+                        color: AppColors.textPrimary.withValues(alpha: 0.45),
+                      ).copyWith(
+                        fontSize: 10,
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: onTapReadMore,
+                    child: Text(
+                      'Baca Artikel Selengkapnya ->',
+                      textAlign: TextAlign.right,
+                      style: AppTextStyles.medium(
+                        fontSize: 13,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

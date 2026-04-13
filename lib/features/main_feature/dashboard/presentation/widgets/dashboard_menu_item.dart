@@ -3,7 +3,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../models/dashboard_menu_model.dart';
 
-class DashboardMenuItem extends StatelessWidget {
+class DashboardMenuItem extends StatefulWidget {
   final DashboardMenuModel menu;
 
   const DashboardMenuItem({
@@ -12,44 +12,110 @@ class DashboardMenuItem extends StatelessWidget {
   });
 
   @override
+  State<DashboardMenuItem> createState() => _DashboardMenuItemState();
+}
+
+class _DashboardMenuItemState extends State<DashboardMenuItem> {
+  bool _isPressed = false;
+
+  void _setPressed(bool value) {
+    if (_isPressed == value) return;
+    setState(() {
+      _isPressed = value;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: menu.onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 54,
-              height: 54,
+    return AnimatedScale(
+      scale: _isPressed ? 0.98 : 1,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _isPressed ? 1.5 : -2, 0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.menu.onTap,
+            onTapDown: (_) => _setPressed(true),
+            onTapUp: (_) => _setPressed(false),
+            onTapCancel: () => _setPressed(false),
+            borderRadius: BorderRadius.circular(28),
+            child: Container(
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: AppColors.primary,
-                  width: 1,
+                  color: AppColors.textPrimary.withValues(alpha: 0.18),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: _isPressed ? 0.05 : 0.10,
+                    ),
+                    blurRadius: _isPressed ? 8 : 14,
+                    offset: Offset(0, _isPressed ? 3 : 8),
+                  ),
+                ],
               ),
-              child: Center(
-                child: Image.asset(
-                  menu.iconPath,
-                  width: 24,
-                  height: 24,
-                  color: AppColors.primary,
-                  fit: BoxFit.contain,
-                ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final iconBoxSize =
+                  (constraints.maxWidth * 0.5).clamp(7.0, 82.0);
+                  final iconSize = (iconBoxSize * 0.58).clamp(4.0, 48.0);
+
+                  return Column(
+                    children: [
+                      const Spacer(flex: 2),
+                      Container(
+                        width: iconBoxSize,
+                        height: iconBoxSize,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD2E7BA),
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        child: Center(
+                          child: SizedBox(
+                            width: iconSize,
+                            height: iconSize,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Image.asset(
+                                widget.menu.iconPath,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 40,
+                        child: Center(
+                          child: Text(
+                            widget.menu.title,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.titleMedium(
+                              color: AppColors.primary,
+                            ).copyWith(
+                              fontSize: 13,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(flex: 3),
+                    ],
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              menu.title,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.caption(),
-            ),
-          ],
+          ),
         ),
       ),
     );

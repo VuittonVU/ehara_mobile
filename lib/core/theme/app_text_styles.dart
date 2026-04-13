@@ -50,6 +50,21 @@ class AppTextStyles {
     );
   }
 
+  static TextStyle small({
+    double fontSize = 12,
+    Color color = AppColors.textPrimary,
+    double? height,
+    double? letterSpacing,
+  }) {
+    return GoogleFonts.poppins(
+      fontSize: fontSize,
+      fontWeight: FontWeight.w400,
+      color: color,
+      height: height,
+      letterSpacing: letterSpacing,
+    );
+  }
+
   static TextStyle semiBold({
     double fontSize = 14,
     Color color = AppColors.textPrimary,
@@ -173,6 +188,17 @@ class AppTextStyles {
       fontWeight: FontWeight.w500,
       color: color,
       height: 1.35,
+    );
+  }
+
+  static TextStyle titleSmall({
+    Color color = AppColors.textPrimary,
+  }) {
+    return GoogleFonts.poppins(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: color,
+      height: 1.25,
     );
   }
 
