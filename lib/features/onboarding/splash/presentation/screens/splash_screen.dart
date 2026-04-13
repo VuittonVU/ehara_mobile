@@ -16,7 +16,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
 
   void _goNext() {
-    context.go(AppRoutes.dashboard);
+    context.go(AppRoutes.login);
   }
 
   @override

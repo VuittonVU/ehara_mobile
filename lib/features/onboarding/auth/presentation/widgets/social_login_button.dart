@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 
@@ -22,12 +23,13 @@ class SocialLoginButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.white.withOpacity(0.95),
           side: BorderSide(
-            color: Colors.black.withOpacity(0.18),
+            color: Colors.black.withOpacity(0.16),
           ),
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),

@@ -44,7 +44,7 @@ dependencies:
   #Untuk bisa tap link external
   url_launcher: ^6.2.5
   #Untuk akses web
-  http: ^1.2.1
+  http: ^1.6.0
   #Untuk akses map
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
@@ -54,6 +54,7 @@ dependencies:
   provider: ^6.1.2
   #database lokal
   shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:

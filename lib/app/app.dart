@@ -4,6 +4,7 @@ import 'routes/app_routes.dart';
 
 import '../core/theme/app_theme.dart';
 import '../features/onboarding/auth/presentation/screens/login_screen.dart';
+import '../features/onboarding/auth/presentation/screens/email_login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/signup_screen.dart';
 import '../features/onboarding/splash/presentation/screens/splash_screen.dart';
 import '../features/onboarding/walkthrough/presentation/screens/walkthrough_screen.dart';
@@ -24,6 +25,8 @@ import '../features/main_feature/form/presentation/screens/form3.dart';
 import '../features/main_feature/form/presentation/screens/form3_map.dart';
 
 import '../features/main_feature/pembayaran/presentation/screens/pembayaran_page.dart';
+import '../features/main_feature/pembayaran/presentation/screens/menu_pembayaran_page.dart';
+import '../features/main_feature/pembayaran/presentation/screens/proses_pembayaran_page.dart';
 
 import '../features/main_feature/profile/presentation/screens/profile_page.dart';
 import '../features/main_feature/profile/presentation/screens/side_features/detail_profile_page.dart';
@@ -80,6 +83,10 @@ class EHaraApp extends StatelessWidget {
             );
           },
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.emailLogin,
+        builder: (context, state) => const EmailLoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.signup,
@@ -155,6 +162,20 @@ class EHaraApp extends StatelessWidget {
         builder: (context, state) {
           final article = state.extra as ArticleModel;
           return ArticleDetailPage(article: article);
+        },
+      ),
+      GoRoute(
+        path: '/menu-pembayaran/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return MenuPembayaranPage(pembayaranId: id);
+        },
+      ),
+      GoRoute(
+        path: '/proses-pembayaran/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ProsesPembayaranPage(pembayaranId: id);
         },
       ),
       GoRoute(

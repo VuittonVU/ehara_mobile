@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../app/routes/app_routes.dart';
 
+import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../widgets/login_text_field.dart';
-import '../widgets/social_login_button.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../widgets/social_login_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,33 +15,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  bool _isGoogleLoading = false;
 
-  bool isPasswordHidden = true;
+  Future<void> _handleGoogleLogin() async {
+    if (_isGoogleLoading) return;
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
+    setState(() => _isGoogleLoading = true);
+    await Future.delayed(const Duration(milliseconds: 700));
 
-  void handleLogin() {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-
-    debugPrint('Email / Username: $email');
-    debugPrint('Password: $password');
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email/Username dan Password wajib diisi'),
-        ),
-      );
-      return;
-    }
+    if (!mounted) return;
+    setState(() => _isGoogleLoading = false);
 
     context.go(AppRoutes.dashboard);
   }
@@ -75,133 +57,74 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Column(
                         children: [
-                          const SizedBox(height: 36),
-
+                          const SizedBox(height: 54),
                           Image.asset(
                             'assets/images/logo/logo_ehara.png',
-                            width: 150,
+                            width: 160,
                             fit: BoxFit.contain,
                           ),
-
-                          const SizedBox(height: 28),
-
+                          const SizedBox(height: 44),
                           Text(
                             'Sign In',
                             style: AppTextStyles.displayMedium(),
                           ),
-
-                          const SizedBox(height: 8),
-
+                          const SizedBox(height: 10),
                           Text(
                             'Silahkan masuk dengan akun Anda.',
                             textAlign: TextAlign.center,
                             style: AppTextStyles.regular(
                               fontSize: 14,
-                              color: AppColors.textPrimary.withOpacity(0.75),
+                              color: AppColors.textPrimary.withOpacity(0.74),
                             ),
                           ),
-
-                          const SizedBox(height: 34),
-
-                          SocialLoginButton(
-                            text: 'Sign in dengan Google',
-                            iconPath: 'assets/icons/google.png',
-                            onTap: () {},
+                          const SizedBox(height: 42),
+                          AbsorbPointer(
+                            absorbing: _isGoogleLoading,
+                            child: SocialLoginButton(
+                              text: _isGoogleLoading
+                                  ? 'Sedang masuk...'
+                                  : 'Sign in dengan Google',
+                              iconPath: 'assets/icons/google.png',
+                              onTap: _handleGoogleLogin,
+                            ),
                           ),
-
-                          const SizedBox(height: 26),
-
+                          const SizedBox(height: 30),
                           Row(
                             children: [
                               Expanded(
                                 child: Container(
                                   height: 1,
-                                  color: Colors.black.withOpacity(0.5),
+                                  color: Colors.black.withOpacity(0.10),
                                 ),
                               ),
                               Padding(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
                                 child: Text(
-                                  'Atau menggunakan Email',
+                                  'Atau',
                                   style: AppTextStyles.regular(
                                     fontSize: 13,
-                                    color: AppColors.textPrimary.withOpacity(
-                                      0.72,
-                                    ),
+                                    color: AppColors.textPrimary.withOpacity(0.62),
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Container(
                                   height: 1,
-                                  color: Colors.black.withOpacity(0.5),
+                                  color: Colors.black.withOpacity(0.10),
                                 ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 24),
-
-                          LoginTextField(
-                            controller: emailController,
-                            hintText: 'Email / Username',
-                            iconPath: 'assets/icons/email.png',
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          LoginTextField(
-                            controller: passwordController,
-                            hintText: 'Password',
-                            iconPath: 'assets/icons/lock.png',
-                            obscureText: isPasswordHidden,
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isPasswordHidden = !isPasswordHidden;
-                                });
-                              },
-                              icon: Icon(
-                                isPasswordHidden
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppColors.textPrimary.withOpacity(0.4),
-                                size: 22,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'Lupa Password?',
-                                style: AppTextStyles.medium(
-                                  fontSize: 14,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
+                          const SizedBox(height: 30),
                           SizedBox(
                             width: double.infinity,
                             height: 48,
-                            child: ElevatedButton(
-                              onPressed: handleLogin,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                context.push(AppRoutes.emailLogin);
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -210,74 +133,45 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              child: Text(
-                                'Masuk',
+                              icon: const Icon(
+                                Icons.mail_outline,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Sign in dengan Email',
                                 style: AppTextStyles.semiBold(
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 20),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Belum punya akun? ',
-                                style: AppTextStyles.regular(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary.withOpacity(
-                                    0.78,
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  context.push(AppRoutes.signup);
-                                },
-                                child: Text(
-                                  'Daftar',
-                                  style: AppTextStyles.semiBold(
-                                    fontSize: 14,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-
+                          const SizedBox(height: 14),
                           TextButton(
                             onPressed: () {},
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),
-                              tapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
                               'Privacy Policy',
                               style: AppTextStyles.regular(
                                 fontSize: 12,
-                                color: AppColors.textPrimary.withOpacity(0.5),
+                                color: AppColors.textPrimary.withOpacity(0.50),
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 24),
                         ],
                       ),
-
                       Padding(
                         padding: const EdgeInsets.only(bottom: 32, top: 24),
                         child: Column(
                           children: [
                             Container(
-                              width: 220,
+                              width: 230,
                               height: 2,
                               color: AppColors.primary,
                             ),

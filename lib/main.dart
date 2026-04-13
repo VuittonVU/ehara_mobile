@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'app/app.dart';
 import 'app/app_providers.dart';
+import 'features/onboarding/auth/services/auth_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
