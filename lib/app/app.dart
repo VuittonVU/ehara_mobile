@@ -17,6 +17,8 @@ import '../features/main_feature/dashboard/presentation/screens/article/article_
 import '../features/main_feature/dashboard/presentation/screens/article/article_list_page.dart';
 
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
+import '../features/main_feature/sertifikat/presentation/screens/sertifikat_page.dart';
+
 import '../features/main_feature/riwayat/presentation/screens/riwayat_page.dart';
 
 import '../features/main_feature/form/presentation/screens/form1.dart';
@@ -118,6 +120,11 @@ class EHaraApp extends StatelessWidget {
             path: AppRoutes.profile,
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: AppRoutes.sertifikat,
+            name: 'sertifikat',
+            builder: (context, state) => const SertifikatPage(),
           ),
         ],
       ),

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
-import '../../providers/dashboard_provider.dart';
+import '../../providers/dashboard_controller.dart';
 import '../widgets/article/article_section.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_menu_section.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.read<DashboardProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = ref.watch(dashboardControllerProvider);
 
     final allArticles = provider.allArticles;
     final dashboardArticles = provider.dashboardArticles;
@@ -24,7 +24,9 @@ class DashboardPage extends StatelessWidget {
       onEHaraTap: () {},
       onRekomendasiTap: () {},
       onGanodermaTap: () {},
-      onSertifikasiTap: () {},
+      onSertifikasiTap: () {
+        context.push(AppRoutes.sertifikat);
+      },
     );
 
     return AppBackground(

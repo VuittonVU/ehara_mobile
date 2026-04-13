@@ -15,6 +15,8 @@ class AppRoutes {
 
   static const String notifikasi = '/notifikasi';
 
+  static const String sertifikat = '/sertifikat';
+
   static const String form1 = '/form1';
   static const String form2 = '/form2';
   static const String form3 = '/form3';

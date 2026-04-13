@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/article_data.dart';
 import '../models/article_model.dart';
 import '../models/dashboard_menu_model.dart';
 
-class DashboardProvider extends ChangeNotifier {
+final dashboardControllerProvider = Provider<DashboardController>((ref) {
+  return DashboardController();
+});
+
+class DashboardController {
   List<ArticleModel> get allArticles => ArticleData.allArticles;
 
   List<ArticleModel> get dashboardArticles => ArticleData.dashboardArticles;
@@ -22,7 +27,7 @@ class DashboardProvider extends ChangeNotifier {
         onTap: onEHaraTap,
       ),
       DashboardMenuModel(
-        title: 'Rekomendasi\nPemupukan',
+        title: 'Pemupukan',
         iconPath: 'assets/icons/sprout.png',
         onTap: onRekomendasiTap,
       ),

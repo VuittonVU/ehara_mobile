@@ -64,53 +64,50 @@ class _DashboardMenuItemState extends State<DashboardMenuItem> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final iconBoxSize =
-                  (constraints.maxWidth * 0.5).clamp(7.0, 82.0);
-                  final iconSize = (iconBoxSize * 0.58).clamp(4.0, 48.0);
+                  (constraints.maxWidth * 0.50).clamp(68.0, 82.0);
+                  final iconSize =
+                  (iconBoxSize * 0.58).clamp(38.0, 48.0);
 
-                  return Column(
-                    children: [
-                      const Spacer(flex: 2),
-                      Container(
-                        width: iconBoxSize,
-                        height: iconBoxSize,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD2E7BA),
-                          borderRadius: BorderRadius.circular(22),
-                        ),
-                        child: Center(
-                          child: SizedBox(
-                            width: iconSize,
-                            height: iconSize,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Image.asset(
-                                widget.menu.iconPath,
-                                color: AppColors.primary,
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: iconBoxSize,
+                          height: iconBoxSize,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD2E7BA),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: Center(
+                            child: SizedBox(
+                              width: iconSize,
+                              height: iconSize,
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: Image.asset(
+                                  widget.menu.iconPath,
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            widget.menu.title,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.titleMedium(
-                              color: AppColors.primary,
-                            ).copyWith(
-                              fontSize: 13,
-                              height: 1.2,
-                            ),
+                        const SizedBox(height: 6),
+                        Text(
+                          widget.menu.title,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.titleMedium(
+                            color: AppColors.primary,
+                          ).copyWith(
+                            fontSize: 13,
+                            height: 1.2,
                           ),
                         ),
-                      ),
-                      const Spacer(flex: 3),
-                    ],
+                      ],
+                    ),
                   );
                 },
               ),

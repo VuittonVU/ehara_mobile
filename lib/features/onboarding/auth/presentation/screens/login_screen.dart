@@ -133,11 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              icon: const Icon(
-                                Icons.mail_outline,
-                                color: Colors.white,
-                                size: 20,
-                              ),
                               label: Text(
                                 'Sign in dengan Email',
                                 style: AppTextStyles.semiBold(

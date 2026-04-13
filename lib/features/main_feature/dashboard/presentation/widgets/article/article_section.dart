@@ -115,7 +115,7 @@ class _ArticleSectionState extends State<ArticleSection> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(28),
@@ -133,16 +133,19 @@ class _ArticleSectionState extends State<ArticleSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Artikel',
-            style: AppTextStyles.heading3(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              'Artikel',
+              style: AppTextStyles.titleMedium(),
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           GestureDetector(
             onPanDown: (_) => _pauseTemporarily(),
             onHorizontalDragStart: (_) => _pauseTemporarily(),
             child: AspectRatio(
-              aspectRatio: 16 / 8,
+              aspectRatio: 15 / 8,
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (index) {
@@ -161,7 +164,7 @@ class _ArticleSectionState extends State<ArticleSection> {
               ),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 9),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -183,7 +186,7 @@ class _ArticleSectionState extends State<ArticleSection> {
               },
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 9),
           Center(
             child: InkWell(
               onTap: widget.onSeeMoreTap,
