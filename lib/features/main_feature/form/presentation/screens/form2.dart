@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../providers/form_provider.dart';
+import '../../providers/form_state.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
 import '../widgets/form_text_field.dart';
 
-class Form2Page extends StatefulWidget {
+class Form2Page extends ConsumerStatefulWidget {
   const Form2Page({super.key});
 
   @override
-  State<Form2Page> createState() => _Form2PageState();
+  ConsumerState<Form2Page> createState() => _Form2PageState();
 }
 
-class _Form2PageState extends State<Form2Page> {
+class _Form2PageState extends ConsumerState<Form2Page> {
   final TextEditingController _tahunTanamController = TextEditingController();
   final TextEditingController _nomorKcdController = TextEditingController();
   final TextEditingController _blokController = TextEditingController();
@@ -41,27 +42,29 @@ class _Form2PageState extends State<Form2Page> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<FormProvider>();
-      _fillControllersFromProvider(provider);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(formNotifierProvider.notifier).initialize();
+
+      if (!mounted) return;
+      _fillControllersFromState(ref.read(formNotifierProvider));
       _bindControllerListeners();
     });
   }
 
-  void _fillControllersFromProvider(FormProvider provider) {
-    _tahunTanamController.text = provider.tahunTanam;
-    _nomorKcdController.text = provider.nomorKcd;
-    _blokController.text = provider.blok;
-    _luasHaController.text = provider.luasHa;
-    _jumlahPohonHaController.text = provider.jumlahPohonHa;
-    _protasController.text = provider.protas;
-    _proyeksiProtasController.text = provider.proyeksiProtasStep2;
+  void _fillControllersFromState(TambahFormState state) {
+    _tahunTanamController.text = state.tahunTanam;
+    _nomorKcdController.text = state.nomorKcd;
+    _blokController.text = state.blok;
+    _luasHaController.text = state.luasHa;
+    _jumlahPohonHaController.text = state.jumlahPohonHa;
+    _protasController.text = state.protas;
+    _proyeksiProtasController.text = state.proyeksiProtasStep2;
 
-    _nilaiNController.text = provider.nilaiNStep2;
-    _nilaiPController.text = provider.nilaiPStep2;
-    _nilaiKController.text = provider.nilaiKStep2;
-    _nilaiCaController.text = provider.nilaiCaStep2;
-    _nilaiMgController.text = provider.nilaiMgStep2;
+    _nilaiNController.text = state.nilaiNStep2;
+    _nilaiPController.text = state.nilaiPStep2;
+    _nilaiKController.text = state.nilaiKStep2;
+    _nilaiCaController.text = state.nilaiCaStep2;
+    _nilaiMgController.text = state.nilaiMgStep2;
   }
 
   void _bindControllerListeners() {
@@ -69,45 +72,59 @@ class _Form2PageState extends State<Form2Page> {
     _hasBoundListeners = true;
 
     _tahunTanamController.addListener(() {
-      context.read<FormProvider>().setTahunTanam(_tahunTanamController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setTahunTanam(_tahunTanamController.text);
     });
     _nomorKcdController.addListener(() {
-      context.read<FormProvider>().setNomorKcd(_nomorKcdController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNomorKcd(_nomorKcdController.text);
     });
     _blokController.addListener(() {
-      context.read<FormProvider>().setBlok(_blokController.text);
+      ref.read(formNotifierProvider.notifier).setBlok(_blokController.text);
     });
     _luasHaController.addListener(() {
-      context.read<FormProvider>().setLuasHa(_luasHaController.text);
+      ref.read(formNotifierProvider.notifier).setLuasHa(_luasHaController.text);
     });
     _jumlahPohonHaController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setJumlahPohonHa(_jumlahPohonHaController.text);
     });
     _protasController.addListener(() {
-      context.read<FormProvider>().setProtas(_protasController.text);
+      ref.read(formNotifierProvider.notifier).setProtas(_protasController.text);
     });
     _proyeksiProtasController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setProyeksiProtasStep2(_proyeksiProtasController.text);
     });
 
     _nilaiNController.addListener(() {
-      context.read<FormProvider>().setNilaiNStep2(_nilaiNController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNilaiNStep2(_nilaiNController.text);
     });
     _nilaiPController.addListener(() {
-      context.read<FormProvider>().setNilaiPStep2(_nilaiPController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNilaiPStep2(_nilaiPController.text);
     });
     _nilaiKController.addListener(() {
-      context.read<FormProvider>().setNilaiKStep2(_nilaiKController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNilaiKStep2(_nilaiKController.text);
     });
     _nilaiCaController.addListener(() {
-      context.read<FormProvider>().setNilaiCaStep2(_nilaiCaController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNilaiCaStep2(_nilaiCaController.text);
     });
     _nilaiMgController.addListener(() {
-      context.read<FormProvider>().setNilaiMgStep2(_nilaiMgController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNilaiMgStep2(_nilaiMgController.text);
     });
   }
 
@@ -130,9 +147,9 @@ class _Form2PageState extends State<Form2Page> {
   }
 
   Future<void> _goNext() async {
-    final provider = context.read<FormProvider>();
+    final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!provider.validateStep2()) {
+    if (!notifier.validateStep2()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lengkapi dulu data Form 2 ya')),
       );
@@ -145,7 +162,7 @@ class _Form2PageState extends State<Form2Page> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<FormProvider>();
+    final formState = ref.watch(formNotifierProvider);
 
     return Scaffold(
       body: AppBackground(
@@ -202,7 +219,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Tahun Tanam',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Nomor KCD'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -210,7 +226,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Nomor KCD',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Blok'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -218,7 +233,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Blok',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Luas / Ha'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -226,7 +240,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Luas / Ha',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Jumlah Pohon / Ha'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -234,7 +247,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Jumlah Pohon / Ha',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Protas'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -242,7 +254,6 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Protas',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Proyeksi Protas'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -250,13 +261,12 @@ class _Form2PageState extends State<Form2Page> {
                               hintText: 'Proyeksi Protas',
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(
                               text: 'Tambahkan Analisis Deteksi Ganoderma?',
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: provider.ganodermaStep2,
+                              value: formState.ganodermaStep2,
                               hintText: 'Pilih',
                               items: const ['Ya', 'Tidak']
                                   .map(
@@ -268,18 +278,17 @@ class _Form2PageState extends State<Form2Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context
-                                      .read<FormProvider>()
+                                  ref
+                                      .read(formNotifierProvider.notifier)
                                       .setGanodermaStep2(value);
                                 }
                               },
                             ),
                             const SizedBox(height: 18),
-
                             const FormLabel(text: 'Status Hara Tanah'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: provider.statusHaraTanahStep2,
+                              value: formState.statusHaraTanahStep2,
                               hintText: 'Pilih',
                               items: const [
                                 'Ada Nilai Hara Tanah',
@@ -294,8 +303,8 @@ class _Form2PageState extends State<Form2Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context
-                                      .read<FormProvider>()
+                                  ref
+                                      .read(formNotifierProvider.notifier)
                                       .setStatusHaraTanahStep2(value);
                                 }
                               },
@@ -307,8 +316,7 @@ class _Form2PageState extends State<Form2Page> {
                               color: const Color(0xFFD5D5D5),
                             ),
                             const SizedBox(height: 16),
-
-                            if (provider.showSoilFieldsStep2) ...[
+                            if (formState.showSoilFieldsStep2) ...[
                               const FormLabel(text: 'Nilai Hara Tanah (N)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -316,7 +324,6 @@ class _Form2PageState extends State<Form2Page> {
                                 hintText: 'Nilai Hara Tanah (N)',
                               ),
                               const SizedBox(height: 18),
-
                               const FormLabel(text: 'Nilai Hara Tanah (P)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -324,7 +331,6 @@ class _Form2PageState extends State<Form2Page> {
                                 hintText: 'Nilai Hara Tanah (P)',
                               ),
                               const SizedBox(height: 18),
-
                               const FormLabel(text: 'Nilai Hara Tanah (K)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -332,7 +338,6 @@ class _Form2PageState extends State<Form2Page> {
                                 hintText: 'Nilai Hara Tanah (K)',
                               ),
                               const SizedBox(height: 18),
-
                               const FormLabel(text: 'Nilai Hara Tanah (Ca)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -340,7 +345,6 @@ class _Form2PageState extends State<Form2Page> {
                                 hintText: 'Nilai Hara Tanah (Ca)',
                               ),
                               const SizedBox(height: 18),
-
                               const FormLabel(text: 'Nilai Hara Tanah (Mg)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -371,7 +375,6 @@ class _Form2PageState extends State<Form2Page> {
                                 ),
                               ),
                             ],
-
                             const SizedBox(height: 18),
                             Row(
                               children: [

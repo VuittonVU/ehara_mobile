@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
@@ -14,18 +14,26 @@ import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
 import 'full_screen_map_page.dart';
 
-class Form3MapPage extends StatefulWidget {
+class Form3MapPage extends ConsumerStatefulWidget {
   const Form3MapPage({super.key});
 
   @override
-  State<Form3MapPage> createState() => _Form3MapPageState();
+  ConsumerState<Form3MapPage> createState() => _Form3MapPageState();
 }
 
-class _Form3MapPageState extends State<Form3MapPage> {
+class _Form3MapPageState extends ConsumerState<Form3MapPage> {
   final MapController _mapController = MapController();
   final LatLng initialCenter = const LatLng(3.5952, 98.6722);
 
   bool _isGettingLocation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(formNotifierProvider.notifier).initialize();
+    });
+  }
 
   Widget _buildHeader() {
     return Padding(
@@ -116,7 +124,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
 
       if (!mounted) return;
 
-      context.read<FormProvider>().setLocation(
+      ref.read(formNotifierProvider.notifier).setLocation(
         lat: currentLatLng.latitude,
         lng: currentLatLng.longitude,
       );
@@ -158,7 +166,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
     );
 
     if (result != null && mounted) {
-      context.read<FormProvider>().setLocation(
+      ref.read(formNotifierProvider.notifier).setLocation(
         lat: result.latitude,
         lng: result.longitude,
       );
@@ -167,9 +175,9 @@ class _Form3MapPageState extends State<Form3MapPage> {
   }
 
   Future<void> _goToForm3() async {
-    final provider = context.read<FormProvider>();
+    final formState = ref.read(formNotifierProvider);
 
-    if (provider.latitude == null || provider.longitude == null) {
+    if (formState.latitude == null || formState.longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pilih lokasi kebun dulu ya'),
@@ -198,7 +206,7 @@ class _Form3MapPageState extends State<Form3MapPage> {
                   initialCenter: selectedLocation,
                   initialZoom: 14,
                   onTap: (tapPosition, point) {
-                    context.read<FormProvider>().setLocation(
+                    ref.read(formNotifierProvider.notifier).setLocation(
                       lat: point.latitude,
                       lng: point.longitude,
                     );
@@ -284,8 +292,8 @@ class _Form3MapPageState extends State<Form3MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<FormProvider>();
-    final selectedLocation = provider.selectedLatLng ?? initialCenter;
+    final formState = ref.watch(formNotifierProvider);
+    final selectedLocation = formState.selectedLatLng ?? initialCenter;
 
     return Scaffold(
       body: AppBackground(
@@ -318,12 +326,12 @@ class _Form3MapPageState extends State<Form3MapPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (provider.latitude != null &&
-                            provider.longitude != null)
+                        if (formState.latitude != null &&
+                            formState.longitude != null)
                           Center(
                             child: Text(
-                              'Lat: ${provider.latitude!.toStringAsFixed(6)}  •  '
-                                  'Lng: ${provider.longitude!.toStringAsFixed(6)}',
+                              'Lat: ${formState.latitude!.toStringAsFixed(6)}  •  '
+                                  'Lng: ${formState.longitude!.toStringAsFixed(6)}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 12,

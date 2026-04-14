@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_top_bar.dart';
 import '../../models/sertifikat_model.dart';
 import '../../providers/sertifikat_controller.dart';
@@ -54,75 +55,78 @@ class SertifikatPage extends ConsumerWidget {
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8F5),
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppTopBar(
-              title: 'Sertifikat',
-              onBackTap: () => Navigator.of(context).pop(),
-              onActionTap: () => _openFilterDialog(context, ref, state),
-              backIconPath: 'assets/icons/arrow_back.png',
-              actionIconPath: 'assets/icons/filter.png',
-            ),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  switch (state.viewState) {
-                    case SertifikatViewState.loading:
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-
-                    case SertifikatViewState.empty:
-                      return const SertifikatEmptyState(
-                        title: 'Data belum ditemukan!',
-                        description:
-                        'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu dan optimalkan hasil panen sekarang!',
-                      );
-
-                    case SertifikatViewState.error:
-                      return SertifikatEmptyState(
-                        title: 'Data belum ditemukan!',
-                        description:
-                        state.errorMessage ?? 'Coba sesuaikan pencarian atau filter anda!',
-                        showClockBadge: true,
-                      );
-
-                    case SertifikatViewState.success:
-                      final certificates = state.filteredCertificates;
-
-                      return RefreshIndicator(
-                        onRefresh: () => ref
-                            .read(sertifikatControllerProvider.notifier)
-                            .loadCertificates(),
-                        child: ListView.separated(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.fromLTRB(
-                            10,
-                            20,
-                            10,
-                            77 + bottomSafeArea,
-                          ),
-                          itemCount: certificates.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 18),
-                          itemBuilder: (context, index) {
-                            final item = certificates[index];
-                            return SertifikatCard(
-                              sertifikat: item,
-                              onDownload: () => _onDownload(context, item),
-                              calendarIconPath: 'assets/icons/calendar.png',
-                              kebunIconPath: 'assets/icons/kebun.png',
-                              sertifikatIconPath: 'assets/icons/badge-check.png',
-                            );
-                          },
-                        ),
-                      );
-                  }
-                },
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              AppTopBar(
+                title: 'Sertifikat',
+                onBackTap: () => Navigator.of(context).pop(),
+                onActionTap: () => _openFilterDialog(context, ref, state),
+                backIconPath: 'assets/icons/arrow_back.png',
+                actionIconPath: 'assets/icons/filter.png',
               ),
-            ),
-          ],
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    switch (state.viewState) {
+                      case SertifikatViewState.loading:
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+
+                      case SertifikatViewState.empty:
+                        return const SertifikatEmptyState(
+                          title: 'Data belum ditemukan!',
+                          description:
+                          'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu dan optimalkan hasil panen sekarang!',
+                        );
+
+                      case SertifikatViewState.error:
+                        return SertifikatEmptyState(
+                          title: 'Data belum ditemukan!',
+                          description: state.errorMessage ??
+                              'Coba sesuaikan pencarian atau filter anda!',
+                          showClockBadge: true,
+                        );
+
+                      case SertifikatViewState.success:
+                        final certificates = state.filteredCertificates;
+
+                        return RefreshIndicator(
+                          onRefresh: () => ref
+                              .read(sertifikatControllerProvider.notifier)
+                              .loadCertificates(),
+                          child: ListView.separated(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: EdgeInsets.fromLTRB(
+                              10,
+                              20,
+                              10,
+                              77 + bottomSafeArea,
+                            ),
+                            itemCount: certificates.length,
+                            separatorBuilder: (_, __) =>
+                            const SizedBox(height: 18),
+                            itemBuilder: (context, index) {
+                              final item = certificates[index];
+                              return SertifikatCard(
+                                sertifikat: item,
+                                onDownload: () => _onDownload(context, item),
+                                calendarIconPath: 'assets/icons/calendar.png',
+                                kebunIconPath: 'assets/icons/kebun.png',
+                                sertifikatIconPath:
+                                'assets/icons/badge-check.png',
+                              );
+                            },
+                          ),
+                        );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

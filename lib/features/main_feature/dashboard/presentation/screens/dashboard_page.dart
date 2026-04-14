@@ -5,13 +5,27 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../../list_kebun/models/kebun_feature_type.dart';
 import '../../providers/dashboard_controller.dart';
+import '../../../list_kebun/providers/kebun_selection_controller.dart';
 import '../widgets/article/article_section.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_menu_section.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
+
+  void _goToListKebun(
+      BuildContext context,
+      WidgetRef ref,
+      KebunFeatureType feature,
+      ) {
+    ref
+        .read(kebunSelectionControllerProvider.notifier)
+        .setSelectedFeature(feature);
+
+    context.push(AppRoutes.listKebun);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,9 +35,19 @@ class DashboardPage extends ConsumerWidget {
     final dashboardArticles = provider.dashboardArticles;
 
     final menus = provider.buildMenus(
-      onEHaraTap: () {},
-      onRekomendasiTap: () {},
-      onGanodermaTap: () {},
+      onEHaraTap: () {
+        _goToListKebun(context, ref, KebunFeatureType.ehara);
+      },
+      onRekomendasiTap: () {
+        _goToListKebun(
+          context,
+          ref,
+          KebunFeatureType.rekomendasiPemupukan,
+        );
+      },
+      onGanodermaTap: () {
+        _goToListKebun(context, ref, KebunFeatureType.ganoderma);
+      },
       onSertifikasiTap: () {
         context.push(AppRoutes.sertifikat);
       },

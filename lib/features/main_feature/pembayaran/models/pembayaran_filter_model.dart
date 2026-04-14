@@ -10,13 +10,13 @@ enum PembayaranSortType {
 class PembayaranFilterModel {
   final DateTime? startDate;
   final DateTime? endDate;
-  final PembayaranSortType sortType;
+  final PembayaranSortType? sortType;
   final PembayaranStatus? status;
 
   const PembayaranFilterModel({
     this.startDate,
     this.endDate,
-    this.sortType = PembayaranSortType.terbaru,
+    this.sortType,
     this.status,
   });
 
@@ -26,20 +26,26 @@ class PembayaranFilterModel {
     bool clearStartDate = false,
     bool clearEndDate = false,
     PembayaranSortType? sortType,
+    bool clearSortType = false,
     PembayaranStatus? status,
     bool clearStatus = false,
   }) {
     return PembayaranFilterModel(
       startDate: clearStartDate ? null : (startDate ?? this.startDate),
       endDate: clearEndDate ? null : (endDate ?? this.endDate),
-      sortType: sortType ?? this.sortType,
+      sortType: clearSortType ? null : (sortType ?? this.sortType),
       status: clearStatus ? null : (status ?? this.status),
     );
   }
 
   bool get hasActiveFilter {
-    return startDate != null || endDate != null || status != null;
+    return startDate != null || endDate != null || sortType != null || status != null;
   }
 
-  static const empty = PembayaranFilterModel();
+  static const empty = PembayaranFilterModel(
+    startDate: null,
+    endDate: null,
+    sortType: null,
+    status: null,
+  );
 }

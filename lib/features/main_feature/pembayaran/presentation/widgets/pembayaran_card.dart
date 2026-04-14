@@ -7,11 +7,18 @@ class PembayaranCard extends StatelessWidget {
   final String tanggalText;
   final VoidCallback? onPrimaryTap;
 
+  final String calendarIconPath;
+  final String kebunIconPath;
+  final String statusIconPath;
+
   const PembayaranCard({
     super.key,
     required this.item,
     required this.tanggalText,
     this.onPrimaryTap,
+    required this.calendarIconPath,
+    required this.kebunIconPath,
+    required this.statusIconPath,
   });
 
   Color _statusColor(PembayaranStatus status) {
@@ -32,155 +39,196 @@ class PembayaranCard extends StatelessWidget {
       case PembayaranStatus.selesai:
         return 'Pembayaran Selesai';
       case PembayaranStatus.dibatalkan:
-        return 'Pembayaran Dibatalkan';
+        return 'Belum Pembayaran';
     }
   }
 
   String _buttonText(PembayaranStatus status) {
     switch (status) {
       case PembayaranStatus.proses:
+      case PembayaranStatus.dibatalkan:
         return 'Menu Pembayaran';
       case PembayaranStatus.selesai:
         return 'Download Invoice';
-      case PembayaranStatus.dibatalkan:
-        return '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final statusColor = _statusColor(item.status);
-    final showButton = item.status != PembayaranStatus.dibatalkan;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF3E7F69),
-          width: 2,
+          color: const Color(0xFF3E806D),
+          width: 2.6,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x18000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         children: [
-          Text(
-            item.namaProjek,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF333333),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(
-                Icons.calendar_today_outlined,
-                size: 20,
-                color: Color(0xFF4C4C4C),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                tanggalText,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF4C4C4C),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Container(
             width: double.infinity,
-            height: 1,
-            color: const Color(0xFFD2D2D2),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(
-                Icons.layers_outlined,
-                size: 20,
-                color: Color(0xFF4C4C4C),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Jumlah Baris: ${item.jumlahBaris}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF303030),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.info_outline,
-                size: 20,
-                color: Color(0xFF4C4C4C),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'Status Pembayaran: ',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF303030),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  _statusText(item.status),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: statusColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (showButton) ...[
-            const SizedBox(height: 20),
-            SizedBox(
-              width: 182,
-              height: 42,
-              child: ElevatedButton(
-                onPressed: onPrimaryTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3E7F69),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  _buttonText(item.status),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFF3E806D),
+                  width: 2.2,
                 ),
               ),
             ),
-          ],
+            child: Text(
+              item.namaProjek,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF303030),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            child: Column(
+              children: [
+                _InfoRow(
+                  iconPath: calendarIconPath,
+                  leftText: tanggalText,
+                ),
+                const SizedBox(height: 10),
+                _InfoRow(
+                  iconPath: kebunIconPath,
+                  leftText: 'Kebun',
+                  rightText: item.kebun,
+                ),
+                const SizedBox(height: 10),
+                _InfoRow(
+                  iconPath: statusIconPath,
+                  leftText: 'Status Pembayaran',
+                  rightText: _statusText(item.status),
+                  rightTextColor: statusColor,
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: 242,
+                  height: 42,
+                  child: ElevatedButton(
+                    onPressed: onPrimaryTap,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFF4A8A76),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      _buttonText(item.status),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String iconPath;
+  final String leftText;
+  final String? rightText;
+  final Color? rightTextColor;
+
+  const _InfoRow({
+    required this.iconPath,
+    required this.leftText,
+    this.rightText,
+    this.rightTextColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRightText = rightText != null;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Image.asset(
+            iconPath,
+            width: 20,
+            height: 20,
+            fit: BoxFit.contain,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: hasRightText
+              ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  leftText,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF373737),
+                    height: 1.25,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                ':',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF373737),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  rightText!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: rightTextColor ?? const Color(0xFF373737),
+                    height: 1.25,
+                  ),
+                ),
+              ),
+            ],
+          )
+              : Text(
+            leftText,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF373737),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

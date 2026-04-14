@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/pressable_button.dart';
+
 class ProfileMenuTile extends StatelessWidget {
   final String iconPath;
   final String title;
@@ -16,7 +18,7 @@ class ProfileMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ProfileBaseTile(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: const Color(0xFFFFFFFF),
       borderColor: const Color(0xFFC9C9C9),
       foregroundColor: const Color(0xFF3E3E3E),
       iconPath: iconPath,
@@ -63,65 +65,50 @@ class _ProfileBaseTile extends StatelessWidget {
     final minTileHeight =
         math.max(iconSize, scaledLineHeight) + (verticalPadding * 2);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: borderColor,
-              width: 1.6,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14000000),
-                blurRadius: 8,
-                offset: Offset(0, 3),
-              ),
-            ],
+    return PressableButton(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      color: backgroundColor,
+      border: Border.all(
+        color: borderColor,
+        width: 1.6,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minTileHeight),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: minTileHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: verticalPadding,
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
+          child: Row(
+            children: [
+              SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: Center(
+                  child: Image.asset(
+                    iconPath,
                     width: iconSize,
                     height: iconSize,
-                    child: Center(
-                      child: Image.asset(
-                        iconPath,
-                        width: iconSize,
-                        height: iconSize,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w700,
-                        color: foregroundColor,
-                        height: textHeight,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
-                  if (trailing != null) trailing!,
-                ],
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w700,
+                    color: foregroundColor,
+                    height: textHeight,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              if (trailing != null) trailing!,
+            ],
           ),
         ),
       ),

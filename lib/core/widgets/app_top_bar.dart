@@ -6,12 +6,8 @@ class AppTopBar extends StatelessWidget {
   final VoidCallback? onActionTap;
   final String? backIconPath;
   final String? actionIconPath;
-  final bool centerTitle;
-  final double height;
-  final EdgeInsetsGeometry padding;
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color titleColor;
+  final bool showBackButton;
+  final bool showBottomDivider;
 
   const AppTopBar({
     super.key,
@@ -20,96 +16,89 @@ class AppTopBar extends StatelessWidget {
     this.onActionTap,
     this.backIconPath,
     this.actionIconPath,
-    this.centerTitle = true,
-    this.height = 72,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16),
-    this.backgroundColor = Colors.transparent,
-    this.borderColor = const Color(0xFF8D8D8D),
-    this.titleColor = Colors.black,
+    this.showBackButton = true,
+    this.showBottomDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border(
-          bottom: BorderSide(
-            color: borderColor,
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
+      color: const Color(0xFFF7F8F5),
+      child: Column(
         children: [
-          _TopBarIconButton(
-            onTap: onBackTap ?? () => Navigator.of(context).maybePop(),
-            iconPath: backIconPath,
-          ),
-          Expanded(
-            child: centerTitle
-                ? Center(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: titleColor,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            child: Row(
+              children: [
+                if (showBackButton)
+                  GestureDetector(
+                    onTap: onBackTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Center(
+                        child: backIconPath != null
+                            ? Image.asset(
+                          backIconPath!,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        )
+                            : const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox(width: 8),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: showBackButton ? 8 : 4),
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF111111),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            )
-                : Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: titleColor,
-              ),
+                if (actionIconPath != null)
+                  GestureDetector(
+                    onTap: onActionTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Center(
+                        child: Image.asset(
+                          actionIconPath!,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox(width: 40),
+              ],
             ),
           ),
-          _TopBarIconButton(
-            onTap: onActionTap,
-            iconPath: actionIconPath,
-          ),
+          if (showBottomDivider)
+            const SizedBox(
+              width: double.infinity,
+              child: Divider(
+                height: 1,
+                thickness: 1.5,
+                color: Color(0xFF4D4D4D),
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _TopBarIconButton extends StatelessWidget {
-  final VoidCallback? onTap;
-  final String? iconPath;
-
-  const _TopBarIconButton({
-    required this.onTap,
-    required this.iconPath,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(999),
-      onTap: onTap,
-      child: SizedBox(
-        width: 40,
-        height: 40,
-        child: Center(
-          child: iconPath == null
-              ? const SizedBox.shrink()
-              : Image.asset(
-            iconPath!,
-            width: 28,
-            height: 28,
-            fit: BoxFit.contain,
-          ),
-        ),
       ),
     );
   }

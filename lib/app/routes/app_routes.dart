@@ -14,8 +14,11 @@ class AppRoutes {
   static const articleDetail = '/article-detail';
 
   static const String notifikasi = '/notifikasi';
-
   static const String sertifikat = '/sertifikat';
+  static const String listKebun = '/list-kebun';
+  static const String ehara = '/ehara';
+  static const String rekomendasiPemupukan = '/rekomendasi-pemupukan';
+  static const String ganoderma = '/ganoderma';
 
   static const String form1 = '/form1';
   static const String form2 = '/form2';

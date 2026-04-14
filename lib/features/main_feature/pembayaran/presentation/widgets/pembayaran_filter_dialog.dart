@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/date_input_field.dart';
+import '../../../../../core/widgets/filter_option_button.dart';
 import '../../models/pembayaran_filter_model.dart';
 import '../../models/pembayaran_model.dart';
 
@@ -12,14 +14,13 @@ class PembayaranFilterDialog extends StatefulWidget {
   });
 
   @override
-  State<PembayaranFilterDialog> createState() =>
-      _PembayaranFilterDialogState();
+  State<PembayaranFilterDialog> createState() => _PembayaranFilterDialogState();
 }
 
 class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
   DateTime? _startDate;
   DateTime? _endDate;
-  late PembayaranSortType _sortType;
+  PembayaranSortType? _sortType;
   PembayaranStatus? _status;
 
   @override
@@ -34,7 +35,7 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
   Future<void> _pickDate({required bool isStart}) async {
     final initialDate = isStart
         ? (_startDate ?? DateTime.now())
-        : (_endDate ?? DateTime.now());
+        : (_endDate ?? _startDate ?? DateTime.now());
 
     final pickedDate = await showDatePicker(
       context: context,
@@ -74,150 +75,69 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
     );
   }
 
-  Widget _buildDateField({
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          height: 42,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFFB4B4B4),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: text.contains('tanggal')
-                        ? const Color(0xFF9A9A9A)
-                        : const Color(0xFF444444),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const Icon(
-                Icons.calendar_today_outlined,
-                size: 17,
-                color: Color(0xFF4D4D4D),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionButton({
-    required String text,
-    required bool selected,
-    required VoidCallback onTap,
-    double? width,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: 40,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFE8F3EF) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected
-                ? const Color(0xFF3E7F69)
-                : const Color(0xFFB4B4B4),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
-              color: selected
-                  ? const Color(0xFF2F6F5C)
-                  : const Color(0xFF4D4D4D),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
+          color: const Color(0xFFF8F8F6),
           borderRadius: BorderRadius.circular(26),
           border: Border.all(
-            color: const Color(0xFF3E7F69),
-            width: 2,
+            color: const Color(0xFF3E806D),
+            width: 2.8,
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x22000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
+              color: Colors.black.withOpacity(0.14),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  const Spacer(),
-                  const Text(
-                    'Filter',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF333333),
+                  const Center(
+                    child: Text(
+                      'Filter',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF2F2F2F),
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(100),
-                    onTap: () => Navigator.pop(context),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.close,
-                        size: 28,
-                        color: Color(0xFF1F1F1F),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(999),
+                      child: const Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.close,
+                          size: 26,
+                          color: Color(0xFF222222),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                height: 1.5,
-                color: const Color(0xFF4A4A4A),
+              const SizedBox(height: 14),
+              const Divider(
+                thickness: 2.0,
+                color: Color(0xFF474747),
+                indent: 8,
+                endIndent: 8,
               ),
-              const SizedBox(height: 16),
-
+              const SizedBox(height: 20),
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -225,30 +145,35 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF3A3A3A),
+                    color: Color(0xFF2F2F2F),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildDateField(
-                    text: _startDate == null
-                        ? 'Dari tanggal'
-                        : _formatDate(_startDate),
-                    onTap: () => _pickDate(isStart: true),
+                  Expanded(
+                    child: DateInputField(
+                      label: _startDate == null
+                          ? 'Dari tanggal'
+                          : _formatDate(_startDate),
+                      onTap: () => _pickDate(isStart: true),
+                      iconPath: 'assets/icons/calendar.png',
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _buildDateField(
-                    text: _endDate == null
-                        ? 'Sampe tanggal'
-                        : _formatDate(_endDate),
-                    onTap: () => _pickDate(isStart: false),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DateInputField(
+                      label: _endDate == null
+                          ? 'Sampe tanggal'
+                          : _formatDate(_endDate),
+                      onTap: () => _pickDate(isStart: false),
+                      iconPath: 'assets/icons/calendar.png',
+                    ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 18),
+              const SizedBox(height: 22),
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -256,34 +181,34 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF3A3A3A),
+                    color: Color(0xFF2F2F2F),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'Terbaru',
-                      selected: _sortType == PembayaranSortType.terbaru,
-                      onTap: () {
-                        setState(() {
-                          _sortType = PembayaranSortType.terbaru;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'Terbaru',
+                      isSelected: _sortType == PembayaranSortType.terbaru,
+                      onTap: () => setState(() {
+                        _sortType = _sortType == PembayaranSortType.terbaru
+                            ? null
+                            : PembayaranSortType.terbaru;
+                      }),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'Terlama',
-                      selected: _sortType == PembayaranSortType.terlama,
-                      onTap: () {
-                        setState(() {
-                          _sortType = PembayaranSortType.terlama;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'Terlama',
+                      isSelected: _sortType == PembayaranSortType.terlama,
+                      onTap: () => setState(() {
+                        _sortType = _sortType == PembayaranSortType.terlama
+                            ? null
+                            : PembayaranSortType.terlama;
+                      }),
                     ),
                   ),
                 ],
@@ -292,32 +217,31 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'A-Z',
-                      selected: _sortType == PembayaranSortType.az,
-                      onTap: () {
-                        setState(() {
-                          _sortType = PembayaranSortType.az;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'A-Z',
+                      isSelected: _sortType == PembayaranSortType.az,
+                      onTap: () => setState(() {
+                        _sortType = _sortType == PembayaranSortType.az
+                            ? null
+                            : PembayaranSortType.az;
+                      }),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'Z-A',
-                      selected: _sortType == PembayaranSortType.za,
-                      onTap: () {
-                        setState(() {
-                          _sortType = PembayaranSortType.za;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'Z-A',
+                      isSelected: _sortType == PembayaranSortType.za,
+                      onTap: () => setState(() {
+                        _sortType = _sortType == PembayaranSortType.za
+                            ? null
+                            : PembayaranSortType.za;
+                      }),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 18),
+              const SizedBox(height: 22),
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -325,64 +249,67 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF3A3A3A),
+                    color: Color(0xFF2F2F2F),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'Proses Pembayaran',
-                      selected: _status == PembayaranStatus.proses,
-                      onTap: () {
-                        setState(() {
-                          _status = PembayaranStatus.proses;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'Pembayaran Selesai',
+                      isSelected: _status == PembayaranStatus.selesai,
+                      onTap: () => setState(() {
+                        _status = _status == PembayaranStatus.selesai
+                            ? null
+                            : PembayaranStatus.selesai;
+                      }),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: _buildOptionButton(
-                      text: 'Pembayaran Dibatalkan',
-                      selected: _status == PembayaranStatus.dibatalkan,
-                      onTap: () {
-                        setState(() {
-                          _status = PembayaranStatus.dibatalkan;
-                        });
-                      },
+                    child: FilterOptionButton(
+                      label: 'Proses Pembayaran',
+                      isSelected: _status == PembayaranStatus.proses,
+                      onTap: () => setState(() {
+                        _status = _status == PembayaranStatus.proses
+                            ? null
+                            : PembayaranStatus.proses;
+                      }),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
-              Center(
-                child: SizedBox(
-                  width: 150,
-                  child: _buildOptionButton(
-                    text: 'Pembayaran Selesai',
-                    selected: _status == PembayaranStatus.selesai,
-                    onTap: () {
-                      setState(() {
-                        _status = PembayaranStatus.selesai;
-                      });
-                    },
+              Row(
+                children: [
+                  const Spacer(),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.42,
+                    child: FilterOptionButton(
+                      label: 'Belum Pembayaran',
+                      isSelected: _status == PembayaranStatus.dibatalkan,
+                      onTap: () => setState(() {
+                        _status = _status == PembayaranStatus.dibatalkan
+                            ? null
+                            : PembayaranStatus.dibatalkan;
+                      }),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                ],
               ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 26),
               SizedBox(
-                width: 190,
+                width: 220,
                 height: 42,
                 child: ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3E7F69),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
+                    elevation: 1.5,
+                    backgroundColor: const Color(0xFF4A8A76),
+                    shadowColor: Colors.black.withOpacity(0.18),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -390,8 +317,9 @@ class _PembayaranFilterDialogState extends State<PembayaranFilterDialog> {
                   child: const Text(
                     'Terapkan Filter',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
                 ),

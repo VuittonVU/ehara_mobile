@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
-import '../../providers/profile_provider.dart';
+import '../../../../../core/widgets/pressable_button.dart';
+import '../../providers/profile_controller.dart';
+import '../../providers/profile_state.dart';
 import '../widgets/profile_action_button.dart';
 import '../widgets/profile_avatar_card.dart';
 import '../widgets/profile_menu_tile.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   void _onDetailProfileTap(BuildContext context) {
@@ -114,32 +116,35 @@ class ProfilePage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<ProfileProvider>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(profileControllerProvider);
+    final profile = state.profile;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: RefreshIndicator(
-            onRefresh: provider.refreshProfile,
+            onRefresh: () =>
+                ref.read(profileControllerProvider.notifier).refreshProfile(),
             child: Builder(
               builder: (context) {
-                if (provider.isLoading && provider.profile == null) {
+                if (state.isLoading && profile == null) {
                   return const _ProfileLoadingView();
                 }
 
-                if (provider.errorMessage != null && provider.profile == null) {
+                if (state.viewState == ProfileViewState.error &&
+                    profile == null) {
                   return _ProfileErrorView(
-                    onRetry: provider.loadProfile,
+                    onRetry: () =>
+                        ref.read(profileControllerProvider.notifier).loadProfile(),
                   );
                 }
 
-                final profile = provider.profile;
-
                 if (profile == null) {
                   return _ProfileErrorView(
-                    onRetry: provider.loadProfile,
+                    onRetry: () =>
+                        ref.read(profileControllerProvider.notifier).loadProfile(),
                   );
                 }
 
@@ -148,7 +153,7 @@ class ProfilePage extends StatelessWidget {
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
                         child: Column(
                           children: [
                             Align(
@@ -252,25 +257,22 @@ class _LogoutDialogButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 38,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          onTap: onTap,
-          child: Ink(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+      child: PressableButton(
+        onTap: onTap,
+        enableHaptic: true,
+        pressedScale: 0.96,
+        pressedTranslateY: 1.5,
+        idleTranslateY: -0.5,
+        borderRadius: BorderRadius.circular(6),
+        color: backgroundColor,
+        padding: EdgeInsets.zero,
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

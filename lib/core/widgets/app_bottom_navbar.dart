@@ -229,7 +229,7 @@ class _CenterNavButtonState extends State<_CenterNavButton> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withOpacity(0.04),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   ),

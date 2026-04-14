@@ -34,4 +34,16 @@ class WilayahItem {
 
   @override
   String toString() => name;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is WilayahItem &&
+        other.code == code &&
+        other.name == name;
+  }
+
+  @override
+  int get hashCode => Object.hash(code, name);
 }

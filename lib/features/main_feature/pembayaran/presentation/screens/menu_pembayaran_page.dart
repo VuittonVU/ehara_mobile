@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../core/widgets/app_background.dart';
-import '../../providers/pembayaran_provider.dart';
+import '../../providers/pembayaran_controller.dart';
 
-class MenuPembayaranPage extends StatelessWidget {
+class MenuPembayaranPage extends ConsumerWidget {
   final String pembayaranId;
 
   const MenuPembayaranPage({
@@ -58,18 +58,17 @@ class MenuPembayaranPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<PembayaranProvider>();
-    final item = provider.visibleItems.cast<dynamic?>().firstWhere(
-          (e) => e?.id == pembayaranId,
-      orElse: () => null,
-    ) ??
-        provider.visibleItems.isNotEmpty
-        ? provider.visibleItems.firstWhere(
-          (e) => e.id == pembayaranId,
-      orElse: () => throw Exception('Pembayaran tidak ditemukan'),
-    )
-        : throw Exception('Pembayaran tidak ditemukan');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(pembayaranControllerProvider.notifier);
+    final item = notifier.findById(pembayaranId);
+
+    if (item == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Pembayaran tidak ditemukan'),
+        ),
+      );
+    }
 
     return Scaffold(
       body: AppBackground(
@@ -114,7 +113,7 @@ class MenuPembayaranPage extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: const Color(0xFFBDBDBD),
@@ -212,7 +211,7 @@ class MenuPembayaranPage extends StatelessWidget {
                         _buildField(
                           icon: Icons.park_outlined,
                           label: 'Harga Per Satuan Pohon',
-                          value: provider.formatCurrency(item.hargaPerSatuanPohon),
+                          value: notifier.formatCurrency(item.hargaPerSatuanPohon),
                         ),
                         const SizedBox(height: 16),
                         _buildField(
@@ -248,7 +247,7 @@ class MenuPembayaranPage extends StatelessWidget {
                             border: Border.all(color: const Color(0xFFC9C9C9)),
                           ),
                           child: Text(
-                            provider.formatCurrency(item.subTotal),
+                            notifier.formatCurrency(item.subTotal),
                             style: const TextStyle(
                               fontSize: 14,
                               color: Color(0xFF7A7A7A),
@@ -275,7 +274,7 @@ class MenuPembayaranPage extends StatelessWidget {
                                   child: const Text(
                                     'Batalkan',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -301,7 +300,7 @@ class MenuPembayaranPage extends StatelessWidget {
                                   child: const Text(
                                     'Bayar Sekarang',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),

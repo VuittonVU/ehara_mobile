@@ -1,30 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/widgets/app_background.dart';
 import '../../../../../../core/widgets/app_status_dialog.dart';
+import '../../../../../../core/widgets/pressable_button.dart';
+import '../../../providers/side_features/change_pass/change_pass_controller.dart';
+import '../../widgets/profile_header.dart';
 
-class ChangePasswordPage extends StatefulWidget {
+class ChangePasswordPage extends ConsumerStatefulWidget {
   const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
+  ConsumerState<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  final TextEditingController oldPasswordController = TextEditingController();
-  final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
+  late final TextEditingController _oldPasswordController;
+  late final TextEditingController _newPasswordController;
+  late final TextEditingController _confirmPasswordController;
 
-  bool _obscureOldPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
+  @override
+  void initState() {
+    super.initState();
+
+    final state = ref.read(changePasswordControllerProvider);
+
+    _oldPasswordController = TextEditingController(text: state.oldPassword);
+    _newPasswordController = TextEditingController(text: state.newPassword);
+    _confirmPasswordController =
+        TextEditingController(text: state.confirmPassword);
+
+    _oldPasswordController.addListener(() {
+      ref
+          .read(changePasswordControllerProvider.notifier)
+          .updateOldPassword(_oldPasswordController.text);
+    });
+
+    _newPasswordController.addListener(() {
+      ref
+          .read(changePasswordControllerProvider.notifier)
+          .updateNewPassword(_newPasswordController.text);
+    });
+
+    _confirmPasswordController.addListener(() {
+      ref
+          .read(changePasswordControllerProvider.notifier)
+          .updateConfirmPassword(_confirmPasswordController.text);
+    });
+  }
 
   @override
   void dispose() {
-    oldPasswordController.dispose();
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -42,50 +71,41 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog({
+    required String title,
+    required String message,
+  }) {
     AppStatusDialog.show(
       context: context,
-      title: 'Password Berhasil Diganti!',
-      message: 'Password kamu sudah berhasil diperbarui.',
+      title: title,
+      message: message,
       imagePath: 'assets/maskot/maskot2.png',
       buttonText: 'Kembali',
       onPressed: () {
-        Navigator.pop(context); // tutup dialog
-        context.pop(); // balik ke profil
+        Navigator.pop(context);
+        Navigator.pop(context);
       },
     );
   }
 
-  void _handleChangePassword() {
-    final oldPass = oldPasswordController.text.trim();
-    final newPass = newPasswordController.text.trim();
-    final confirmPass = confirmPasswordController.text.trim();
+  Future<void> _handleChangePassword() async {
+    final result =
+    await ref.read(changePasswordControllerProvider.notifier).submit();
 
-    if (oldPass.isEmpty || newPass.isEmpty || confirmPass.isEmpty) {
-      _showErrorDialog(
-        title: 'Data Tidak Lengkap!',
-        message: 'Semua field password wajib diisi.',
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      _showSuccessDialog(
+        title: result.title,
+        message: result.message,
       );
       return;
     }
 
-    if (oldPass == newPass) {
-      _showErrorDialog(
-        title: 'Password Tidak Valid!',
-        message: 'Password baru harus berbeda dengan password lama.',
-      );
-      return;
-    }
-
-    if (newPass != confirmPass) {
-      _showErrorDialog(
-        title: 'Konfirmasi Salah!',
-        message: 'Konfirmasi password baru tidak cocok.',
-      );
-      return;
-    }
-
-    _showSuccessDialog();
+    _showErrorDialog(
+      title: result.title,
+      message: result.message,
+    );
   }
 
   Widget _buildPasswordField({
@@ -111,9 +131,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           obscureText: obscureText,
           obscuringCharacter: '*',
           decoration: InputDecoration(
-            prefixIcon: const Icon(
-              Icons.lock_outline_rounded,
-              color: Color(0xFF6E6E6E),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Image.asset(
+                'assets/icons/lock.png',
+                width: 20,
+                height: 20,
+              ),
+            ),
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 46,
+              minHeight: 46,
             ),
             suffixIcon: IconButton(
               onPressed: onToggleVisibility,
@@ -154,44 +182,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IconButton(
-              onPressed: () => context.pop(),
-              icon: Image.asset(
-                'assets/icons/arrow_back.png',
-                width: 28,
-                height: 28,
-              ),
-            ),
-          ),
-          const Text(
-            'Ganti Password',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF2F2F2F),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(changePasswordControllerProvider);
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
+              ProfileHeader(
+                title: 'Ganti Password',
+                onBackTap: () => Navigator.pop(context),
+              ),
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
@@ -218,56 +222,74 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         children: [
                           _buildPasswordField(
                             label: 'Password Saat Ini',
-                            controller: oldPasswordController,
-                            obscureText: _obscureOldPassword,
+                            controller: _oldPasswordController,
+                            obscureText: state.obscureOldPassword,
                             onToggleVisibility: () {
-                              setState(() {
-                                _obscureOldPassword = !_obscureOldPassword;
-                              });
+                              ref
+                                  .read(
+                                changePasswordControllerProvider.notifier,
+                              )
+                                  .toggleOldPasswordVisibility();
                             },
                           ),
                           const SizedBox(height: 24),
                           _buildPasswordField(
                             label: 'Password Baru',
-                            controller: newPasswordController,
-                            obscureText: _obscureNewPassword,
+                            controller: _newPasswordController,
+                            obscureText: state.obscureNewPassword,
                             onToggleVisibility: () {
-                              setState(() {
-                                _obscureNewPassword = !_obscureNewPassword;
-                              });
+                              ref
+                                  .read(
+                                changePasswordControllerProvider.notifier,
+                              )
+                                  .toggleNewPasswordVisibility();
                             },
                           ),
                           const SizedBox(height: 24),
                           _buildPasswordField(
                             label: 'Konfirmasi Password Baru',
-                            controller: confirmPasswordController,
-                            obscureText: _obscureConfirmPassword,
+                            controller: _confirmPasswordController,
+                            obscureText: state.obscureConfirmPassword,
                             onToggleVisibility: () {
-                              setState(() {
-                                _obscureConfirmPassword =
-                                !_obscureConfirmPassword;
-                              });
+                              ref
+                                  .read(
+                                changePasswordControllerProvider.notifier,
+                              )
+                                  .toggleConfirmPasswordVisibility();
                             },
                           ),
                           const SizedBox(height: 32),
                           SizedBox(
                             width: 220,
                             height: 48,
-                            child: ElevatedButton(
-                              onPressed: _handleChangePassword,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3E7F69),
-                                foregroundColor: Colors.white,
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              ),
-                              child: const Text(
-                                'Simpan Perubahan',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
+                            child: PressableButton(
+                              onTap:
+                              state.isSubmitting ? null : _handleChangePassword,
+                              borderRadius: BorderRadius.circular(6),
+                              color: const Color(0xFF3E7F69),
+                              pressedScale: 0.98,
+                              pressedTranslateY: 1.2,
+                              idleTranslateY: -0.4,
+                              child: Center(
+                                child: state.isSubmitting
+                                    ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    valueColor:
+                                    AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                    : const Text(
+                                  'Simpan Perubahan',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),

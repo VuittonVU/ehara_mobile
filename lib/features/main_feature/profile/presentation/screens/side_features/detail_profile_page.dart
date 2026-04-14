@@ -1,28 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../../../core/widgets/app_background.dart';
 import '../../../../../../core/widgets/app_status_dialog.dart';
+import '../../../../../../core/widgets/pressable_button.dart';
+import '../../../providers/side_features/detail_profile/detail_profile_controller.dart';
+import '../../widgets/profile_header.dart';
 
-class DetailProfilePage extends StatefulWidget {
+class DetailProfilePage extends ConsumerStatefulWidget {
   const DetailProfilePage({super.key});
 
   @override
-  State<DetailProfilePage> createState() => _DetailProfilePageState();
+  ConsumerState<DetailProfilePage> createState() => _DetailProfilePageState();
 }
 
-class _DetailProfilePageState extends State<DetailProfilePage> {
-  final TextEditingController _fullNameController =
-  TextEditingController(text: 'Vuitton Varian Utomo');
-  final TextEditingController _usernameController =
-  TextEditingController(text: 'VVU');
-  final TextEditingController _addressController = TextEditingController(
-    text: 'Jalan Muktar Basri Komplek Gaharu\nTown House Blok F1B',
-  );
-  final TextEditingController _emailController =
-  TextEditingController(text: 'vuittonvarianu@gmail.com');
-  final TextEditingController _phoneController =
-  TextEditingController(text: '0895622924083');
-  final TextEditingController _whatsappController =
-  TextEditingController(text: '0895622924083');
+class _DetailProfilePageState extends ConsumerState<DetailProfilePage> {
+  late final TextEditingController _fullNameController;
+  late final TextEditingController _usernameController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _whatsappController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final state = ref.read(detailProfileControllerProvider);
+
+    _fullNameController = TextEditingController(text: state.fullName);
+    _usernameController = TextEditingController(text: state.username);
+    _addressController = TextEditingController(text: state.address);
+    _emailController = TextEditingController(text: state.email);
+    _phoneController = TextEditingController(text: state.phoneNumber);
+    _whatsappController = TextEditingController(text: state.whatsappNumber);
+
+    _fullNameController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updateFullName(_fullNameController.text);
+    });
+    _usernameController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updateUsername(_usernameController.text);
+    });
+    _addressController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updateAddress(_addressController.text);
+    });
+    _emailController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updateEmail(_emailController.text);
+    });
+    _phoneController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updatePhoneNumber(_phoneController.text);
+    });
+    _whatsappController.addListener(() {
+      ref
+          .read(detailProfileControllerProvider.notifier)
+          .updateWhatsappNumber(_whatsappController.text);
+    });
+  }
 
   @override
   void dispose() {
@@ -35,7 +78,11 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
     super.dispose();
   }
 
-  void _onSaveChanges() {
+  Future<void> _onSaveChanges() async {
+    await ref.read(detailProfileControllerProvider.notifier).saveChanges();
+
+    if (!mounted) return;
+
     AppStatusDialog.show(
       context: context,
       title: 'Data Berhasil Disimpan!',
@@ -106,53 +153,21 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
                 Row(
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        height: 46,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _showDeleteSuccessDialog();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE95B59),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Ya',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
+                      child: _DialogActionButton(
+                        label: 'Ya',
+                        backgroundColor: const Color(0xFFE95B59),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showDeleteSuccessDialog();
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: SizedBox(
-                        height: 46,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A8A74),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Tidak',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
+                      child: _DialogActionButton(
+                        label: 'Tidak',
+                        backgroundColor: const Color(0xFF4A8A74),
+                        onTap: () => Navigator.pop(context),
                       ),
                     ),
                   ],
@@ -181,6 +196,8 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(detailProfileControllerProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
@@ -189,29 +206,9 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Image.asset(
-                        'assets/icons/arrow_back.png',
-                        width: 28,
-                        height: 30,
-                      ),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        'Detail Profil',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
+                ProfileHeader(
+                  title: 'Detail Profil',
+                  onBackTap: () => Navigator.pop(context),
                 ),
                 const SizedBox(height: 20),
                 Stack(
@@ -328,21 +325,32 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
                       SizedBox(
                         width: 200,
                         height: 46,
-                        child: ElevatedButton(
-                          onPressed: _onSaveChanges,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A8A74),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Simpan Perubahan',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                        child: PressableButton(
+                          onTap: state.isSaving ? null : _onSaveChanges,
+                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF4A8A74),
+                          pressedScale: 0.98,
+                          pressedTranslateY: 1.2,
+                          idleTranslateY: -0.4,
+                          child: Center(
+                            child: state.isSaving
+                                ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                                : const Text(
+                              'Simpan Perubahan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -354,29 +362,29 @@ class _DetailProfilePageState extends State<DetailProfilePage> {
                 SizedBox(
                   width: double.infinity,
                   height: 62,
-                  child: ElevatedButton.icon(
-                    onPressed: _showDeleteConfirmationDialog,
-                    icon: Image.asset(
-                      'assets/icons/trash.png',
-                      width: 28,
-                      height: 28,
-                      color: Colors.white,
-                    ),
-                    label: const Text(
-                      'Hapus Akun',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF4B4B),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                  child: PressableButton(
+                    onTap: _showDeleteConfirmationDialog,
+                    borderRadius: BorderRadius.circular(20),
+                    color: const Color(0xFFFF4B4B),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/icons/trash.png',
+                          width: 28,
+                          height: 28,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Hapus Akun',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -478,6 +486,43 @@ class _ProfileInputField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DialogActionButton extends StatelessWidget {
+  final String label;
+  final Color backgroundColor;
+  final VoidCallback onTap;
+
+  const _DialogActionButton({
+    required this.label,
+    required this.backgroundColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 46,
+      child: PressableButton(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        color: backgroundColor,
+        pressedScale: 0.97,
+        pressedTranslateY: 1.2,
+        idleTranslateY: -0.4,
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

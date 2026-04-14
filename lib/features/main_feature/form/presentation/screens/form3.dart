@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_status_dialog.dart';
 import '../../providers/form_provider.dart';
+import '../../providers/form_state.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
 import '../widgets/form_text_field.dart';
 
-class Form3Page extends StatefulWidget {
+class Form3Page extends ConsumerStatefulWidget {
   const Form3Page({super.key});
 
   @override
-  State<Form3Page> createState() => _Form3PageState();
+  ConsumerState<Form3Page> createState() => _Form3PageState();
 }
 
-class _Form3PageState extends State<Form3Page> {
+class _Form3PageState extends ConsumerState<Form3Page> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController xController = TextEditingController();
   final TextEditingController yController = TextEditingController();
@@ -44,28 +45,30 @@ class _Form3PageState extends State<Form3Page> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<FormProvider>();
-      _fillControllersFromProvider(provider);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(formNotifierProvider.notifier).initialize();
+
+      if (!mounted) return;
+      _fillControllersFromState(ref.read(formNotifierProvider));
       _bindControllerListeners();
-      _syncCoordinateControllers(provider);
+      _syncCoordinateControllers(ref.read(formNotifierProvider));
     });
   }
 
-  void _fillControllersFromProvider(FormProvider provider) {
-    idController.text = provider.idTitik;
-    proyeksiController.text = provider.proyeksiProtasStep3;
+  void _fillControllersFromState(TambahFormState state) {
+    idController.text = state.idTitik;
+    proyeksiController.text = state.proyeksiProtasStep3;
 
-    nController.text = provider.nilaiNStep3;
-    pController.text = provider.nilaiPStep3;
-    kController.text = provider.nilaiKStep3;
-    caController.text = provider.nilaiCaStep3;
-    mgController.text = provider.nilaiMgStep3;
+    nController.text = state.nilaiNStep3;
+    pController.text = state.nilaiPStep3;
+    kController.text = state.nilaiKStep3;
+    caController.text = state.nilaiCaStep3;
+    mgController.text = state.nilaiMgStep3;
   }
 
-  void _syncCoordinateControllers(FormProvider provider) {
-    final nextX = provider.longitude?.toStringAsFixed(6) ?? '';
-    final nextY = provider.latitude?.toStringAsFixed(6) ?? '';
+  void _syncCoordinateControllers(TambahFormState state) {
+    final nextX = state.longitude?.toStringAsFixed(6) ?? '';
+    final nextY = state.latitude?.toStringAsFixed(6) ?? '';
 
     if (xController.text != nextX) {
       xController.text = nextX;
@@ -80,33 +83,33 @@ class _Form3PageState extends State<Form3Page> {
     _hasBoundListeners = true;
 
     idController.addListener(() {
-      context.read<FormProvider>().setIdTitik(idController.text);
+      ref.read(formNotifierProvider.notifier).setIdTitik(idController.text);
     });
 
     proyeksiController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setProyeksiProtasStep3(proyeksiController.text);
     });
 
     nController.addListener(() {
-      context.read<FormProvider>().setNilaiNStep3(nController.text);
+      ref.read(formNotifierProvider.notifier).setNilaiNStep3(nController.text);
     });
 
     pController.addListener(() {
-      context.read<FormProvider>().setNilaiPStep3(pController.text);
+      ref.read(formNotifierProvider.notifier).setNilaiPStep3(pController.text);
     });
 
     kController.addListener(() {
-      context.read<FormProvider>().setNilaiKStep3(kController.text);
+      ref.read(formNotifierProvider.notifier).setNilaiKStep3(kController.text);
     });
 
     caController.addListener(() {
-      context.read<FormProvider>().setNilaiCaStep3(caController.text);
+      ref.read(formNotifierProvider.notifier).setNilaiCaStep3(caController.text);
     });
 
     mgController.addListener(() {
-      context.read<FormProvider>().setNilaiMgStep3(mgController.text);
+      ref.read(formNotifierProvider.notifier).setNilaiMgStep3(mgController.text);
     });
   }
 
@@ -221,7 +224,7 @@ class _Form3PageState extends State<Form3Page> {
       buttonText: 'OK',
       onPressed: () async {
         Navigator.pop(context);
-        await context.read<FormProvider>().resetAndClearDraft();
+        await ref.read(formNotifierProvider.notifier).resetAndClearDraft();
         if (!mounted) return;
         context.go(AppRoutes.dashboard);
       },
@@ -229,17 +232,17 @@ class _Form3PageState extends State<Form3Page> {
   }
 
   Future<void> _submitForm() async {
-    final provider = context.read<FormProvider>();
+    final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!provider.validateStep3()) {
+    if (!notifier.validateStep3()) {
       _showFailedDialog();
       return;
     }
 
-    final payload = provider.buildSubmissionPayload();
+    final payload = notifier.buildSubmissionPayload();
     debugPrint('FORM SUBMISSION PAYLOAD: $payload');
 
-    await provider.clearDraft();
+    await notifier.clearDraft();
 
     if (!mounted) return;
     _showSuccessDialog();
@@ -247,8 +250,8 @@ class _Form3PageState extends State<Form3Page> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<FormProvider>();
-    _syncCoordinateControllers(provider);
+    final formState = ref.watch(formNotifierProvider);
+    _syncCoordinateControllers(formState);
 
     return Scaffold(
       body: AppBackground(
@@ -276,7 +279,6 @@ class _Form3PageState extends State<Form3Page> {
                               hintText: 'ID',
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'X'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -285,7 +287,6 @@ class _Form3PageState extends State<Form3Page> {
                               readOnly: true,
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Y'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -294,12 +295,12 @@ class _Form3PageState extends State<Form3Page> {
                               readOnly: true,
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'BAND Red (Merah)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value:
-                              provider.bandRed.isEmpty ? null : provider.bandRed,
+                              value: formState.bandRed.isEmpty
+                                  ? null
+                                  : formState.bandRed,
                               hintText: 'Red',
                               items: bandOptions
                                   .map(
@@ -311,18 +312,19 @@ class _Form3PageState extends State<Form3Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context.read<FormProvider>().setBandRed(value);
+                                  ref
+                                      .read(formNotifierProvider.notifier)
+                                      .setBandRed(value);
                                 }
                               },
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'BAND Green (Hijau)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: provider.bandGreen.isEmpty
+                              value: formState.bandGreen.isEmpty
                                   ? null
-                                  : provider.bandGreen,
+                                  : formState.bandGreen,
                               hintText: 'Green',
                               items: bandOptions
                                   .map(
@@ -334,19 +336,19 @@ class _Form3PageState extends State<Form3Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context
-                                      .read<FormProvider>()
+                                  ref
+                                      .read(formNotifierProvider.notifier)
                                       .setBandGreen(value);
                                 }
                               },
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'BAND NIR (Inframerah)'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value:
-                              provider.bandNir.isEmpty ? null : provider.bandNir,
+                              value: formState.bandNir.isEmpty
+                                  ? null
+                                  : formState.bandNir,
                               hintText: 'NIR',
                               items: bandOptions
                                   .map(
@@ -358,12 +360,13 @@ class _Form3PageState extends State<Form3Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context.read<FormProvider>().setBandNir(value);
+                                  ref
+                                      .read(formNotifierProvider.notifier)
+                                      .setBandNir(value);
                                 }
                               },
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Proyeksi Protas'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -371,15 +374,14 @@ class _Form3PageState extends State<Form3Page> {
                               hintText: 'Proyeksi Protas',
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(
                               text: 'Tambahkan Analisis Deteksi Ganoderma?',
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: provider.ganodermaStep3.isEmpty
+                              value: formState.ganodermaStep3.isEmpty
                                   ? null
-                                  : provider.ganodermaStep3,
+                                  : formState.ganodermaStep3,
                               hintText: 'Ya',
                               items: yesNoOptions
                                   .map(
@@ -391,8 +393,8 @@ class _Form3PageState extends State<Form3Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context
-                                      .read<FormProvider>()
+                                  ref
+                                      .read(formNotifierProvider.notifier)
                                       .setGanodermaStep3(value);
                                 }
                               },
@@ -411,9 +413,9 @@ class _Form3PageState extends State<Form3Page> {
                               'Silahkan isi data hara tanah untuk hasil yang lebih akurat',
                             ),
                             FormDropdownField<String>(
-                              value: provider.statusHaraTanahStep3.isEmpty
+                              value: formState.statusHaraTanahStep3.isEmpty
                                   ? null
-                                  : provider.statusHaraTanahStep3,
+                                  : formState.statusHaraTanahStep3,
                               hintText: 'Ada Nilai Hara Tanah',
                               items: soilOptions
                                   .map(
@@ -425,15 +427,14 @@ class _Form3PageState extends State<Form3Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  context
-                                      .read<FormProvider>()
+                                  ref
+                                      .read(formNotifierProvider.notifier)
                                       .setStatusHaraTanahStep3(value);
                                 }
                               },
                             ),
                             _buildDivider(),
-
-                            if (provider.showSoilFieldsStep3) ...[
+                            if (formState.showSoilFieldsStep3) ...[
                               const FormLabel(text: 'Nilai Hara Tanah (N)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -442,7 +443,6 @@ class _Form3PageState extends State<Form3Page> {
                                 keyboardType: TextInputType.number,
                               ),
                               const SizedBox(height: 16),
-
                               const FormLabel(text: 'Nilai Hara Tanah (P)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -451,7 +451,6 @@ class _Form3PageState extends State<Form3Page> {
                                 keyboardType: TextInputType.number,
                               ),
                               const SizedBox(height: 16),
-
                               const FormLabel(text: 'Nilai Hara Tanah (K)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -460,7 +459,6 @@ class _Form3PageState extends State<Form3Page> {
                                 keyboardType: TextInputType.number,
                               ),
                               const SizedBox(height: 16),
-
                               const FormLabel(text: 'Nilai Hara Tanah (Ca)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -469,7 +467,6 @@ class _Form3PageState extends State<Form3Page> {
                                 keyboardType: TextInputType.number,
                               ),
                               const SizedBox(height: 16),
-
                               const FormLabel(text: 'Nilai Hara Tanah (Mg)'),
                               const SizedBox(height: 8),
                               FormTextField(
@@ -500,7 +497,6 @@ class _Form3PageState extends State<Form3Page> {
                                 ),
                               ),
                             ],
-
                             const SizedBox(height: 24),
                             SizedBox(
                               width: double.infinity,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../../../core/widgets/app_background.dart';
+import '../../widgets/profile_header.dart';
 
 class LegalPlaceholderPage extends StatelessWidget {
   final String title;
@@ -14,36 +14,14 @@ class LegalPlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        onPressed: () => context.pop(),
-                        icon: Image.asset(
-                          'assets/icons/arrow_back.png',
-                          width: 28,
-                          height: 28,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF2F2F2F),
-                      ),
-                    ),
-                  ],
-                ),
+              ProfileHeader(
+                title: title,
+                onBackTap: () => Navigator.pop(context),
               ),
               const Expanded(
                 child: Center(

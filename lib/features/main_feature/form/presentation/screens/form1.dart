@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../data/sensor_options.dart';
 import '../../models/wilayah_item.dart';
 import '../../providers/form_provider.dart';
+import '../../providers/form_state.dart';
 import '../widgets/form_dropdown_field.dart';
 import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
@@ -14,14 +15,14 @@ import '../widgets/form_stepper.dart';
 import '../widgets/form_text_field.dart';
 import '../widgets/upload_box.dart';
 
-class Form1Page extends StatefulWidget {
+class Form1Page extends ConsumerStatefulWidget {
   const Form1Page({super.key});
 
   @override
-  State<Form1Page> createState() => _Form1PageState();
+  ConsumerState<Form1Page> createState() => _Form1PageState();
 }
 
-class _Form1PageState extends State<Form1Page> {
+class _Form1PageState extends ConsumerState<Form1Page> {
   final TextEditingController _namaProjekController = TextEditingController();
   final TextEditingController _namaPerusahaanController =
   TextEditingController();
@@ -40,12 +41,15 @@ class _Form1PageState extends State<Form1Page> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final provider = context.read<FormProvider>();
+      final notifier = ref.read(formNotifierProvider.notifier);
+      await notifier.initialize();
 
-      _fillControllersFromProvider(provider);
+      if (!mounted) return;
+      _fillControllersFromState(ref.read(formNotifierProvider));
       _bindControllerListeners();
 
-      if (!_hasCheckedDraftDialog && provider.hasDraft) {
+      final currentState = ref.read(formNotifierProvider);
+      if (!_hasCheckedDraftDialog && currentState.hasDraft) {
         _hasCheckedDraftDialog = true;
 
         final shouldLoad = await showDialog<bool>(
@@ -73,9 +77,9 @@ class _Form1PageState extends State<Form1Page> {
         if (!mounted) return;
 
         if (shouldLoad == true) {
-          await provider.loadDraft();
+          await notifier.loadDraft();
           if (!mounted) return;
-          _fillControllersFromProvider(provider);
+          _fillControllersFromState(ref.read(formNotifierProvider));
         }
       }
     });
@@ -86,43 +90,49 @@ class _Form1PageState extends State<Form1Page> {
     _hasBoundListeners = true;
 
     _namaProjekController.addListener(() {
-      context.read<FormProvider>().setNamaProjek(_namaProjekController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNamaProjek(_namaProjekController.text);
     });
 
     _namaPerusahaanController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setNamaPerusahaan(_namaPerusahaanController.text);
     });
 
     _namaKebunController.addListener(() {
-      context.read<FormProvider>().setNamaKebun(_namaKebunController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setNamaKebun(_namaKebunController.text);
     });
 
     _detailLokasiController.addListener(() {
-      context.read<FormProvider>().setDetailLokasi(_detailLokasiController.text);
+      ref
+          .read(formNotifierProvider.notifier)
+          .setDetailLokasi(_detailLokasiController.text);
     });
 
     _tanggalPengambilanController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setTanggalPengambilan(_tanggalPengambilanController.text);
     });
 
     _tanggalAnalisisController.addListener(() {
-      context
-          .read<FormProvider>()
+      ref
+          .read(formNotifierProvider.notifier)
           .setTanggalAnalisis(_tanggalAnalisisController.text);
     });
   }
 
-  void _fillControllersFromProvider(FormProvider provider) {
-    _namaProjekController.text = provider.namaProjek;
-    _namaPerusahaanController.text = provider.namaPerusahaan;
-    _namaKebunController.text = provider.namaKebun;
-    _detailLokasiController.text = provider.detailLokasi;
-    _tanggalPengambilanController.text = provider.tanggalPengambilan;
-    _tanggalAnalisisController.text = provider.tanggalAnalisis;
+  void _fillControllersFromState(TambahFormState state) {
+    _namaProjekController.text = state.namaProjek;
+    _namaPerusahaanController.text = state.namaPerusahaan;
+    _namaKebunController.text = state.namaKebun;
+    _detailLokasiController.text = state.detailLokasi;
+    _tanggalPengambilanController.text = state.tanggalPengambilan;
+    _tanggalAnalisisController.text = state.tanggalAnalisis;
   }
 
   @override
@@ -155,9 +165,9 @@ class _Form1PageState extends State<Form1Page> {
   }
 
   Future<void> _goNext() async {
-    final provider = context.read<FormProvider>();
+    final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!provider.validateStep1()) {
+    if (!notifier.validateStep1()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Lengkapi dulu data Form 1 ya'),
@@ -262,7 +272,7 @@ class _Form1PageState extends State<Form1Page> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<FormProvider>();
+    final formState = ref.watch(formNotifierProvider);
 
     return Scaffold(
       body: AppBackground(
@@ -282,12 +292,11 @@ class _Form1PageState extends State<Form1Page> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildInfoCard(),
-
                             _buildSectionTitle('Unggah File'),
                             UploadBox(
-                              title: provider.fileName.isEmpty
+                              title: formState.fileName.isEmpty
                                   ? 'Unggah File Sampel'
-                                  : provider.fileName,
+                                  : formState.fileName,
                               onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -307,10 +316,8 @@ class _Form1PageState extends State<Form1Page> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-
                             const SizedBox(height: 24),
                             _buildSectionTitle('Informasi Projek'),
-
                             const FormLabel(text: 'Nama Projek'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -318,7 +325,6 @@ class _Form1PageState extends State<Form1Page> {
                               hintText: 'Masukkan nama projek',
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Nama Perusahaan'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -326,25 +332,22 @@ class _Form1PageState extends State<Form1Page> {
                               hintText: 'Masukkan nama perusahaan',
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Nama Kebun'),
                             const SizedBox(height: 8),
                             FormTextField(
                               controller: _namaKebunController,
                               hintText: 'Masukkan nama kebun',
                             ),
-
                             const SizedBox(height: 24),
                             _buildSectionTitle('Lokasi Pengambilan Data'),
-
                             const FormLabel(text: 'Provinsi'),
                             const SizedBox(height: 8),
                             FormDropdownField<WilayahItem>(
-                              value: provider.selectedProvinsi,
-                              hintText: provider.isLoadingProvinsi
+                              value: formState.selectedProvinsi,
+                              hintText: formState.isLoadingProvinsi
                                   ? 'Memuat provinsi...'
                                   : 'Pilih Provinsi',
-                              items: provider.provinsiList
+                              items: formState.provinsiList
                                   .map(
                                     (item) => DropdownMenuItem<WilayahItem>(
                                   value: item,
@@ -352,25 +355,24 @@ class _Form1PageState extends State<Form1Page> {
                                 ),
                               )
                                   .toList(),
-                              onChanged: provider.isLoadingProvinsi
+                              onChanged: formState.isLoadingProvinsi
                                   ? null
-                                  : (value) {
+                                  : (value) async {
                                 if (value == null) return;
-                                context
-                                    .read<FormProvider>()
+                                await ref
+                                    .read(formNotifierProvider.notifier)
                                     .selectProvinsi(value);
                               },
                             ),
                             const SizedBox(height: 12),
-
                             const FormLabel(text: 'Kota / Kabupaten'),
                             const SizedBox(height: 8),
                             FormDropdownField<WilayahItem>(
-                              value: provider.selectedKabupaten,
-                              hintText: provider.isLoadingKabupaten
+                              value: formState.selectedKabupaten,
+                              hintText: formState.isLoadingKabupaten
                                   ? 'Memuat kabupaten...'
                                   : 'Pilih Kota / Kabupaten',
-                              items: provider.kabupatenList
+                              items: formState.kabupatenList
                                   .map(
                                     (item) => DropdownMenuItem<WilayahItem>(
                                   value: item,
@@ -378,26 +380,25 @@ class _Form1PageState extends State<Form1Page> {
                                 ),
                               )
                                   .toList(),
-                              onChanged: provider.selectedProvinsi == null ||
-                                  provider.isLoadingKabupaten
+                              onChanged: formState.selectedProvinsi == null ||
+                                  formState.isLoadingKabupaten
                                   ? null
-                                  : (value) {
+                                  : (value) async {
                                 if (value == null) return;
-                                context
-                                    .read<FormProvider>()
+                                await ref
+                                    .read(formNotifierProvider.notifier)
                                     .selectKabupaten(value);
                               },
                             ),
                             const SizedBox(height: 12),
-
                             const FormLabel(text: 'Kecamatan'),
                             const SizedBox(height: 8),
                             FormDropdownField<WilayahItem>(
-                              value: provider.selectedKecamatan,
-                              hintText: provider.isLoadingKecamatan
+                              value: formState.selectedKecamatan,
+                              hintText: formState.isLoadingKecamatan
                                   ? 'Memuat kecamatan...'
                                   : 'Pilih Kecamatan',
-                              items: provider.kecamatanList
+                              items: formState.kecamatanList
                                   .map(
                                     (item) => DropdownMenuItem<WilayahItem>(
                                   value: item,
@@ -405,27 +406,24 @@ class _Form1PageState extends State<Form1Page> {
                                 ),
                               )
                                   .toList(),
-                              onChanged: provider.selectedKabupaten == null ||
-                                  provider.isLoadingKecamatan
+                              onChanged: formState.selectedKabupaten == null ||
+                                  formState.isLoadingKecamatan
                                   ? null
                                   : (value) {
-                                context
-                                    .read<FormProvider>()
+                                ref
+                                    .read(formNotifierProvider.notifier)
                                     .selectKecamatan(value);
                               },
                             ),
                             const SizedBox(height: 12),
-
                             const FormLabel(text: 'Detail Lokasi'),
                             const SizedBox(height: 8),
                             FormTextField(
                               controller: _detailLokasiController,
                               hintText: 'Masukkan detail lokasi',
                             ),
-
                             const SizedBox(height: 24),
                             _buildSectionTitle('Tanggal dan Sensor'),
-
                             const FormLabel(text: 'Tanggal Pengambilan Data'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -441,7 +439,6 @@ class _Form1PageState extends State<Form1Page> {
                               ),
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Tanggal Analisis'),
                             const SizedBox(height: 8),
                             FormTextField(
@@ -456,12 +453,11 @@ class _Form1PageState extends State<Form1Page> {
                               ),
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(text: 'Sensor'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
                               value:
-                              provider.sensor.isEmpty ? null : provider.sensor,
+                              formState.sensor.isEmpty ? null : formState.sensor,
                               hintText: 'Pilih sensor',
                               items: SensorOptions.items
                                   .map(
@@ -473,19 +469,20 @@ class _Form1PageState extends State<Form1Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value == null) return;
-                                context.read<FormProvider>().setSensor(value);
+                                ref
+                                    .read(formNotifierProvider.notifier)
+                                    .setSensor(value);
                               },
                             ),
                             const SizedBox(height: 16),
-
                             const FormLabel(
                               text: 'Tambahkan Analisis Deteksi Ganoderma?',
                             ),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: provider.ganodermaStep1.isEmpty
+                              value: formState.ganodermaStep1.isEmpty
                                   ? null
-                                  : provider.ganodermaStep1,
+                                  : formState.ganodermaStep1,
                               hintText: 'Pilih opsi',
                               items: const ['Ya', 'Tidak']
                                   .map(
@@ -497,12 +494,11 @@ class _Form1PageState extends State<Form1Page> {
                                   .toList(),
                               onChanged: (value) {
                                 if (value == null) return;
-                                context
-                                    .read<FormProvider>()
+                                ref
+                                    .read(formNotifierProvider.notifier)
                                     .setGanodermaStep1(value);
                               },
                             ),
-
                             const SizedBox(height: 28),
                             SizedBox(
                               width: double.infinity,

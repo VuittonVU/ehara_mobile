@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/pressable_button.dart';
+
 class ProfileActionButton extends StatelessWidget {
   final String label;
   final String iconPath;
@@ -56,65 +58,50 @@ class _ProfileBaseTile extends StatelessWidget {
     final minTileHeight =
         math.max(iconSize, scaledLineHeight) + (verticalPadding * 2);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: borderColor,
-              width: 1.6,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x22000000),
-                blurRadius: 8,
-                offset: Offset(0, 3),
-              ),
-            ],
+    return PressableButton(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      color: backgroundColor,
+      border: Border.all(
+        color: borderColor,
+        width: 1.6,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minTileHeight),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: minTileHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: verticalPadding,
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
+          child: Row(
+            children: [
+              SizedBox(
+                width: iconSize,
+                height: iconSize,
+                child: Center(
+                  child: Image.asset(
+                    iconPath,
                     width: iconSize,
                     height: iconSize,
-                    child: Center(
-                      child: Image.asset(
-                        iconPath,
-                        width: iconSize,
-                        height: iconSize,
-                        fit: BoxFit.contain,
-                        color: foregroundColor,
-                      ),
-                    ),
+                    fit: BoxFit.contain,
+                    color: foregroundColor,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        color: foregroundColor,
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w700,
-                        height: textHeight,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: foregroundColor,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w700,
+                    height: textHeight,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

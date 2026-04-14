@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../../core/widgets/app_background.dart';
 import '../../../../../../app/routes/app_routes.dart';
+import '../../../../../../core/widgets/app_background.dart';
+import '../../../../../../core/widgets/pressable_button.dart';
+import '../../widgets/profile_header.dart';
 
 class AboutAppPage extends StatelessWidget {
   const AboutAppPage({super.key});
@@ -13,36 +15,14 @@ class AboutAppPage extends StatelessWidget {
     size = size.clamp(80.0, 150.0);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        onPressed: () => context.pop(),
-                        icon: Image.asset(
-                          'assets/icons/arrow_back.png',
-                          width: 28,
-                          height: 28,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      'Tentang Aplikasi',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF2F2F2F),
-                      ),
-                    ),
-                  ],
-                ),
+              ProfileHeader(
+                title: 'Tentang Aplikasi',
+                onBackTap: () => Navigator.pop(context),
               ),
               Expanded(
                 child: Center(
@@ -138,36 +118,24 @@ class _AboutButton extends StatelessWidget {
     return SizedBox(
       width: 175,
       height: 42,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: const Color(0xFFC9C9C9),
-                width: 2,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x18000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF3B3B3B),
-                ),
-              ),
+      child: PressableButton(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        color: const Color(0xFFFFFFFF),
+        border: Border.all(
+          color: const Color(0xFFC9C9C9),
+          width: 2,
+        ),
+        pressedScale: 0.97,
+        pressedTranslateY: 1.2,
+        idleTranslateY: -0.4,
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF3B3B3B),
             ),
           ),
         ),

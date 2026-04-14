@@ -18,6 +18,7 @@ import '../features/main_feature/dashboard/presentation/screens/article/article_
 
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
 import '../features/main_feature/sertifikat/presentation/screens/sertifikat_page.dart';
+import '../features/main_feature/list_kebun/kebun_list_page.dart';
 
 import '../features/main_feature/riwayat/presentation/screens/riwayat_page.dart';
 
@@ -121,11 +122,6 @@ class EHaraApp extends StatelessWidget {
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
           ),
-          GoRoute(
-            path: AppRoutes.sertifikat,
-            name: 'sertifikat',
-            builder: (context, state) => const SertifikatPage(),
-          ),
         ],
       ),
 
@@ -134,6 +130,27 @@ class EHaraApp extends StatelessWidget {
         name: 'notifikasi',
         builder: (context, state) => const NotificationPage(),
       ),
+      GoRoute(
+        path: AppRoutes.sertifikat,
+        name: 'sertifikat',
+        builder: (context, state) => const SertifikatPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.listKebun,
+        builder: (context, state) => const ListKebunPage(),
+      ),
+      /* GoRoute(
+        path: AppRoutes.ehara,
+        builder: (context, state) => const EHaraPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.rekomendasiPemupukan,
+        builder: (context, state) => const RekomendasiPemupukanPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.ganoderma,
+        builder: (context, state) => const GanodermaPage(),
+      ), */
       GoRoute(
         path: AppRoutes.form1,
         name: 'form1',
@@ -220,7 +237,6 @@ class EHaraApp extends StatelessWidget {
         ),
       ),
 
-      // siap dipakai nanti buat detail hasil analisis/riwayat
       GoRoute(
         path: '${AppRoutes.detailRiwayat}/:id',
         name: 'detailRiwayat',

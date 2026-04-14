@@ -1,51 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../core/widgets/app_background.dart';
+import '../../../providers/side_features/notification_settings/notification_settings_controller.dart';
+import '../../widgets/profile_header.dart';
 
-class NotificationSettingsPage extends StatefulWidget {
+class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
 
   @override
-  State<NotificationSettingsPage> createState() => _NotificationSettingsPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(notificationSettingsControllerProvider);
 
-class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
-  bool _isNotificationEnabled = false;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
       body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        onPressed: () => context.pop(),
-                        icon: Image.asset(
-                          'assets/icons/arrow_back.png',
-                          width: 28,
-                          height: 28,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      'Notifikasi',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF2F2F2F),
-                      ),
-                    ),
-                  ],
-                ),
+              ProfileHeader(
+                title: 'Notifikasi',
+                onBackTap: () => Navigator.pop(context),
               ),
               const SizedBox(height: 24),
               Padding(
@@ -75,7 +50,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          _isNotificationEnabled
+                          state.isNotificationEnabled
                               ? 'Notifikasi Aktif'
                               : 'Notifikasi Mati',
                           style: const TextStyle(
@@ -88,11 +63,13 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                       Transform.scale(
                         scale: 1.1,
                         child: Switch(
-                          value: _isNotificationEnabled,
+                          value: state.isNotificationEnabled,
                           onChanged: (value) {
-                            setState(() {
-                              _isNotificationEnabled = value;
-                            });
+                            ref
+                                .read(
+                              notificationSettingsControllerProvider.notifier,
+                            )
+                                .setNotification(value);
                           },
                           activeColor: Colors.white,
                           activeTrackColor: const Color(0xFF3E7F69),
