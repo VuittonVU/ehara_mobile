@@ -71,29 +71,28 @@ class ListKebunPage extends ConsumerWidget {
                     90 + bottomSafeArea,
                   ),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 22),
+                  separatorBuilder: (_, __) => const SizedBox(height: 28),
                   itemBuilder: (context, index) {
                     final item = items[index];
 
                     return InkWell(
                       borderRadius: BorderRadius.circular(22),
-                      onTap: () =>
-                          _handleTapKebun(context, ref, item, feature),
+                      onTap: () => _handleTapKebun(context, ref, item, feature),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF9F9F7),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
-                            color: const Color(0xFFC6C6C6),
-                            width: 1.4,
+                            color: const Color(0xFFE0E0E0),
+                            width: 1,
                           ),
                           boxShadow: const [
                             BoxShadow(
-                              color: Color(0x22000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 4),
+                              color: Color(0x1A000000),
+                              blurRadius: 12,
+                              offset: Offset(0, 6),
                             ),
                           ],
                         ),
@@ -109,7 +108,7 @@ class ListKebunPage extends ConsumerWidget {
                                     valueFontSize: 18,
                                   ),
                                 ),
-                                const SizedBox(width: 14),
+                                const SizedBox(width: 18),
                                 _InfoBlock(
                                   label: 'Total Pohon',
                                   value: item.totalPohon.toString(),
@@ -118,7 +117,7 @@ class ListKebunPage extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 24),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -129,12 +128,11 @@ class ListKebunPage extends ConsumerWidget {
                                     valueFontSize: 14,
                                   ),
                                 ),
-                                const SizedBox(width: 14),
+                                const SizedBox(width: 18),
                                 Expanded(
                                   child: _InfoBlock(
                                     label: 'Date Pengambilan Data',
-                                    value:
-                                    _formatDate(item.tanggalPengambilanData),
+                                    value: _formatDate(item.tanggalPengambilanData),
                                     valueFontSize: 14,
                                     textAlign: TextAlign.right,
                                   ),
@@ -186,7 +184,7 @@ class _InfoBlock extends StatelessWidget {
             color: Color(0xFF7A7A7A),
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 6),
         Text(
           value,
           textAlign: textAlign,
@@ -194,7 +192,7 @@ class _InfoBlock extends StatelessWidget {
             fontSize: valueFontSize,
             fontWeight: FontWeight.w800,
             color: const Color(0xFF333333),
-            height: 1.1,
+            height: 1.15,
           ),
         ),
       ],

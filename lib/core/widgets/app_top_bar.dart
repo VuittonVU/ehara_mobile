@@ -23,11 +23,11 @@ class AppTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF7F8F5),
+      color: Colors.white,
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
             child: Row(
               children: [
                 if (showBackButton)
@@ -35,14 +35,14 @@ class AppTopBar extends StatelessWidget {
                     onTap: onBackTap,
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       child: Center(
                         child: backIconPath != null
                             ? Image.asset(
                           backIconPath!,
-                          width: 24,
-                          height: 24,
+                          width: 22,
+                          height: 22,
                           fit: BoxFit.contain,
                         )
                             : const Icon(
@@ -54,48 +54,51 @@ class AppTopBar extends StatelessWidget {
                   )
                 else
                   const SizedBox(width: 8),
+
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(left: showBackButton ? 8 : 4),
+                    padding: EdgeInsets.only(left: showBackButton ? 10 : 4),
                     child: Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF111111),
                       ),
                     ),
                   ),
                 ),
+
                 if (actionIconPath != null)
                   GestureDetector(
                     onTap: onActionTap,
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       child: Center(
                         child: Image.asset(
                           actionIconPath!,
-                          width: 24,
-                          height: 24,
+                          width: 22,
+                          height: 22,
                           fit: BoxFit.contain,
                         ),
                       ),
                     ),
                   )
                 else
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 44),
               ],
             ),
           ),
+
           if (showBottomDivider)
             const SizedBox(
               width: double.infinity,
               child: Divider(
                 height: 1,
-                thickness: 1.5,
-                color: Color(0xFF4D4D4D),
+                thickness: 1,
+                color: Color(0xFFE0E0E0),
               ),
             ),
         ],
