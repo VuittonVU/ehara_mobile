@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../constants/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -15,77 +16,71 @@ class AppBottomNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 98,
-      padding: const EdgeInsets.only(top: 4, bottom: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.textPrimary.withOpacity(0.15),
-          ),
-        ),
-      ),
+    return SizedBox(
+      height: 110,
       child: Stack(
         clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
+        alignment: Alignment.bottomCenter,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _BottomNavItem(
-                  iconPath: 'assets/icons/house.png',
-                  label: 'Dashboard',
-                  isActive: currentIndex == 0,
-                  onTap: () => onTap(0),
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  iconPath: 'assets/icons/riwayat.png',
-                  label: 'Riwayat',
-                  isActive: currentIndex == 1,
-                  onTap: () => onTap(1),
-                ),
-              ),
-              const SizedBox(width: 82),
-              Expanded(
-                child: _BottomNavItem(
-                  iconPath: 'assets/icons/cart.png',
-                  label: 'Pembayaran',
-                  isActive: currentIndex == 3,
-                  onTap: () => onTap(3),
-                ),
-              ),
-              Expanded(
-                child: _BottomNavItem(
-                  iconPath: 'assets/icons/circle_user.png',
-                  label: 'Profile',
-                  isActive: currentIndex == 4,
-                  onTap: () => onTap(4),
-                ),
-              ),
-            ],
-          ),
           Positioned(
-            top: -34,
-            child: _CenterNavButton(
-              isActive: currentIndex == 2,
-              onTap: () => onTap(2),
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 98,
+              padding: const EdgeInsets.only(top: 6, bottom: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.textPrimary.withOpacity(0.15),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _BottomNavItem(
+                      iconPath: 'assets/icons/house.png',
+                      label: 'Dashboard',
+                      isActive: currentIndex == 0,
+                      onTap: () => onTap(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      iconPath: 'assets/icons/riwayat.png',
+                      label: 'Riwayat',
+                      isActive: currentIndex == 1,
+                      onTap: () => onTap(1),
+                    ),
+                  ),
+                  const SizedBox(width: 96),
+                  Expanded(
+                    child: _BottomNavItem(
+                      iconPath: 'assets/icons/cart.png',
+                      label: 'Pembayaran',
+                      isActive: currentIndex == 3,
+                      onTap: () => onTap(3),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      iconPath: 'assets/icons/circle_user.png',
+                      label: 'Profile',
+                      isActive: currentIndex == 4,
+                      onTap: () => onTap(4),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Positioned(
-            bottom: 12,
-            child: IgnorePointer(
-              child: Text(
-                'Tambah\nAnalisis',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.caption(
-                  color: currentIndex == 2
-                      ? const Color(0xFF387867)
-                      : AppColors.textPrimary,
-                ),
-              ),
+            bottom: 2,
+            child: _CenterNavFullButton(
+              isActive: currentIndex == 2,
+              onTap: () => onTap(2),
             ),
           ),
         ],
@@ -168,20 +163,20 @@ class _BottomNavItemState extends State<_BottomNavItem> {
   }
 }
 
-class _CenterNavButton extends StatefulWidget {
+class _CenterNavFullButton extends StatefulWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _CenterNavButton({
+  const _CenterNavFullButton({
     required this.isActive,
     required this.onTap,
   });
 
   @override
-  State<_CenterNavButton> createState() => _CenterNavButtonState();
+  State<_CenterNavFullButton> createState() => _CenterNavFullButtonState();
 }
 
-class _CenterNavButtonState extends State<_CenterNavButton> {
+class _CenterNavFullButtonState extends State<_CenterNavFullButton> {
   bool _isPressed = false;
 
   void _setPressed(bool value) {
@@ -193,37 +188,68 @@ class _CenterNavButtonState extends State<_CenterNavButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-        widget.onTap();
-      },
-      onTapDown: (_) => _setPressed(true),
-      onTapUp: (_) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
-      child: AnimatedScale(
-        scale: _isPressed ? 0.95 : 1,
-        duration: const Duration(milliseconds: 100),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: const Color(0xFF00A008),
-            shape: BoxShape.circle,
-            border: widget.isActive
-                ? Border.all(
-              color: const Color(0xFFBFD8D0),
-              width: 3,
-            )
-                : null,
-          ),
-          child: Center(
-            child: Image.asset(
-              'assets/icons/palm.png',
-              width: 30,
-              height: 30,
-              color: Colors.white,
+    final textColor =
+    widget.isActive ? const Color(0xFF387867) : AppColors.textPrimary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          widget.onTap();
+        },
+        onTapDown: (_) => _setPressed(true),
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
+        borderRadius: BorderRadius.circular(32),
+        child: AnimatedScale(
+          scale: _isPressed ? 0.95 : 1,
+          duration: const Duration(milliseconds: 100),
+          child: SizedBox(
+            width: 108,
+            height: 108,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 140),
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A008),
+                    shape: BoxShape.circle,
+                    border: widget.isActive
+                        ? Border.all(
+                      color: const Color(0xFFBFD8D0),
+                      width: 3,
+                    )
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/icons/palm.png',
+                      width: 30,
+                      height: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Tambah\nAnalisis',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.caption(
+                    color: textColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

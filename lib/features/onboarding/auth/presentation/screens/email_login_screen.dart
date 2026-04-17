@@ -22,7 +22,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   bool isPasswordHidden = true;
   bool _isLoading = false;
 
-  String? _identifierError;
+  String? _emailError;
   String? _passwordError;
 
   @override
@@ -32,11 +32,17 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     super.dispose();
   }
 
-  void _validateIdentifier(String value) {
+  void _showInfo(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _validateEmail(String value) {
     setState(() {
-      _identifierError = value.isEmpty
-          ? null
-          : AuthValidator.validateLoginIdentifier(value);
+      _emailError =
+      value.isEmpty ? null : AuthValidator.validateGmail(value);
     });
   }
 
@@ -48,33 +54,32 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateLoginIdentifier(emailController.text.trim()) ==
-        null &&
+    return AuthValidator.validateGmail(emailController.text.trim()) == null &&
         AuthValidator.validatePassword(passwordController.text) == null;
   }
 
   Future<void> handleLogin() async {
-    _validateIdentifier(emailController.text.trim());
+    _validateEmail(emailController.text.trim());
     _validatePassword(passwordController.text);
 
     if (!_isFormValid || _isLoading) return;
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
+    setState(() => _isLoading = false);
     context.go(AppRoutes.dashboard);
   }
 
   void _handleResetPassword() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fitur lupa password belum tersedia.'),
-      ),
-    );
+    _showInfo('Fitur lupa password belum tersedia.');
+  }
+
+  void _openPrivacyPolicy() {
+    context.push(AppRoutes.privacyPolicy);
   }
 
   @override
@@ -128,11 +133,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                           const SizedBox(height: 42),
                           LoginTextField(
                             controller: emailController,
-                            hintText: 'Email / Username',
+                            hintText: 'Email Gmail',
                             iconPath: 'assets/icons/email.png',
                             keyboardType: TextInputType.emailAddress,
-                            errorText: _identifierError,
-                            onChanged: _validateIdentifier,
+                            errorText: _emailError,
+                            onChanged: _validateEmail,
                           ),
                           const SizedBox(height: 18),
                           LoginTextField(
@@ -143,6 +148,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                             errorText: _passwordError,
                             onChanged: _validatePassword,
                             textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => handleLogin(),
                             suffixIcon: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -238,7 +244,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: _openPrivacyPolicy,
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -49,7 +50,10 @@ class FormNotifier extends Notifier<TambahFormState> {
     final draft = await _draftService.loadDraft();
     if (draft == null) return;
 
-    state = _stateFromDraft(draft).copyWith(hasDraft: true);
+    state = _stateFromDraft(draft).copyWith(
+      hasDraft: true,
+      clearTemporaryImage: true,
+    );
 
     if (state.selectedProvinsi != null) {
       await loadKabupaten(state.selectedProvinsi!.code, notifyLoading: false);
@@ -198,7 +202,10 @@ class FormNotifier extends Notifier<TambahFormState> {
     );
 
     if (value != null) {
-      state = state.copyWith(isLoadingKabupaten: true, clearErrorMessage: true);
+      state = state.copyWith(
+        isLoadingKabupaten: true,
+        clearErrorMessage: true,
+      );
 
       try {
         final result =
@@ -225,7 +232,10 @@ class FormNotifier extends Notifier<TambahFormState> {
     );
 
     if (value != null && state.selectedProvinsi != null) {
-      state = state.copyWith(isLoadingKecamatan: true, clearErrorMessage: true);
+      state = state.copyWith(
+        isLoadingKecamatan: true,
+        clearErrorMessage: true,
+      );
 
       try {
         final result = await _wilayahService.fetchKecamatan(
@@ -250,74 +260,111 @@ class FormNotifier extends Notifier<TambahFormState> {
     _triggerFieldUpdate(state.copyWith(selectedKecamatan: value));
   }
 
-  void setFileName(String value) =>
-      _triggerFieldUpdate(state.copyWith(fileName: value));
+  void setFileName(String value) {
+    _triggerFieldUpdate(state.copyWith(fileName: value));
+  }
 
-  void setNamaProjek(String value) =>
-      _triggerFieldUpdate(state.copyWith(namaProjek: value));
+  void setTemporaryImage({
+    required Uint8List bytes,
+    required String imageName,
+  }) {
+    state = state.copyWith(
+      temporaryImageBytes: bytes,
+      temporaryImageName: imageName,
+    );
+  }
 
-  void setNamaPerusahaan(String value) =>
-      _triggerFieldUpdate(state.copyWith(namaPerusahaan: value));
+  void clearTemporaryImage() {
+    state = state.copyWith(clearTemporaryImage: true);
+  }
 
-  void setNamaKebun(String value) =>
-      _triggerFieldUpdate(state.copyWith(namaKebun: value));
+  void setNamaProjek(String value) {
+    _triggerFieldUpdate(state.copyWith(namaProjek: value));
+  }
 
-  void setDetailLokasi(String value) =>
-      _triggerFieldUpdate(state.copyWith(detailLokasi: value));
+  void setNamaPerusahaan(String value) {
+    _triggerFieldUpdate(state.copyWith(namaPerusahaan: value));
+  }
 
-  void setTanggalPengambilan(String value) =>
-      _triggerFieldUpdate(state.copyWith(tanggalPengambilan: value));
+  void setNamaKebun(String value) {
+    _triggerFieldUpdate(state.copyWith(namaKebun: value));
+  }
 
-  void setTanggalAnalisis(String value) =>
-      _triggerFieldUpdate(state.copyWith(tanggalAnalisis: value));
+  void setDetailLokasi(String value) {
+    _triggerFieldUpdate(state.copyWith(detailLokasi: value));
+  }
 
-  void setSensor(String value) =>
-      _triggerFieldUpdate(state.copyWith(sensor: value));
+  void setTanggalPengambilan(String value) {
+    _triggerFieldUpdate(state.copyWith(tanggalPengambilan: value));
+  }
 
-  void setGanodermaStep1(String value) =>
-      _triggerFieldUpdate(state.copyWith(ganodermaStep1: value));
+  void setTanggalAnalisis(String value) {
+    _triggerFieldUpdate(state.copyWith(tanggalAnalisis: value));
+  }
 
-  void setTahunTanam(String value) =>
-      _triggerFieldUpdate(state.copyWith(tahunTanam: value));
+  void setSensor(String value) {
+    _triggerFieldUpdate(state.copyWith(sensor: value));
+  }
 
-  void setNomorKcd(String value) =>
-      _triggerFieldUpdate(state.copyWith(nomorKcd: value));
+  void setGanodermaStep1(String value) {
+    _triggerFieldUpdate(state.copyWith(ganodermaStep1: value));
+  }
 
-  void setBlok(String value) =>
-      _triggerFieldUpdate(state.copyWith(blok: value));
+  void setTahunTanam(String value) {
+    _triggerFieldUpdate(state.copyWith(tahunTanam: value));
+  }
 
-  void setLuasHa(String value) =>
-      _triggerFieldUpdate(state.copyWith(luasHa: value));
+  void setNomorKcd(String value) {
+    _triggerFieldUpdate(state.copyWith(nomorKcd: value));
+  }
 
-  void setJumlahPohonHa(String value) =>
-      _triggerFieldUpdate(state.copyWith(jumlahPohonHa: value));
+  void setBlok(String value) {
+    _triggerFieldUpdate(state.copyWith(blok: value));
+  }
 
-  void setProtas(String value) =>
-      _triggerFieldUpdate(state.copyWith(protas: value));
+  void setLuasHa(String value) {
+    _triggerFieldUpdate(state.copyWith(luasHa: value));
+  }
 
-  void setProyeksiProtasStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(proyeksiProtasStep2: value));
+  void setJumlahPohonHa(String value) {
+    _triggerFieldUpdate(state.copyWith(jumlahPohonHa: value));
+  }
 
-  void setGanodermaStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(ganodermaStep2: value));
+  void setProtas(String value) {
+    _triggerFieldUpdate(state.copyWith(protas: value));
+  }
 
-  void setStatusHaraTanahStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(statusHaraTanahStep2: value));
+  void setProyeksiProtasStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(proyeksiProtasStep2: value));
+  }
 
-  void setNilaiNStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiNStep2: value));
+  void setGanodermaStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(ganodermaStep2: value));
+  }
 
-  void setNilaiPStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiPStep2: value));
+  void setStatusHaraTanahStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(statusHaraTanahStep2: value));
+  }
 
-  void setNilaiKStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiKStep2: value));
+  void setNilaiNStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiNStep2: value));
+  }
 
-  void setNilaiCaStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiCaStep2: value));
+  void setNilaiPStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiPStep2: value));
+  }
 
-  void setNilaiMgStep2(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiMgStep2: value));
+  void setNilaiKStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiKStep2: value));
+  }
+
+  void setNilaiCaStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiCaStep2: value));
+  }
+
+  void setNilaiMgStep2(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiMgStep2: value));
+  }
 
   void setLocation({
     required double lat,
@@ -331,41 +378,53 @@ class FormNotifier extends Notifier<TambahFormState> {
     );
   }
 
-  void setIdTitik(String value) =>
-      _triggerFieldUpdate(state.copyWith(idTitik: value));
+  void setIdTitik(String value) {
+    _triggerFieldUpdate(state.copyWith(idTitik: value));
+  }
 
-  void setBandRed(String value) =>
-      _triggerFieldUpdate(state.copyWith(bandRed: value));
+  void setBandRed(String value) {
+    _triggerFieldUpdate(state.copyWith(bandRed: value));
+  }
 
-  void setBandGreen(String value) =>
-      _triggerFieldUpdate(state.copyWith(bandGreen: value));
+  void setBandGreen(String value) {
+    _triggerFieldUpdate(state.copyWith(bandGreen: value));
+  }
 
-  void setBandNir(String value) =>
-      _triggerFieldUpdate(state.copyWith(bandNir: value));
+  void setBandNir(String value) {
+    _triggerFieldUpdate(state.copyWith(bandNir: value));
+  }
 
-  void setProyeksiProtasStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(proyeksiProtasStep3: value));
+  void setProyeksiProtasStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(proyeksiProtasStep3: value));
+  }
 
-  void setGanodermaStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(ganodermaStep3: value));
+  void setGanodermaStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(ganodermaStep3: value));
+  }
 
-  void setStatusHaraTanahStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(statusHaraTanahStep3: value));
+  void setStatusHaraTanahStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(statusHaraTanahStep3: value));
+  }
 
-  void setNilaiNStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiNStep3: value));
+  void setNilaiNStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiNStep3: value));
+  }
 
-  void setNilaiPStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiPStep3: value));
+  void setNilaiPStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiPStep3: value));
+  }
 
-  void setNilaiKStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiKStep3: value));
+  void setNilaiKStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiKStep3: value));
+  }
 
-  void setNilaiCaStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiCaStep3: value));
+  void setNilaiCaStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiCaStep3: value));
+  }
 
-  void setNilaiMgStep3(String value) =>
-      _triggerFieldUpdate(state.copyWith(nilaiMgStep3: value));
+  void setNilaiMgStep3(String value) {
+    _triggerFieldUpdate(state.copyWith(nilaiMgStep3: value));
+  }
 
   bool validateStep1() {
     return state.namaProjek.trim().isNotEmpty &&
@@ -427,6 +486,7 @@ class FormNotifier extends Notifier<TambahFormState> {
     return {
       'step1': {
         'fileName': state.fileName,
+        'temporaryImageName': state.temporaryImageName,
         'namaProjek': state.namaProjek,
         'namaPerusahaan': state.namaPerusahaan,
         'namaKebun': state.namaKebun,
@@ -537,6 +597,7 @@ class FormNotifier extends Notifier<TambahFormState> {
 
     return state.copyWith(
       fileName: (draft['fileName'] ?? '').toString(),
+      clearTemporaryImage: true,
       namaProjek: (draft['namaProjek'] ?? '').toString(),
       namaPerusahaan: (draft['namaPerusahaan'] ?? '').toString(),
       namaKebun: (draft['namaKebun'] ?? '').toString(),

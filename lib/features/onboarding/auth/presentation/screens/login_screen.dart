@@ -15,17 +15,25 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  void _showInfo(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   bool _isGoogleLoading = false;
 
   Future<void> _handleGoogleLogin() async {
     if (_isGoogleLoading) return;
 
     setState(() => _isGoogleLoading = true);
-    await Future.delayed(const Duration(milliseconds: 700));
+
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
-    setState(() => _isGoogleLoading = false);
 
+    setState(() => _isGoogleLoading = false);
     context.go(AppRoutes.dashboard);
   }
 
@@ -93,8 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Expanded(
                                 child: Container(
-                                  height: 1,
-                                  color: Colors.black.withOpacity(0.10),
+                                  height: 1.2,
+                                  color: Colors.black.withOpacity(0.22),
                                 ),
                               ),
                               Padding(
@@ -105,14 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'Atau',
                                   style: AppTextStyles.regular(
                                     fontSize: 13,
-                                    color: AppColors.textPrimary.withOpacity(0.62),
+                                    color: AppColors.textPrimary.withOpacity(0.72),
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Container(
-                                  height: 1,
-                                  color: Colors.black.withOpacity(0.10),
+                                  height: 1.2,
+                                  color: Colors.black.withOpacity(0.22),
                                 ),
                               ),
                             ],
@@ -121,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           SizedBox(
                             width: double.infinity,
                             height: 48,
-                            child: ElevatedButton.icon(
+                            child: ElevatedButton(
                               onPressed: () {
                                 context.push(AppRoutes.emailLogin);
                               },
@@ -133,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              label: Text(
+                              child: Text(
                                 'Sign in dengan Email',
                                 style: AppTextStyles.semiBold(
                                   fontSize: 15,
@@ -144,7 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 14),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              context.push(AppRoutes.privacyPolicy);
+                            },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),

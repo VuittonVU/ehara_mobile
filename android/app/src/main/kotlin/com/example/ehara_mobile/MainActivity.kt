@@ -1,4 +1,4 @@
-package com.example.ehara_mobile
+package app.ppks.ehara_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

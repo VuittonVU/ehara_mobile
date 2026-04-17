@@ -19,6 +19,7 @@ class DashboardController {
     required VoidCallback onRekomendasiTap,
     required VoidCallback onGanodermaTap,
     required VoidCallback onSertifikasiTap,
+    required VoidCallback onHitungPohonTap,
   }) {
     return [
       DashboardMenuModel(
@@ -40,6 +41,11 @@ class DashboardController {
         title: 'Sertifikasi',
         iconPath: 'assets/icons/badge_check.png',
         onTap: onSertifikasiTap,
+      ),
+      DashboardMenuModel(
+        title: 'Hitung Pohon',
+        iconPath: 'assets/icons/pohon2.png',
+        onTap: onHitungPohonTap,
       ),
     ];
   }

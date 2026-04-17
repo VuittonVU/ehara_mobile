@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:latlong2/latlong.dart';
 
 import '../models/wilayah_item.dart';
@@ -12,6 +14,9 @@ class TambahFormState {
   final String? errorMessage;
 
   final String fileName;
+  final Uint8List? temporaryImageBytes;
+  final String temporaryImageName;
+
   final String namaProjek;
   final String namaPerusahaan;
   final String namaKebun;
@@ -71,6 +76,8 @@ class TambahFormState {
     required this.hasDraft,
     required this.errorMessage,
     required this.fileName,
+    required this.temporaryImageBytes,
+    required this.temporaryImageName,
     required this.namaProjek,
     required this.namaPerusahaan,
     required this.namaKebun,
@@ -125,6 +132,8 @@ class TambahFormState {
       hasDraft: false,
       errorMessage: null,
       fileName: '',
+      temporaryImageBytes: null,
+      temporaryImageName: '',
       namaProjek: '',
       namaPerusahaan: '',
       namaKebun: '',
@@ -191,6 +200,9 @@ class TambahFormState {
     String? errorMessage,
     bool clearErrorMessage = false,
     String? fileName,
+    Uint8List? temporaryImageBytes,
+    bool clearTemporaryImage = false,
+    String? temporaryImageName,
     String? namaProjek,
     String? namaPerusahaan,
     String? namaKebun,
@@ -248,6 +260,12 @@ class TambahFormState {
       hasDraft: hasDraft ?? this.hasDraft,
       errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       fileName: fileName ?? this.fileName,
+      temporaryImageBytes: clearTemporaryImage
+          ? null
+          : (temporaryImageBytes ?? this.temporaryImageBytes),
+      temporaryImageName: clearTemporaryImage
+          ? ''
+          : (temporaryImageName ?? this.temporaryImageName),
       namaProjek: namaProjek ?? this.namaProjek,
       namaPerusahaan: namaPerusahaan ?? this.namaPerusahaan,
       namaKebun: namaKebun ?? this.namaKebun,

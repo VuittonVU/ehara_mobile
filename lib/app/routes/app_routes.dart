@@ -4,6 +4,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String emailLogin = '/email-login';
   static const String signup = '/signup';
+  static const privacyPolicy = '/privacy-policy';
 
   static const String dashboard = '/dashboard';
   static const String riwayat = '/riwayat';
@@ -16,9 +17,13 @@ class AppRoutes {
   static const String notifikasi = '/notifikasi';
   static const String sertifikat = '/sertifikat';
   static const String listKebun = '/list-kebun';
+  static const hitungPohon = '/hitung-pohon';
+
   static const String ehara = '/ehara';
+  static const String eharaFullMap = '/ehara-full-map';
   static const String rekomendasiPemupukan = '/rekomendasi-pemupukan';
   static const String ganoderma = '/ganoderma';
+  static const String ganodermaFullMap = '/ganoderma-full-map';
 
   static const String form1 = '/form1';
   static const String form2 = '/form2';

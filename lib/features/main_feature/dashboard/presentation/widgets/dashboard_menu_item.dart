@@ -27,14 +27,13 @@ class DashboardMenuItem extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final iconBoxSize =
-          (constraints.maxWidth * 0.48).clamp(64.0, 80.0);
+          (constraints.maxWidth * 0.44).clamp(60.0, 78.0);
           final iconSize =
-          (iconBoxSize * 0.55).clamp(34.0, 44.0);
+          (iconBoxSize * 0.52).clamp(30.0, 40.0);
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 🔹 ICON BOX
               Container(
                 width: iconBoxSize,
                 height: iconBoxSize,
@@ -57,7 +56,6 @@ class DashboardMenuItem extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // 🔹 TITLE
               Text(
                 menu.title,
                 textAlign: TextAlign.center,
@@ -66,7 +64,7 @@ class DashboardMenuItem extends StatelessWidget {
                 style: AppTextStyles.titleMedium(
                   color: AppColors.primary,
                 ).copyWith(
-                  fontSize: 14,
+                  fontSize: 13,
                   height: 1.2,
                 ),
               ),

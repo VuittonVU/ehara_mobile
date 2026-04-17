@@ -18,9 +18,9 @@ class DashboardMenuSection extends StatelessWidget {
       itemCount: menus.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.2,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+        childAspectRatio: 1.35,
       ),
       itemBuilder: (context, index) {
         return DashboardMenuItem(menu: menus[index]);

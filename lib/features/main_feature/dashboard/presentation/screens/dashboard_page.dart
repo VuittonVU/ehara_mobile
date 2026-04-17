@@ -51,6 +51,9 @@ class DashboardPage extends ConsumerWidget {
       onSertifikasiTap: () {
         context.push(AppRoutes.sertifikat);
       },
+      onHitungPohonTap: () {
+        context.push(AppRoutes.hitungPohon);
+      },
     );
 
     return AppBackground(

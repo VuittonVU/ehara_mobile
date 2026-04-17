@@ -6,6 +6,7 @@ import '../core/theme/app_theme.dart';
 import '../features/onboarding/auth/presentation/screens/login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/email_login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/signup_screen.dart';
+import '../features/onboarding/auth/presentation/screens/privacy_policy_page.dart';
 import '../features/onboarding/splash/presentation/screens/splash_screen.dart';
 import '../features/onboarding/walkthrough/presentation/screens/walkthrough_screen.dart';
 
@@ -18,6 +19,7 @@ import '../features/main_feature/dashboard/presentation/screens/article/article_
 
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
 import '../features/main_feature/sertifikat/presentation/screens/sertifikat_page.dart';
+import '../features/main_feature/dashboard/presentation/screens/hitung_pohon_page.dart';
 import '../features/main_feature/list_kebun/kebun_list_page.dart';
 
 import '../features/main_feature/riwayat/presentation/screens/riwayat_page.dart';
@@ -37,6 +39,12 @@ import '../features/main_feature/profile/presentation/screens/side_features/gant
 import '../features/main_feature/profile/presentation/screens/side_features/settings_notifikasi.dart';
 import '../features/main_feature/profile/presentation/screens/side_features/about_app_page.dart';
 import '../features/main_feature/profile/presentation/screens/side_features/legal_placeholder_page.dart';
+
+import '../features/main_feature/ehara/presentation/screens/ehara_page.dart';
+import '../features/main_feature/ehara/presentation/screens/ehara_full_map_page.dart';
+import '../features/main_feature/rekomendasi_pemupukan/presentation/screens/rekomendasi_pemupukan_page.dart';
+import '../features/main_feature/ganoderma/presentation/screens/ganoderma_page.dart';
+import '../features/main_feature/ganoderma/presentation/screens/ganoderma_full_map_page.dart';
 
 class EHaraApp extends StatelessWidget {
   const EHaraApp({super.key});
@@ -96,7 +104,10 @@ class EHaraApp extends StatelessWidget {
         name: 'signup',
         builder: (context, state) => const SignUpScreen(),
       ),
-
+      GoRoute(
+        path: AppRoutes.privacyPolicy,
+        builder: (context, state) => const PrivacyPolicyPage(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           return MainFeatureScreen(child: child);
@@ -124,7 +135,6 @@ class EHaraApp extends StatelessWidget {
           ),
         ],
       ),
-
       GoRoute(
         path: AppRoutes.notifikasi,
         name: 'notifikasi',
@@ -136,21 +146,39 @@ class EHaraApp extends StatelessWidget {
         builder: (context, state) => const SertifikatPage(),
       ),
       GoRoute(
+        path: AppRoutes.hitungPohon,
+        builder: (context, state) => const HitungPohonPage(),
+      ),
+      GoRoute(
         path: AppRoutes.listKebun,
+        name: 'listKebun',
         builder: (context, state) => const ListKebunPage(),
       ),
-      /* GoRoute(
+      GoRoute(
         path: AppRoutes.ehara,
+        name: 'ehara',
         builder: (context, state) => const EHaraPage(),
       ),
       GoRoute(
+        path: AppRoutes.eharaFullMap,
+        name: 'eharaFullMap',
+        builder: (context, state) => const EHaraFullMapPage(),
+      ),
+      GoRoute(
         path: AppRoutes.rekomendasiPemupukan,
+        name: 'rekomendasiPemupukan',
         builder: (context, state) => const RekomendasiPemupukanPage(),
       ),
       GoRoute(
         path: AppRoutes.ganoderma,
+        name: 'ganoderma',
         builder: (context, state) => const GanodermaPage(),
-      ), */
+      ),
+      GoRoute(
+        path: AppRoutes.ganodermaFullMap,
+        name: 'ganodermaFullMap',
+        builder: (context, state) => const GanodermaFullMapPage(),
+      ),
       GoRoute(
         path: AppRoutes.form1,
         name: 'form1',
@@ -171,7 +199,6 @@ class EHaraApp extends StatelessWidget {
         name: 'form3',
         builder: (context, state) => const Form3Page(),
       ),
-
       GoRoute(
         path: AppRoutes.articleList,
         name: 'articleList',
@@ -236,7 +263,6 @@ class EHaraApp extends StatelessWidget {
           title: 'Kebijakan Privasi',
         ),
       ),
-
       GoRoute(
         path: '${AppRoutes.detailRiwayat}/:id',
         name: 'detailRiwayat',

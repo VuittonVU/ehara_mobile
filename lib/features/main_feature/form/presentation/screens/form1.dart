@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
@@ -13,7 +14,7 @@ import '../widgets/form_label.dart';
 import '../widgets/form_section_card.dart';
 import '../widgets/form_stepper.dart';
 import '../widgets/form_text_field.dart';
-import '../widgets/upload_box.dart';
+import 'upload_box.dart';
 
 class Form1Page extends ConsumerStatefulWidget {
   const Form1Page({super.key});
@@ -90,39 +91,39 @@ class _Form1PageState extends ConsumerState<Form1Page> {
     _hasBoundListeners = true;
 
     _namaProjekController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setNamaProjek(_namaProjekController.text);
+      ref.read(formNotifierProvider.notifier).setNamaProjek(
+        _namaProjekController.text,
+      );
     });
 
     _namaPerusahaanController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setNamaPerusahaan(_namaPerusahaanController.text);
+      ref.read(formNotifierProvider.notifier).setNamaPerusahaan(
+        _namaPerusahaanController.text,
+      );
     });
 
     _namaKebunController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setNamaKebun(_namaKebunController.text);
+      ref.read(formNotifierProvider.notifier).setNamaKebun(
+        _namaKebunController.text,
+      );
     });
 
     _detailLokasiController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setDetailLokasi(_detailLokasiController.text);
+      ref.read(formNotifierProvider.notifier).setDetailLokasi(
+        _detailLokasiController.text,
+      );
     });
 
     _tanggalPengambilanController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setTanggalPengambilan(_tanggalPengambilanController.text);
+      ref.read(formNotifierProvider.notifier).setTanggalPengambilan(
+        _tanggalPengambilanController.text,
+      );
     });
 
     _tanggalAnalisisController.addListener(() {
-      ref
-          .read(formNotifierProvider.notifier)
-          .setTanggalAnalisis(_tanggalAnalisisController.text);
+      ref.read(formNotifierProvider.notifier).setTanggalAnalisis(
+        _tanggalAnalisisController.text,
+      );
     });
   }
 
@@ -161,6 +162,40 @@ class _Form1PageState extends ConsumerState<Form1Page> {
       final month = pickedDate.month.toString().padLeft(2, '0');
       final year = pickedDate.year.toString();
       controller.text = '$day/$month/$year';
+    }
+  }
+
+  Future<void> _pickTemporaryImage() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+
+      if (picked == null) return;
+
+      final bytes = await picked.readAsBytes();
+
+      if (!mounted) return;
+
+      ref.read(formNotifierProvider.notifier).setTemporaryImage(
+        bytes: bytes,
+        imageName: picked.name,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gambar dipilih sementara'),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memilih gambar'),
+        ),
+      );
     }
   }
 
@@ -294,22 +329,25 @@ class _Form1PageState extends ConsumerState<Form1Page> {
                             _buildInfoCard(),
                             _buildSectionTitle('Unggah File'),
                             UploadBox(
-                              title: formState.fileName.isEmpty
-                                  ? 'Unggah File Sampel'
-                                  : formState.fileName,
-                              onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Fitur upload file masih placeholder',
-                                    ),
-                                  ),
-                                );
+                              title: formState.temporaryImageBytes != null
+                                  ? 'Preview Gambar'
+                                  : 'Unggah Gambar Sampel',
+                              subtitle: formState.temporaryImageBytes != null
+                                  ? formState.temporaryImageName
+                                  : 'Placeholder sementara, tidak disimpan permanen',
+                              imageBytes: formState.temporaryImageBytes,
+                              onTap: _pickTemporaryImage,
+                              onClear: formState.temporaryImageBytes == null
+                                  ? null
+                                  : () {
+                                ref
+                                    .read(formNotifierProvider.notifier)
+                                    .clearTemporaryImage();
                               },
                             ),
                             const SizedBox(height: 12),
                             const Text(
-                              'Format yang didukung: .xlsx / .xls / .csv',
+                              'Format sementara: gambar dari galeri. Hanya preview lokal.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Color(0xFF666666),
@@ -456,8 +494,9 @@ class _Form1PageState extends ConsumerState<Form1Page> {
                             const FormLabel(text: 'Sensor'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value:
-                              formState.sensor.isEmpty ? null : formState.sensor,
+                              value: formState.sensor.isEmpty
+                                  ? null
+                                  : formState.sensor,
                               hintText: 'Pilih sensor',
                               items: SensorOptions.items
                                   .map(

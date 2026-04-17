@@ -14,6 +14,7 @@ class LoginTextField extends StatelessWidget {
   final TextInputAction textInputAction;
   final String? errorText;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final List<TextInputFormatter>? inputFormatters;
 
   const LoginTextField({
@@ -27,6 +28,7 @@ class LoginTextField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.errorText,
     this.onChanged,
+    this.onSubmitted,
     this.inputFormatters,
   });
 
@@ -45,6 +47,7 @@ class LoginTextField extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           onChanged: onChanged,
+          onSubmitted: onSubmitted,
           inputFormatters: inputFormatters,
           style: AppTextStyles.regular(
             fontSize: 14,

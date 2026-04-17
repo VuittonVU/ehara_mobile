@@ -31,7 +31,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isPasswordHidden = true;
   bool isConfirmPasswordHidden = true;
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
 
   String? _fullNameError;
   String? _usernameError;
@@ -55,26 +54,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  void _showInfo(String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   void _validateFullName(String value) {
     setState(() {
-      _fullNameError = value.isEmpty
-          ? null
-          : AuthValidator.validateRequired(value, 'Nama lengkap');
+      _fullNameError =
+      value.isEmpty ? null : AuthValidator.validateFullName(value);
     });
   }
 
   void _validateUsername(String value) {
     setState(() {
-      _usernameError = value.isEmpty
-          ? null
-          : AuthValidator.validateRequired(value, 'Username');
+      _usernameError =
+      value.isEmpty ? null : AuthValidator.validateUsername(value);
     });
   }
 
   void _validateAddress(String value) {
     setState(() {
       _addressError =
-      value.isEmpty ? null : AuthValidator.validateRequired(value, 'Alamat');
+      value.isEmpty ? null : AuthValidator.validateAddress(value);
     });
   }
 
@@ -126,23 +130,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateRequired(
-      fullNameController.text,
-      'Nama lengkap',
-    ) ==
+    return AuthValidator.validateFullName(fullNameController.text.trim()) ==
         null &&
-        AuthValidator.validateRequired(usernameController.text, 'Username') ==
-            null &&
-        AuthValidator.validateRequired(addressController.text, 'Alamat') ==
-            null &&
+        AuthValidator.validateUsername(usernameController.text.trim()) == null &&
+        AuthValidator.validateAddress(addressController.text.trim()) == null &&
         AuthValidator.validateGmail(emailController.text.trim()) == null &&
         AuthValidator.validatePhoneNumber(
-          phoneController.text,
+          phoneController.text.trim(),
           'Nomor handphone',
         ) ==
             null &&
         AuthValidator.validatePhoneNumber(
-          whatsappController.text,
+          whatsappController.text.trim(),
           'Nomor WhatsApp',
         ) ==
             null &&
@@ -172,24 +171,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
+    setState(() => _isLoading = false);
     context.go(AppRoutes.dashboard);
   }
+
+  bool _isGoogleLoading = false;
 
   Future<void> _handleGoogleSignUp() async {
     if (_isGoogleLoading) return;
 
     setState(() => _isGoogleLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     if (!mounted) return;
-    setState(() => _isGoogleLoading = false);
 
+    setState(() => _isGoogleLoading = false);
     context.go(AppRoutes.dashboard);
   }
 
@@ -365,6 +366,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             textInputAction: TextInputAction.done,
                             errorText: _confirmPasswordError,
                             onChanged: _validateConfirmPassword,
+                            onSubmitted: (_) => handleRegister(),
                             suffixIcon: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -391,7 +393,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                               children: [
                                 const TextSpan(
-                                  text: 'Dengan menekan Daftar, Anda menyetujui ',
+                                  text:
+                                  'Dengan menekan Daftar, Anda menyetujui ',
                                 ),
                                 TextSpan(
                                   text: 'Syarat dan Ketentuan (S&K)',
@@ -465,7 +468,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 8),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _showInfo('Privacy Policy belum tersedia.');
+                            },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(0, 0),
