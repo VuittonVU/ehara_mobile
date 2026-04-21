@@ -10,21 +10,18 @@ class RiwayatService {
         projectName: 'Projek Nusantara',
         date: DateTime(2026, 3, 9),
         farmName: 'Kwala Sawit',
-        isPublished: true,
       ),
       RiwayatModel(
         id: '2',
         projectName: 'Projek Nusantara',
         date: DateTime(2026, 3, 8),
         farmName: 'Kwala Sawit',
-        isPublished: false,
       ),
       RiwayatModel(
         id: '3',
         projectName: 'Projek Nusantara',
         date: DateTime(2026, 3, 7),
         farmName: 'Kwala Sawit',
-        isPublished: true,
       ),
     ];
   }

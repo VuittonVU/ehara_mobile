@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class RekomendasiAnalisisHaraChart extends StatefulWidget {
   const RekomendasiAnalisisHaraChart({super.key});
@@ -25,7 +25,7 @@ class _RekomendasiAnalisisHaraChartState
     const leftPad = 36.0;
     const rightPad = 14.0;
     const topPad = 16.0;
-    const bottomPad = 46.0;
+    const bottomPad = 42.0;
 
     final chartWidth = size.width - leftPad - rightPad;
     final chartHeight = size.height - topPad - bottomPad;
@@ -72,11 +72,19 @@ class _RekomendasiAnalisisHaraChartState
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final chartHeight = isSmall ? 232.0 : 250.0;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 10 : 12,
+        isSmall ? 10 : 12,
+        isSmall ? 10 : 12,
+        isSmall ? 10 : 12,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final chartSize = Size(constraints.maxWidth, 290);
+          final chartSize = Size(constraints.maxWidth, chartHeight);
 
           return MouseRegion(
             opaque: true,
@@ -92,7 +100,7 @@ class _RekomendasiAnalisisHaraChartState
               behavior: HitTestBehavior.opaque,
               onTapDown: (details) => _updateHover(details.localPosition, chartSize),
               child: SizedBox(
-                height: 290,
+                height: chartHeight,
                 width: double.infinity,
                 child: Stack(
                   children: [
@@ -149,14 +157,17 @@ class _HoverInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
     final diff = hasil - standar;
+    final cardWidth = isSmall ? 144.0 : 160.0;
+
     final left = math.min(
       math.max(12.0, position.dx + 12),
-      chartSize.width - 172,
+      chartSize.width - cardWidth - 12,
     );
     final top = math.min(
-      math.max(10.0, position.dy - 96),
-      chartSize.height - 92,
+      math.max(10.0, position.dy - (isSmall ? 92 : 96)),
+      chartSize.height - (isSmall ? 88 : 92),
     );
 
     return Positioned(
@@ -164,8 +175,13 @@ class _HoverInfoCard extends StatelessWidget {
       top: top,
       child: IgnorePointer(
         child: Container(
-          width: 160,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          width: cardWidth,
+          padding: EdgeInsets.fromLTRB(
+            isSmall ? 8 : 10,
+            isSmall ? 8 : 10,
+            isSmall ? 8 : 10,
+            isSmall ? 8 : 10,
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFF3A3A3A).withOpacity(0.96),
             borderRadius: BorderRadius.circular(10),
@@ -178,8 +194,8 @@ class _HoverInfoCard extends StatelessWidget {
             ],
           ),
           child: DefaultTextStyle(
-            style: const TextStyle(
-              fontSize: 11,
+            style: TextStyle(
+              fontSize: isSmall ? 10 : 11,
               color: Colors.white,
               fontWeight: FontWeight.w500,
             ),
@@ -188,8 +204,8 @@ class _HoverInfoCard extends StatelessWidget {
               children: [
                 Text(
                   '$label (${_namaUnsur(label)})',
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: TextStyle(
+                    fontSize: isSmall ? 12 : 13,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -199,7 +215,7 @@ class _HoverInfoCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, size: 10, color: Color(0xFF39B54A)),
                     const SizedBox(width: 6),
-                    Text('Hasil: ${hasil.toStringAsFixed(2)}'),
+                    Expanded(child: Text('Hasil: ${hasil.toStringAsFixed(2)}')),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -207,14 +223,14 @@ class _HoverInfoCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, size: 10, color: Color(0xFFE39A25)),
                     const SizedBox(width: 6),
-                    Text('Standar: ${standar.toStringAsFixed(2)}'),
+                    Expanded(child: Text('Standar: ${standar.toStringAsFixed(2)}')),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Selisih: ${diff.toStringAsFixed(2)} ($status)',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: isSmall ? 11 : 12,
                     fontWeight: FontWeight.w700,
                     color: statusColor,
                   ),
@@ -261,7 +277,7 @@ class _AnalisisChartPainter extends CustomPainter {
     const leftPad = 36.0;
     const rightPad = 14.0;
     const topPad = 16.0;
-    const bottomPad = 46.0;
+    const bottomPad = 42.0;
 
     final chartWidth = size.width - leftPad - rightPad;
     final chartHeight = size.height - topPad - bottomPad;

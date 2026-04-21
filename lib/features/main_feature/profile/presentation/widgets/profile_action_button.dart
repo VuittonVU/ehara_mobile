@@ -1,6 +1,6 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/pressable_button.dart';
 
 class ProfileActionButton extends StatelessWidget {
@@ -17,92 +17,45 @@ class ProfileActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ProfileBaseTile(
-      backgroundColor: const Color(0xFFFF4B4B),
-      borderColor: const Color(0xFFFF4B4B),
-      foregroundColor: Colors.white,
-      iconPath: iconPath,
-      label: label,
-      onTap: onTap,
-    );
-  }
-}
-
-class _ProfileBaseTile extends StatelessWidget {
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color foregroundColor;
-  final String iconPath;
-  final String label;
-  final VoidCallback? onTap;
-
-  const _ProfileBaseTile({
-    required this.backgroundColor,
-    required this.borderColor,
-    required this.foregroundColor,
-    required this.iconPath,
-    required this.label,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const double horizontalPadding = 18;
-    const double verticalPadding = 16;
-    const double iconSize = 26;
-    const double fontSize = 16;
-    const double textHeight = 1.2;
-
-    final textScaler = MediaQuery.textScalerOf(context);
-    final scaledLineHeight = textScaler.scale(fontSize * textHeight);
-    final minTileHeight =
-        math.max(iconSize, scaledLineHeight) + (verticalPadding * 2);
+    final iconSize = Responsive.w(context, 22);
 
     return PressableButton(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      color: backgroundColor,
-      border: Border.all(
-        color: borderColor,
-        width: 1.6,
+      borderRadius: BorderRadius.circular(
+        Responsive.r(context, 20),
       ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: minTileHeight),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: iconSize,
-                height: iconSize,
-                child: Center(
-                  child: Image.asset(
-                    iconPath,
-                    width: iconSize,
-                    height: iconSize,
-                    fit: BoxFit.contain,
-                    color: foregroundColor,
-                  ),
+      color: const Color(0xFFE95B59),
+      border: Border.all(
+        color: const Color(0xFFE95B59),
+        width: 1.4,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 18),
+          vertical: Responsive.h(context, 16),
+        ),
+        child: Row(
+          children: [
+            Image.asset(
+              iconPath,
+              width: iconSize,
+              height: iconSize,
+              color: Colors.white,
+            ),
+            SizedBox(width: Responsive.w(context, 14)),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: Responsive.sp(context, 16),
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: foregroundColor,
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w700,
-                    height: textHeight,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

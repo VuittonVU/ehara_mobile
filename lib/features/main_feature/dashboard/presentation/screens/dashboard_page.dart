@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../list_kebun/models/kebun_feature_type.dart';
-import '../../providers/dashboard_controller.dart';
 import '../../../list_kebun/providers/kebun_selection_controller.dart';
+import '../../providers/dashboard_controller.dart';
 import '../widgets/article/article_section.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_menu_section.dart';
@@ -56,6 +57,10 @@ class DashboardPage extends ConsumerWidget {
       },
     );
 
+    final horizontal = Responsive.w(context, 20);
+    final top = Responsive.h(context, 14);
+    final bottom = Responsive.h(context, 20);
+
     return AppBackground(
       child: SafeArea(
         child: CustomScrollView(
@@ -63,7 +68,7 @@ class DashboardPage extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -72,14 +77,16 @@ class DashboardPage extends ConsumerWidget {
                         context.push(AppRoutes.notifikasi);
                       },
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.h(context, 18)),
                     Text(
                       'Fitur E-Hara',
-                      style: AppTextStyles.heading2(),
+                      style: AppTextStyles.heading2().copyWith(
+                        fontSize: Responsive.sp(context, 22),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Responsive.h(context, 12)),
                     DashboardMenuSection(menus: menus),
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.h(context, 24)),
                     ArticleSection(
                       articles: dashboardArticles,
                       onArticleTap: (article) {

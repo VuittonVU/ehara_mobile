@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/pressable_button.dart';
 
 class DashboardHeader extends StatelessWidget {
@@ -12,35 +13,45 @@ class DashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logoWidth = Responsive.w(context, 78);
+    final buttonSize = Responsive.w(context, 52);
+    final iconSize = Responsive.w(context, 20);
+
     return Row(
       children: [
         Image.asset(
           'assets/images/logo/logo_ehara.png',
-          width: 78,
-          fit: BoxFit.cover,
+          width: logoWidth,
         ),
+
         const Spacer(),
-        SizedBox(
-          width: 52,
-          height: 52,
-          child: PressableButton(
-            onTap: onNotificationTap,
-            borderRadius: BorderRadius.circular(20),
-            color: const Color(0xFFF9FAFB),
-            border: Border.all(
-              color: const Color(0xFF2F2F2F).withOpacity(0.3),
-              width: 1.4,
+
+        Padding(
+          padding: EdgeInsets.only(right: Responsive.w(context, 2)), // 🔥 biar lebih kanan dikit
+          child: SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: PressableButton(
+              onTap: onNotificationTap,
+              borderRadius: BorderRadius.circular(
+                Responsive.r(context, 20),
+              ),
+              color: const Color(0xFFF9FAFB),
+              border: Border.all(
+                color: const Color(0xFF2F2F2F).withValues(alpha: 0.3),
+                width: Responsive.w(context, 1.4),
+              ),
+              padding: EdgeInsets.all(Responsive.w(context, 12)),
+              pressedScale: 0.96,
+              pressedTranslateY: 1.2,
+              idleTranslateY: -0.3,
+              child: Image.asset(
+                'assets/icons/notification.png',
+                width: iconSize,
+                height: iconSize,
+              ),
             ),
-            padding: const EdgeInsets.all(12),
-            pressedScale: 0.96,
-            pressedTranslateY: 1.2,
-            idleTranslateY: -0.3,
-            child: Image.asset(
-              'assets/icons/notification.png',
-              width: 20,
-              height: 20,
-            ),
-          )
+          ),
         ),
       ],
     );

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_top_bar.dart';
+import '../../../list_kebun/models/kebun_feature_type.dart';
+import '../../../list_kebun/models/kebun_model.dart';
+import '../../../list_kebun/providers/kebun_selection_controller.dart';
+import '../../models/riwayat_model.dart';
 import '../../providers/riwayat_controller.dart';
 import '../../providers/riwayat_state.dart';
 import '../widgets/riwayat_card.dart';
@@ -36,18 +42,37 @@ class RiwayatPage extends ConsumerWidget {
     }
   }
 
-  void _onTapHasilAnalisis(BuildContext context, String id) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Buka hasil analisis ID: $id'),
+  /// 🔥 FLOW BARU → LANGSUNG KE E-HARA
+  void _onTapHasilAnalisis(
+      BuildContext context,
+      WidgetRef ref,
+      RiwayatModel item,
+      ) {
+    final controller =
+    ref.read(kebunSelectionControllerProvider.notifier);
+
+    controller.setSelectedFeature(KebunFeatureType.ehara);
+
+    controller.setSelectedKebun(
+      KebunModel(
+        id: item.id,
+        namaKebun: item.farmName,
+        totalPohon: 0,
+        tanggalAnalisis: item.date,
+        tanggalPengambilanData: item.date,
       ),
     );
+
+    // 🚀 langsung ke E-HARA
+    context.push(AppRoutes.ehara);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(riwayatControllerProvider);
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
 
     return Scaffold(
       body: AppBackground(
@@ -73,7 +98,7 @@ class RiwayatPage extends ConsumerWidget {
                         return const RiwayatEmptyState(
                           title: 'Data belum ditemukan!',
                           description:
-                          'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu dan optimalkan hasil panen sekarang!',
+                          'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu!',
                           imagePath: 'assets/images/ehara_robot_empty.png',
                         );
 
@@ -81,7 +106,7 @@ class RiwayatPage extends ConsumerWidget {
                         return RiwayatEmptyState(
                           title: 'Data belum ditemukan!',
                           description: state.errorMessage ??
-                              'Coba sesuaikan pencarian atau filter anda!',
+                              'Coba sesuaikan filter kamu!',
                           showClockBadge: true,
                           imagePath: 'assets/images/ehara_robot_empty.png',
                         );
@@ -96,21 +121,21 @@ class RiwayatPage extends ConsumerWidget {
                           child: ListView.separated(
                             physics: const AlwaysScrollableScrollPhysics(),
                             padding: EdgeInsets.fromLTRB(
-                              10,
-                              20,
-                              10,
-                              80 + bottomSafeArea,
+                              isSmall ? 12 : 16,
+                              isSmall ? 16 : 20,
+                              isSmall ? 12 : 16,
+                              90 + bottomSafeArea,
                             ),
                             itemCount: items.length,
                             separatorBuilder: (_, __) =>
-                            const SizedBox(height: 18),
+                                SizedBox(height: isSmall ? 14 : 18),
                             itemBuilder: (context, index) {
                               final item = items[index];
 
                               return RiwayatCard(
                                 riwayat: item,
                                 onTapDetail: () =>
-                                    _onTapHasilAnalisis(context, item.id),
+                                    _onTapHasilAnalisis(context, ref, item),
                                 calendarIconPath: 'assets/icons/calendar.png',
                                 kebunIconPath: 'assets/icons/kebun.png',
                               );

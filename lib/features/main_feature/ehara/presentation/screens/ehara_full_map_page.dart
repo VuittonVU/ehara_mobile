@@ -5,13 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_background.dart';
-import '../../../shared/widgets/analysis_top_bar.dart';
+import '../../../shared_analysis/widgets/analysis_top_bar.dart';
 
 class EHaraFullMapPage extends StatelessWidget {
   const EHaraFullMapPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -22,11 +24,16 @@ class EHaraFullMapPage extends StatelessWidget {
                 onBackTap: () => context.pop(),
                 onPdfTap: () {},
               ),
-              const SizedBox(height: 16),
-              const Expanded(
+              SizedBox(height: isSmall ? 12 : 16),
+              Expanded(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: _FullMapCard(),
+                  padding: EdgeInsets.fromLTRB(
+                    isSmall ? 14 : 20,
+                    0,
+                    isSmall ? 14 : 20,
+                    isSmall ? 14 : 20,
+                  ),
+                  child: const _FullMapCard(),
                 ),
               ),
             ],
@@ -42,11 +49,13 @@ class _FullMapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFF8F8F6),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(isSmall ? 24 : 28),
         border: Border.all(
           color: const Color(0xFFC9C9C9),
           width: 1.4,
@@ -61,28 +70,38 @@ class _FullMapCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 14),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              isSmall ? 14 : 20,
+              isSmall ? 16 : 20,
+              isSmall ? 14 : 20,
+              isSmall ? 10 : 14,
+            ),
             child: Text(
               'Prototype Sebaran',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: isSmall ? 17 : 20,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF373737),
+                color: const Color(0xFF373737),
               ),
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+            margin: EdgeInsets.symmetric(horizontal: isSmall ? 14 : 20),
             width: double.infinity,
             height: 1.1,
             color: const Color(0xFFC9C9C9),
           ),
-          const SizedBox(height: 18),
-          const Expanded(
+          SizedBox(height: isSmall ? 14 : 18),
+          Expanded(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(18, 0, 18, 18),
-              child: _PrototypeMap(),
+              padding: EdgeInsets.fromLTRB(
+                isSmall ? 12 : 18,
+                0,
+                isSmall ? 12 : 18,
+                isSmall ? 12 : 18,
+              ),
+              child: const _PrototypeMap(),
             ),
           ),
         ],
@@ -104,8 +123,11 @@ class _PrototypeMapState extends State<_PrototypeMap> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final legendWidth = MediaQuery.of(context).size.width * (isSmall ? 0.42 : 0.38);
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(isSmall ? 14 : 18),
       child: Container(
         color: Colors.white,
         child: GestureDetector(
@@ -135,8 +157,8 @@ class _PrototypeMapState extends State<_PrototypeMap> {
                 ),
               ),
               Positioned(
-                left: 14,
-                top: 14,
+                left: isSmall ? 10 : 14,
+                top: isSmall ? 10 : 14,
                 child: Column(
                   children: [
                     _ZoomButton(
@@ -147,7 +169,7 @@ class _PrototypeMapState extends State<_PrototypeMap> {
                         });
                       },
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: isSmall ? 6 : 8),
                     _ZoomButton(
                       icon: Icons.remove,
                       onTap: () {
@@ -160,11 +182,16 @@ class _PrototypeMapState extends State<_PrototypeMap> {
                 ),
               ),
               Positioned(
-                right: 14,
-                bottom: 14,
+                right: isSmall ? 10 : 14,
+                bottom: isSmall ? 10 : 14,
                 child: Container(
-                  width: 170,
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  width: legendWidth,
+                  padding: EdgeInsets.fromLTRB(
+                    isSmall ? 10 : 12,
+                    isSmall ? 8 : 10,
+                    isSmall ? 10 : 12,
+                    isSmall ? 8 : 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -176,9 +203,9 @@ class _PrototypeMapState extends State<_PrototypeMap> {
                       ),
                     ],
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
                         'Keterangan',
                         style: TextStyle(
@@ -202,20 +229,23 @@ class _PrototypeMapState extends State<_PrototypeMap> {
                 ),
               ),
               Positioned(
-                bottom: 14,
-                left: 14,
+                bottom: isSmall ? 10 : 14,
+                left: isSmall ? 10 : 14,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmall ? 8 : 10,
+                    vertical: isSmall ? 5 : 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.92),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Double tap untuk reset',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: isSmall ? 10 : 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF555555),
+                      color: const Color(0xFF555555),
                     ),
                   ),
                 ),
@@ -239,6 +269,8 @@ class _ZoomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
@@ -246,11 +278,12 @@ class _ZoomButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(
-          width: 40,
-          height: 40,
+          width: isSmall ? 34 : 40,
+          height: isSmall ? 34 : 40,
           child: Icon(
             icon,
             color: const Color(0xFF333333),
+            size: isSmall ? 20 : 24,
           ),
         ),
       ),
@@ -269,24 +302,26 @@ class _LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: isSmall ? 10 : 12,
+          height: isSmall ? 10 : 12,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: isSmall ? 6 : 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: isSmall ? 11 : 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF223355),
+              color: const Color(0xFF223355),
             ),
           ),
         ),

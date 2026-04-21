@@ -11,8 +11,8 @@ class AboutAppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double size = MediaQuery.of(context).size.width * 0.75;
-    size = size.clamp(80.0, 150.0);
+    double logoSize = MediaQuery.of(context).size.width * 0.75;
+    logoSize = logoSize.clamp(80.0, 150.0);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
@@ -27,7 +27,10 @@ class AboutAppPage extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     child: Column(
                       children: [
                         const Text(
@@ -50,8 +53,8 @@ class AboutAppPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         SizedBox(
-                          width: size,
-                          height: size,
+                          width: logoSize,
+                          height: logoSize,
                           child: Padding(
                             padding: const EdgeInsets.all(4),
                             child: Image.asset(
@@ -81,16 +84,28 @@ class AboutAppPage extends StatelessWidget {
                             color: Color(0xFF3A3A3A),
                           ),
                         ),
-                        const SizedBox(height: 28),
-                        _AboutButton(
-                          label: 'Syarat & Ketentuan',
-                          onTap: () => context.push(AppRoutes.termsPlaceholder),
+                        const SizedBox(height: 34),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(
+                            children: [
+                              _AboutButton(
+                                label: 'Syarat & Ketentuan',
+                                onTap: () {
+                                  context.push(AppRoutes.termsPlaceholder);
+                                },
+                              ),
+                              const SizedBox(height: 18),
+                              _AboutButton(
+                                label: 'Kebijakan Privasi',
+                                onTap: () {
+                                  context.push(AppRoutes.privacyPolicy);
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 14),
-                        _AboutButton(
-                          label: 'Kebijakan Privasi',
-                          onTap: () => context.push(AppRoutes.privacyPlaceholder),
-                        ),
+                        const SizedBox(height: 12),
                       ],
                     ),
                   ),
@@ -115,27 +130,34 @@ class _AboutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 175,
-      height: 42,
-      child: PressableButton(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        color: const Color(0xFFFFFFFF),
-        border: Border.all(
-          color: const Color(0xFFC9C9C9),
-          width: 2,
-        ),
-        pressedScale: 0.97,
-        pressedTranslateY: 1.2,
-        idleTranslateY: -0.4,
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF3B3B3B),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: SizedBox(
+        width: double.infinity,
+        height: 46,
+        child: PressableButton(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(
+            color: const Color(0xFFC9C9C9),
+            width: 2,
+          ),
+          pressedScale: 0.97,
+          pressedTranslateY: 1.2,
+          idleTranslateY: -0.4,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Center(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF3B3B3B),
+                ),
+              ),
             ),
           ),
         ),

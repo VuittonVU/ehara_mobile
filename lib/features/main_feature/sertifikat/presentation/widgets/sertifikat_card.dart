@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../models/sertifikat_model.dart';
 
 class SertifikatCard extends StatelessWidget {
@@ -26,15 +27,17 @@ class SertifikatCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF8F8F6),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(
+          Responsive.r(context, 24),
+        ),
         border: Border.all(
           color: const Color(0xFF3E806D),
-          width: 2.6,
+          width: Responsive.w(context, 2.2),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.14),
-            blurRadius: 10,
+            blurRadius: Responsive.w(context, 10),
             offset: const Offset(0, 5),
           ),
         ],
@@ -43,55 +46,67 @@ class SertifikatCard extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 20),
+              Responsive.h(context, 12),
+              Responsive.w(context, 20),
+              Responsive.h(context, 10),
+            ),
+            decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Color(0xFF3E806D),
-                  width: 2.2,
+                  color: const Color(0xFF3E806D),
+                  width: Responsive.w(context, 2),
                 ),
               ),
             ),
             child: Text(
               sertifikat.projectName,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 18),
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF303030),
+                color: const Color(0xFF303030),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 18),
+              Responsive.h(context, 14),
+              Responsive.w(context, 18),
+              Responsive.h(context, 16),
+            ),
             child: Column(
               children: [
                 _InfoRow(
                   iconPath: calendarIconPath,
                   leftText: dateText,
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: Responsive.h(context, 10)),
                 _InfoRow(
                   iconPath: kebunIconPath,
                   leftText: 'Kebun',
                   rightText: sertifikat.farmName,
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: Responsive.h(context, 10)),
                 _InfoRow(
                   iconPath: sertifikatIconPath,
                   leftText: 'No. Sertifikat E-Hara',
                   rightText: sertifikat.eHaraCertificateNumber,
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: Responsive.h(context, 10)),
                 _InfoRow(
                   iconPath: sertifikatIconPath,
                   leftText: 'No. Sertifikat\nGanomon',
                   rightText: sertifikat.ganomonCertificateNumber,
                 ),
-                const SizedBox(height: 18),
+                SizedBox(height: Responsive.h(context, 18)),
                 SizedBox(
-                  width: 242,
-                  height: 42,
+                  width: double.infinity,
+                  height: Responsive.h(context, 44),
                   child: ElevatedButton(
                     onPressed: sertifikat.isPublished ? onDownload : null,
                     style: ElevatedButton.styleFrom(
@@ -99,13 +114,16 @@ class SertifikatCard extends StatelessWidget {
                       backgroundColor: const Color(0xFF4A8A76),
                       disabledBackgroundColor: const Color(0xFFD5DDDA),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(
+                          Responsive.r(context, 10),
+                        ),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Download Sertifikat',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 0.2,
@@ -136,20 +154,26 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasRightText = rightText != null;
+    final textStyle = TextStyle(
+      fontSize: Responsive.sp(context, 14),
+      fontWeight: FontWeight.w600,
+      color: const Color(0xFF373737),
+      height: 1.25,
+    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 1),
+          padding: EdgeInsets.only(top: Responsive.h(context, 1)),
           child: Image.asset(
             iconPath,
-            width: 20,
-            height: 20,
+            width: Responsive.w(context, 20),
+            height: Responsive.w(context, 20),
             fit: BoxFit.contain,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: Responsive.w(context, 10)),
         Expanded(
           child: hasRightText
               ? Row(
@@ -158,44 +182,26 @@ class _InfoRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   leftText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF373737),
-                    height: 1.25,
-                  ),
+                  style: textStyle,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: Responsive.w(context, 8)),
+              Text(
                 ':',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF373737),
-                ),
+                style: textStyle.copyWith(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: Responsive.w(context, 8)),
               Expanded(
                 child: Text(
                   rightText!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF373737),
-                    height: 1.25,
-                  ),
+                  style: textStyle,
                 ),
               ),
             ],
           )
               : Text(
             leftText,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF373737),
-            ),
+            style: textStyle,
           ),
         ),
       ],

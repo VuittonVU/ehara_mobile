@@ -90,11 +90,19 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
+
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      insetPadding: EdgeInsets.symmetric(horizontal: isSmall ? 14 : 20),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+        padding: EdgeInsets.fromLTRB(
+          isSmall ? 14 : 16,
+          16,
+          isSmall ? 14 : 16,
+          20,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFFF8F8F6),
           borderRadius: BorderRadius.circular(26),
@@ -116,13 +124,13 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  const Center(
+                  Center(
                     child: Text(
                       'Filter',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: isSmall ? 18 : 20,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF2F2F2F),
+                        color: const Color(0xFF2F2F2F),
                       ),
                     ),
                   ),
@@ -131,9 +139,13 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                     child: InkWell(
                       onTap: () => Navigator.pop(context),
                       borderRadius: BorderRadius.circular(999),
-                      child: const Padding(
-                        padding: EdgeInsets.all(4),
-                        child: Icon(Icons.close, size: 26, color: Color(0xFF222222)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.close,
+                          size: isSmall ? 24 : 26,
+                          color: const Color(0xFF222222),
+                        ),
                       ),
                     ),
                   ),
@@ -147,14 +159,14 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                 endIndent: 8,
               ),
               const SizedBox(height: 20),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Tanggal',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: isSmall ? 13 : 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF2F2F2F),
+                    color: const Color(0xFF2F2F2F),
                   ),
                 ),
               ),
@@ -179,14 +191,14 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                 ],
               ),
               const SizedBox(height: 22),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Urutan',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: isSmall ? 13 : 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF2F2F2F),
+                    color: const Color(0xFF2F2F2F),
                   ),
                 ),
               ),
@@ -226,9 +238,8 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                       label: 'A-Z',
                       isSelected: _sortType == RiwayatSortType.az,
                       onTap: () => setState(() {
-                        _sortType = _sortType == RiwayatSortType.az
-                            ? null
-                            : RiwayatSortType.az;
+                        _sortType =
+                        _sortType == RiwayatSortType.az ? null : RiwayatSortType.az;
                       }),
                     ),
                   ),
@@ -238,9 +249,8 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                       label: 'Z-A',
                       isSelected: _sortType == RiwayatSortType.za,
                       onTap: () => setState(() {
-                        _sortType = _sortType == RiwayatSortType.za
-                            ? null
-                            : RiwayatSortType.za;
+                        _sortType =
+                        _sortType == RiwayatSortType.za ? null : RiwayatSortType.za;
                       }),
                     ),
                   ),
@@ -248,8 +258,8 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
               ),
               const SizedBox(height: 26),
               SizedBox(
-                width: 220,
-                height: 42,
+                width: isSmall ? double.infinity : 220,
+                height: isSmall ? 44 : 42,
                 child: ElevatedButton(
                   onPressed: _apply,
                   style: ElevatedButton.styleFrom(
@@ -259,13 +269,17 @@ class _RiwayatFilterDialogState extends State<RiwayatFilterDialog> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                   ),
-                  child: const Text(
-                    'Terapkan Filter',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'Terapkan Filter',
+                      style: TextStyle(
+                        fontSize: isSmall ? 13 : 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

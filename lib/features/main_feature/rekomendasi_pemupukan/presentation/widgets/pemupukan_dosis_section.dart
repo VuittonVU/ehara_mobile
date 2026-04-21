@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class PemupukanDoseItem {
   final String title;
@@ -26,17 +26,27 @@ class PemupukanDosisSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final itemWidth = isSmall ? 94.0 : 108.0;
+    final boxWidth = isSmall ? 86.0 : 96.0;
+    final boxHeight = isSmall ? 108.0 : 116.0;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 14 : 18,
+        isSmall ? 16 : 20,
+        isSmall ? 14 : 18,
+        isSmall ? 16 : 20,
+      ),
       child: Column(
         children: [
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: isSmall ? 16 : 18,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF373737),
+              color: const Color(0xFF373737),
             ),
           ),
           const SizedBox(height: 16),
@@ -45,74 +55,110 @@ class PemupukanDosisSection extends StatelessWidget {
             height: 1.1,
             color: const Color(0xFFC9C9C9),
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: isSmall ? 18 : 22),
           Wrap(
-            spacing: 22,
-            runSpacing: 22,
+            spacing: isSmall ? 12 : 18,
+            runSpacing: isSmall ? 16 : 22,
             alignment: WrapAlignment.center,
             children: items.map((item) {
               return SizedBox(
-                width: 110,
+                width: itemWidth,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       item.title,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: isSmall ? 14 : 17,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF373737),
+                        color: const Color(0xFF373737),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: isSmall ? 8 : 10),
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: boxWidth,
+                      height: boxHeight,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmall ? 6 : 8,
+                        vertical: isSmall ? 8 : 10,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF3F816D),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'Minimum',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Minimum',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: isSmall ? 8 : 9,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                          Text(
-                            item.minimum,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
+
+                          SizedBox(height: isSmall ? 2 : 3),
+
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                item.minimum,
+                                style: TextStyle(
+                                  fontSize: isSmall ? 14 : 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                          const Text(
-                            '|',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              height: 0.9,
+
+                          Text('|',
+                              style: TextStyle(
+                                fontSize: isSmall ? 14 : 17,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              )),
+
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                item.maksimum,
+                                style: TextStyle(
+                                  fontSize: isSmall ? 14 : 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                          Text(
-                            item.maksimum,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Text(
-                            'Maksimum',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+
+                          SizedBox(height: isSmall ? 2 : 3),
+
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Maksimum',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: isSmall ? 8 : 9,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ],

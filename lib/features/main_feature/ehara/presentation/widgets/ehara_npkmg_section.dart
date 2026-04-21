@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class EHaraNpkmgSection extends StatelessWidget {
   const EHaraNpkmgSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final chartHeight = MediaQuery.of(context).size.width * 0.6;
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+      ),
       child: SizedBox(
         width: double.infinity,
-        height: 240,
+        height: chartHeight,
         child: CustomPaint(
           painter: _NpkmgPainter(),
         ),

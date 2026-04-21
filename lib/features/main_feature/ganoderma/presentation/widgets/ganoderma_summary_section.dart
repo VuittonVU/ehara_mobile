@@ -1,31 +1,38 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class GanodermaSummarySection extends StatelessWidget {
   const GanodermaSummarySection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 12 : 16,
+        isSmall ? 14 : 18,
+        isSmall ? 12 : 16,
+        isSmall ? 14 : 18,
+      ),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Ringkasan Ganoderma',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: isSmall ? 16 : 18,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF373737),
+              color: const Color(0xFF373737),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Container(
             width: double.infinity,
             height: 1.1,
             color: const Color(0xFFC9C9C9),
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: isSmall ? 14 : 18),
           Row(
             children: const [
               Expanded(
@@ -35,7 +42,7 @@ class GanodermaSummarySection extends StatelessWidget {
                   value: '18',
                 ),
               ),
-              SizedBox(width: 14),
+              SizedBox(width: 12),
               Expanded(
                 child: _SummaryCard(
                   color: Color(0xFF1DB954),
@@ -45,21 +52,26 @@ class GanodermaSummarySection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isSmall ? 12 : 14),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            padding: EdgeInsets.fromLTRB(
+              isSmall ? 12 : 14,
+              isSmall ? 10 : 12,
+              isSmall ? 12 : 14,
+              isSmall ? 10 : 12,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: const Color(0xFFE1E1E1),
                 width: 1,
               ),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: const [
                 Text(
                   'Keterangan',
                   style: TextStyle(
@@ -68,12 +80,12 @@ class GanodermaSummarySection extends StatelessWidget {
                     color: Color(0xFF444444),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 _LegendRow(
                   color: Color(0xFFE53935),
                   label: 'Ganoderma Terdeteksi',
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 6),
                 _LegendRow(
                   color: Color(0xFF1DB954),
                   label: 'Tidak Terdeteksi',
@@ -100,30 +112,41 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 8 : 12,
+        isSmall ? 10 : 12,
+        isSmall ? 8 : 12,
+        isSmall ? 10 : 12,
+      ),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: isSmall ? 20 : 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: isSmall ? 4 : 5),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: isSmall ? 11 : 12,
               fontWeight: FontWeight.w600,
               color: Colors.white,
+              height: 1.15,
             ),
           ),
         ],
@@ -143,24 +166,26 @@ class _LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: isSmall ? 10 : 12,
+          height: isSmall ? 10 : 12,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: isSmall ? 6 : 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: isSmall ? 11 : 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF555555),
+              color: const Color(0xFF555555),
             ),
           ),
         ),

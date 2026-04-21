@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
+import '../../../../../../core/utils/responsive.dart';
 import '../../../models/article_model.dart';
 
 class ArticleCard extends StatelessWidget {
@@ -14,17 +15,25 @@ class ArticleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = Responsive.isCompact(context);
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(
+        Responsive.r(context, 16),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.w(context, 2),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(
+                  Responsive.r(context, 14),
+                ),
                 child: Image.asset(
                   article.imagePath,
                   width: double.infinity,
@@ -32,14 +41,16 @@ class ArticleCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.h(context, 8)),
             Text(
               article.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.medium(
-                fontSize: 12.5,
-              ).copyWith(height: 1.25),
+                fontSize: Responsive.sp(context, isCompact ? 11.5 : 12.5),
+              ).copyWith(
+                height: 1.25,
+              ),
             ),
           ],
         ),

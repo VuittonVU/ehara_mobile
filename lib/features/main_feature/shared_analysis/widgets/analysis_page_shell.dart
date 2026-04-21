@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/app_background.dart';
 import 'analysis_page_indicator.dart';
 import 'analysis_top_bar.dart';
@@ -30,7 +31,12 @@ class AnalysisPageShell extends StatelessWidget {
       body: AppBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 30 + bottomSafeArea),
+            padding: EdgeInsets.fromLTRB(
+              0,
+              0,
+              0,
+              Responsive.h(context, 24) + bottomSafeArea,
+            ),
             child: Column(
               children: [
                 AnalysisTopBar(
@@ -38,14 +44,16 @@ class AnalysisPageShell extends StatelessWidget {
                   onBackTap: onBackTap,
                   onPdfTap: onPdfTap,
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: Responsive.h(context, 14)),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(context, 18),
+                  ),
                   child: Column(
                     children: children,
                   ),
                 ),
-                const SizedBox(height: 26),
+                SizedBox(height: Responsive.h(context, 24)),
                 AnalysisPageIndicator(
                   total: totalIndicators,
                   currentIndex: currentIndicator,

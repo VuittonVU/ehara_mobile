@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'detail_profile_state.dart';
 import '../../profile_controller.dart';
+import 'detail_profile_state.dart';
 
 final detailProfileControllerProvider =
 StateNotifierProvider.autoDispose<DetailProfileController, DetailProfileState>(
@@ -13,7 +13,8 @@ StateNotifierProvider.autoDispose<DetailProfileController, DetailProfileState>(
       DetailProfileState(
         fullName: profile?.name ?? 'Vuitton Varian Utomo',
         username: 'VVU',
-        address: 'Jalan Muktar Basri Komplek Gaharu\nTown House Blok F1B',
+        address:
+        'Jl. Brigjend Katamso No.51, Kp. Baru, Kec. Medan Maimun, Kota Medan, Sumatera Utara 20158',
         email: profile?.email ?? 'vuittonvarianu@gmail.com',
         phoneNumber: '0895622924083',
         whatsappNumber: '0895622924083',

@@ -5,10 +5,12 @@ class EHaraChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return SizedBox(
       width: double.infinity,
       child: AspectRatio(
-        aspectRatio: 1.1,
+        aspectRatio: isSmall ? 1.02 : 1.1,
         child: Stack(
           children: [
             Positioned.fill(
@@ -17,9 +19,9 @@ class EHaraChartSection extends StatelessWidget {
               ),
             ),
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: 6,
+              left: isSmall ? 10 : 16,
+              right: isSmall ? 10 : 16,
+              bottom: 8,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
@@ -47,23 +49,25 @@ class _LegendDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: isSmall ? 14 : 16,
+          height: isSmall ? 14 : 16,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: isSmall ? 5 : 6),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
+          style: TextStyle(
+            fontSize: isSmall ? 11 : 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF444444),
+            color: const Color(0xFF444444),
           ),
         ),
       ],
@@ -82,23 +86,25 @@ class _LegendLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       children: [
         Container(
-          width: 18,
+          width: isSmall ? 16 : 18,
           height: 3,
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(999),
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: isSmall ? 5 : 6),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
+          style: TextStyle(
+            fontSize: isSmall ? 11 : 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF444444),
+            color: const Color(0xFF444444),
           ),
         ),
       ],

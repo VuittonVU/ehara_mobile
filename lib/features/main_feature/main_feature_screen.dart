@@ -15,7 +15,7 @@ class MainFeatureScreen extends StatelessWidget {
   static const List<String> _tabRoutes = [
     AppRoutes.dashboard,
     AppRoutes.riwayat,
-    '', // tombol tengah = form
+    '',
     AppRoutes.pembayaran,
     AppRoutes.profile,
   ];
@@ -48,6 +48,8 @@ class MainFeatureScreen extends StatelessWidget {
     final currentIndex = _getCurrentIndex(context);
 
     return Scaffold(
+      extendBody: true,
+      resizeToAvoidBottomInset: false,
       body: child,
       bottomNavigationBar: AppBottomNavbar(
         currentIndex: currentIndex,

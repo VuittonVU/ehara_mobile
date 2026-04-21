@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/app_background.dart';
 import 'analysis_page_indicator.dart';
 import 'analysis_top_bar.dart';
@@ -55,7 +56,7 @@ class _AnalysisCarouselPageState extends State<AnalysisCarouselPage> {
                 onBackTap: widget.onBackTap,
                 onPdfTap: widget.onPdfTap,
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: Responsive.h(context, 14)),
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -68,22 +69,22 @@ class _AnalysisCarouselPageState extends State<AnalysisCarouselPage> {
                   itemBuilder: (context, index) {
                     return SingleChildScrollView(
                       padding: EdgeInsets.fromLTRB(
-                        20,
+                        Responsive.w(context, 18),
                         0,
-                        20,
-                        8 + bottomSafeArea,
+                        Responsive.w(context, 18),
+                        Responsive.h(context, 8) + bottomSafeArea,
                       ),
                       child: widget.slides[index],
                     );
                   },
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: Responsive.h(context, 10)),
               AnalysisPageIndicator(
                 total: widget.slides.length,
                 currentIndex: _currentIndex,
               ),
-              SizedBox(height: 22 + bottomSafeArea),
+              SizedBox(height: Responsive.h(context, 18) + bottomSafeArea),
             ],
           ),
         ),

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../../../../core/widgets/pressable_button.dart';
 
 class ProfileMenuTile extends StatelessWidget {
@@ -23,10 +24,10 @@ class ProfileMenuTile extends StatelessWidget {
       foregroundColor: const Color(0xFF3E3E3E),
       iconPath: iconPath,
       label: title,
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right_rounded,
-        size: 32,
-        color: Color(0xFF4E4E4E),
+        size: Responsive.w(context, 30),
+        color: const Color(0xFF4E4E4E),
       ),
       onTap: onTap,
     );
@@ -54,11 +55,11 @@ class _ProfileBaseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double horizontalPadding = 18;
-    const double verticalPadding = 16;
-    const double iconSize = 26;
-    const double fontSize = 16;
-    const double textHeight = 1.2;
+    final horizontalPadding = Responsive.w(context, 18);
+    final verticalPadding = Responsive.h(context, 16);
+    final iconSize = Responsive.w(context, 24);
+    final fontSize = Responsive.sp(context, 16);
+    const textHeight = 1.2;
 
     final textScaler = MediaQuery.textScalerOf(context);
     final scaledLineHeight = textScaler.scale(fontSize * textHeight);
@@ -67,7 +68,9 @@ class _ProfileBaseTile extends StatelessWidget {
 
     return PressableButton(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(
+        Responsive.r(context, 20),
+      ),
       color: backgroundColor,
       border: Border.all(
         color: borderColor,
@@ -76,7 +79,7 @@ class _ProfileBaseTile extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: minTileHeight),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
+          padding: EdgeInsets.symmetric(
             horizontal: horizontalPadding,
             vertical: verticalPadding,
           ),
@@ -94,10 +97,12 @@ class _ProfileBaseTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: Responsive.w(context, 16)),
               Expanded(
                 child: Text(
                   label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: fontSize,
                     fontWeight: FontWeight.w700,

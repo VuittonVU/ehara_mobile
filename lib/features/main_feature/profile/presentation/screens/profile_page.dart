@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,11 +32,86 @@ class ProfilePage extends ConsumerWidget {
     context.push(AppRoutes.aboutApp);
   }
 
+  void _showFullScreenAvatar(BuildContext context, String? photoPath, String? photoUrl) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.92),
+      builder: (dialogContext) {
+        Widget imageWidget;
+
+        if (photoPath != null && photoPath.trim().isNotEmpty) {
+          imageWidget = InteractiveViewer(
+            minScale: 0.8,
+            maxScale: 4,
+            child: Image.file(
+              File(photoPath),
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) {
+                return const Icon(
+                  Icons.person_outline_rounded,
+                  size: 140,
+                  color: Colors.white70,
+                );
+              },
+            ),
+          );
+        } else if (photoUrl != null && photoUrl.trim().isNotEmpty) {
+          imageWidget = InteractiveViewer(
+            minScale: 0.8,
+            maxScale: 4,
+            child: Image.network(
+              photoUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) {
+                return const Icon(
+                  Icons.person_outline_rounded,
+                  size: 140,
+                  color: Colors.white70,
+                );
+              },
+            ),
+          );
+        } else {
+          imageWidget = const Icon(
+            Icons.person_outline_rounded,
+            size: 140,
+            color: Colors.white70,
+          );
+        }
+
+        return GestureDetector(
+          onTap: () => Navigator.of(dialogContext).pop(),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                Center(child: imageWidget),
+                Positioned(
+                  top: 48,
+                  right: 20,
+                  child: IconButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _onLogoutTap(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) {
+      builder: (dialogContext) {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.symmetric(horizontal: 32),
@@ -91,7 +168,8 @@ class ProfilePage extends ConsumerWidget {
                         label: 'Ya',
                         backgroundColor: const Color(0xFFE95B59),
                         onTap: () {
-                          Navigator.pop(context);
+                          Navigator.of(dialogContext).pop();
+                          context.go(AppRoutes.login);
                         },
                       ),
                     ),
@@ -101,7 +179,7 @@ class ProfilePage extends ConsumerWidget {
                         label: 'Tidak',
                         backgroundColor: const Color(0xFF3D8B73),
                         onTap: () {
-                          Navigator.pop(context);
+                          Navigator.of(dialogContext).pop();
                         },
                       ),
                     ),
@@ -167,7 +245,11 @@ class ProfilePage extends ConsumerWidget {
                             const SizedBox(height: 12),
                             ProfileAvatarCard(
                               profile: profile,
-                              onAvatarTap: () {},
+                              onAvatarTap: () => _showFullScreenAvatar(
+                                context,
+                                profile.photoPath,
+                                profile.photoUrl,
+                              ),
                             ),
                             const SizedBox(height: 24),
                             ProfileMenuTile(

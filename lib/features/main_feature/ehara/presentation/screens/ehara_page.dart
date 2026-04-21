@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../shared/widgets/analysis_carousel_page.dart';
-import '../../../shared/widgets/analysis_section_card.dart';
-import '../../../shared/widgets/detail_kebun_card.dart';
+import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../widgets/ehara_mapping_section.dart';
 import '../widgets/ehara_npkmg_section.dart';
 import '../widgets/ehara_status_section.dart';
@@ -37,8 +37,8 @@ class _EHaraSlideOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         _EHaraDetailKebunCard(),
       ],
     );
@@ -50,8 +50,8 @@ class _EHaraSlideTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -74,8 +74,8 @@ class _EHaraSlideThree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -98,8 +98,8 @@ class _EHaraSlideFour extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -122,12 +122,14 @@ class _EHaraDetailKebunCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(
-        26,
-        28,
-        26,
-        30,
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 18 : 26,
+        isSmall ? 22 : 28,
+        isSmall ? 18 : 26,
+        isSmall ? 24 : 30,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,12 +187,14 @@ class _IconInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 46,
-          height: 46,
+          width: isSmall ? 40 : 46,
+          height: isSmall ? 40 : 46,
           decoration: BoxDecoration(
             color: const Color(0xFF4A8A76),
             borderRadius: BorderRadius.circular(6),
@@ -198,30 +202,30 @@ class _IconInfoRow extends StatelessWidget {
           child: Center(
             child: Image.asset(
               iconPath,
-              width: 22,
-              height: 22,
+              width: isSmall ? 18 : 22,
+              height: isSmall ? 18 : 22,
               fit: BoxFit.contain,
               color: Colors.white,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: isSmall ? 10 : 12),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: isSmall ? 13 : 14,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF4A4A4A),
+            color: const Color(0xFF4A4A4A),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: isSmall ? 8 : 10),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: isSmall ? 14 : 16,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF333333),
+              color: const Color(0xFF333333),
             ),
           ),
         ),
@@ -245,15 +249,17 @@ class _SingleField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: isSmall ? 12 : 13,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF787878),
+            color: const Color(0xFF787878),
           ),
         ),
         const SizedBox(height: 6),
@@ -261,7 +267,7 @@ class _SingleField extends StatelessWidget {
           value,
           softWrap: true,
           style: TextStyle(
-            fontSize: valueFontSize,
+            fontSize: isSmall ? valueFontSize - 1.5 : valueFontSize,
             fontWeight: FontWeight.w800,
             color: const Color(0xFF3A3A3A),
             height: valueHeight,

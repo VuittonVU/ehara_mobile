@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
 import '../theme/app_text_styles.dart';
+import '../utils/responsive.dart';
 
 class AppBottomNavbar extends StatelessWidget {
   final int currentIndex;
@@ -16,8 +17,17 @@ class AppBottomNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final bottomInset = mediaQuery.padding.bottom;
+    final isCompact = Responsive.isCompact(context);
+
+    final fabSize = Responsive.w(context, isCompact ? 60 : 66);
+    final fabOverlap = Responsive.h(context, isCompact ? 24 : 28);
+    final navBarHeight = Responsive.h(context, isCompact ? 78 : 84);
+    final totalHeight = navBarHeight + fabOverlap + bottomInset;
+
     return SizedBox(
-      height: 110,
+      height: totalHeight,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.bottomCenter,
@@ -27,17 +37,36 @@ class AppBottomNavbar extends StatelessWidget {
             right: 0,
             bottom: 0,
             child: Container(
-              height: 98,
-              padding: const EdgeInsets.only(top: 6, bottom: 8),
+              height: navBarHeight + bottomInset,
+              padding: EdgeInsets.fromLTRB(
+                Responsive.w(context, 8),
+                Responsive.h(context, 5),
+                Responsive.w(context, 8),
+                bottomInset > 0
+                    ? bottomInset + Responsive.h(context, 4)
+                    : Responsive.h(context, 8),
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(Responsive.r(context, 24)),
+                  topRight: Radius.circular(Responsive.r(context, 24)),
+                ),
                 border: Border(
                   top: BorderSide(
-                    color: AppColors.textPrimary.withOpacity(0.15),
+                    color: AppColors.textPrimary.withValues(alpha: 0.10),
                   ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: Responsive.w(context, 14),
+                    offset: const Offset(0, -3),
+                  ),
+                ],
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: _BottomNavItem(
@@ -55,7 +84,7 @@ class AppBottomNavbar extends StatelessWidget {
                       onTap: () => onTap(1),
                     ),
                   ),
-                  const SizedBox(width: 96),
+                  SizedBox(width: fabSize + Responsive.w(context, 30)),
                   Expanded(
                     child: _BottomNavItem(
                       iconPath: 'assets/icons/cart.png',
@@ -67,7 +96,7 @@ class AppBottomNavbar extends StatelessWidget {
                   Expanded(
                     child: _BottomNavItem(
                       iconPath: 'assets/icons/circle_user.png',
-                      label: 'Profile',
+                      label: 'Profil',
                       isActive: currentIndex == 4,
                       onTap: () => onTap(4),
                     ),
@@ -77,9 +106,10 @@ class AppBottomNavbar extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 2,
-            child: _CenterNavFullButton(
+            top: 0,
+            child: _CenterNavButton(
               isActive: currentIndex == 2,
+              size: fabSize,
               onTap: () => onTap(2),
             ),
           ),
@@ -121,6 +151,8 @@ class _BottomNavItemState extends State<_BottomNavItem> {
     final itemColor =
     widget.isActive ? const Color(0xFF387867) : AppColors.textPrimary;
 
+    final isCompact = Responsive.isCompact(context);
+
     return AnimatedScale(
       scale: _isPressed ? 0.97 : 1,
       duration: const Duration(milliseconds: 110),
@@ -134,24 +166,37 @@ class _BottomNavItemState extends State<_BottomNavItem> {
           onTapDown: (_) => _setPressed(true),
           onTapUp: (_) => _setPressed(false),
           onTapCancel: () => _setPressed(false),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12),
+          borderRadius: BorderRadius.circular(Responsive.r(context, 14)),
+          child: SizedBox(
+            height: Responsive.h(context, 54),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
                   widget.iconPath,
-                  width: 22,
-                  height: 22,
+                  width: Responsive.w(context, 20),
+                  height: Responsive.w(context, 20),
                   color: itemColor,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.label,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.caption(
-                    color: itemColor,
+                SizedBox(height: Responsive.h(context, 4)),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
+                    style: AppTextStyles.caption(
+                      color: itemColor,
+                    ).copyWith(
+                      fontSize: Responsive.sp(
+                        context,
+                        isCompact ? 8.1 : 8.8,
+                      ),
+                      height: 1.1,
+                      fontWeight:
+                      widget.isActive ? FontWeight.w700 : FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -163,20 +208,22 @@ class _BottomNavItemState extends State<_BottomNavItem> {
   }
 }
 
-class _CenterNavFullButton extends StatefulWidget {
+class _CenterNavButton extends StatefulWidget {
   final bool isActive;
+  final double size;
   final VoidCallback onTap;
 
-  const _CenterNavFullButton({
+  const _CenterNavButton({
     required this.isActive,
+    required this.size,
     required this.onTap,
   });
 
   @override
-  State<_CenterNavFullButton> createState() => _CenterNavFullButtonState();
+  State<_CenterNavButton> createState() => _CenterNavButtonState();
 }
 
-class _CenterNavFullButtonState extends State<_CenterNavFullButton> {
+class _CenterNavButtonState extends State<_CenterNavButton> {
   bool _isPressed = false;
 
   void _setPressed(bool value) {
@@ -188,8 +235,10 @@ class _CenterNavFullButtonState extends State<_CenterNavFullButton> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-    widget.isActive ? const Color(0xFF387867) : AppColors.textPrimary;
+    final textColor = widget.isActive
+        ? const Color(0xFF387867)
+        : AppColors.textPrimary.withValues(alpha: 0.75);
+    final isCompact = Responsive.isCompact(context);
 
     return Material(
       color: Colors.transparent,
@@ -201,52 +250,54 @@ class _CenterNavFullButtonState extends State<_CenterNavFullButton> {
         onTapDown: (_) => _setPressed(true),
         onTapUp: (_) => _setPressed(false),
         onTapCancel: () => _setPressed(false),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(widget.size / 2),
         child: AnimatedScale(
           scale: _isPressed ? 0.95 : 1,
           duration: const Duration(milliseconds: 100),
           child: SizedBox(
-            width: 108,
-            height: 108,
+            width: widget.size + Responsive.w(context, 38),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 140),
-                  width: 72,
-                  height: 72,
+                Container(
+                  width: widget.size,
+                  height: widget.size,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00A008),
                     shape: BoxShape.circle,
-                    border: widget.isActive
-                        ? Border.all(
-                      color: const Color(0xFFBFD8D0),
-                      width: 3,
-                    )
-                        : null,
+                    color: const Color(0xFF387867),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: Responsive.w(context, 8),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Center(
                     child: Image.asset(
                       'assets/icons/palm.png',
-                      width: 30,
-                      height: 30,
+                      width: widget.size * 0.32,
+                      height: widget.size * 0.32,
                       color: Colors.white,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: Responsive.h(context, 4)),
                 Text(
                   'Tambah\nAnalisis',
                   textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
                   style: AppTextStyles.caption(
                     color: textColor,
+                  ).copyWith(
+                    fontSize: Responsive.sp(
+                      context,
+                      isCompact ? 7.8 : 8.6,
+                    ),
+                    height: 1.05,
+                    fontWeight:
+                    widget.isActive ? FontWeight.w700 : FontWeight.w600,
                   ),
                 ),
               ],

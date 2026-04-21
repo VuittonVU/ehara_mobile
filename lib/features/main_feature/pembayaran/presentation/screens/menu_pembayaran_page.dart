@@ -14,23 +14,33 @@ class MenuPembayaranPage extends ConsumerWidget {
   });
 
   Widget _buildField({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 28, color: const Color(0xFF4A4A4A)),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF4A4A4A),
+            Icon(
+              icon,
+              size: isSmall ? 24 : 28,
+              color: const Color(0xFF4A4A4A),
+            ),
+            SizedBox(width: isSmall ? 6 : 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: isSmall ? 14 : 16,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF4A4A4A),
+                ),
               ),
             ),
           ],
@@ -38,18 +48,22 @@ class MenuPembayaranPage extends ConsumerWidget {
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmall ? 14 : 16,
+            vertical: isSmall ? 12 : 14,
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFFEDEDED),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: const Color(0xFFC9C9C9)),
           ),
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF7A7A7A),
+            style: TextStyle(
+              fontSize: isSmall ? 13 : 14,
+              color: const Color(0xFF7A7A7A),
               fontWeight: FontWeight.w500,
+              height: 1.35,
             ),
           ),
         ),
@@ -70,51 +84,69 @@ class MenuPembayaranPage extends ConsumerWidget {
       );
     }
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                padding: EdgeInsets.fromLTRB(
+                  isSmall ? 16 : 20,
+                  18,
+                  isSmall ? 16 : 20,
+                  8,
+                ),
                 child: Row(
                   children: [
                     InkWell(
                       borderRadius: BorderRadius.circular(100),
                       onTap: () => context.pop(),
-                      child: const Padding(
-                        padding: EdgeInsets.all(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
                         child: Icon(
                           Icons.arrow_back,
-                          size: 36,
+                          size: isSmall ? 30 : 36,
                           color: Colors.black,
                         ),
                       ),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Center(
                         child: Text(
                           'Pembayaran',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: isSmall ? 22 : 28,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF333333),
+                            color: const Color(0xFF333333),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 40),
+                    SizedBox(width: isSmall ? 34 : 40),
                   ],
                 ),
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    isSmall ? 14 : 18,
+                    14,
+                    isSmall ? 14 : 18,
+                    24,
+                  ),
                   child: Container(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
+                    padding: EdgeInsets.fromLTRB(
+                      isSmall ? 14 : 18,
+                      isSmall ? 16 : 18,
+                      isSmall ? 14 : 18,
+                      isSmall ? 20 : 24,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(isSmall ? 24 : 30),
                       border: Border.all(
                         color: const Color(0xFFBDBDBD),
                         width: 1.5,
@@ -132,35 +164,36 @@ class MenuPembayaranPage extends ConsumerWidget {
                       children: [
                         Container(
                           width: double.infinity,
-                          height: 230,
+                          height: isSmall ? 190 : 230,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: const Color(0xFFCFCFCF)),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Text(
                                 'Sebaran',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF444444),
+                                  fontSize: isSmall ? 11 : 12,
+                                  color: const Color(0xFF444444),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: isSmall ? 8 : 10),
                               Icon(
                                 Icons.scatter_plot_outlined,
-                                size: 100,
-                                color: Color(0xFF4F8A78),
+                                size: isSmall ? 82 : 100,
+                                color: const Color(0xFF4F8A78),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: isSmall ? 8 : 10),
                               Text(
                                 'Preview peta / chart placeholder',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF777777),
+                                  fontSize: isSmall ? 11 : 12,
+                                  color: const Color(0xFF777777),
                                 ),
                               ),
                             ],
@@ -169,7 +202,7 @@ class MenuPembayaranPage extends ConsumerWidget {
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
-                          height: 44,
+                          height: isSmall ? 42 : 46,
                           child: ElevatedButton(
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -183,131 +216,161 @@ class MenuPembayaranPage extends ConsumerWidget {
                               foregroundColor: Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Lihat Peta',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Lihat Peta',
+                                style: TextStyle(
+                                  fontSize: isSmall ? 13.5 : 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
                         _buildField(
+                          context: context,
                           icon: Icons.forest_outlined,
                           label: 'Kebun',
                           value: item.kebun,
                         ),
                         const SizedBox(height: 16),
                         _buildField(
+                          context: context,
                           icon: Icons.location_on_outlined,
                           label: 'Lokasi',
                           value: item.lokasi,
                         ),
                         const SizedBox(height: 16),
                         _buildField(
+                          context: context,
                           icon: Icons.park_outlined,
                           label: 'Harga Per Satuan Pohon',
                           value: notifier.formatCurrency(item.hargaPerSatuanPohon),
                         ),
                         const SizedBox(height: 16),
                         _buildField(
+                          context: context,
                           icon: Icons.park_outlined,
                           label: 'Total Pohon',
                           value: item.totalPohon.toString(),
                         ),
                         const SizedBox(height: 16),
                         _buildField(
+                          context: context,
                           icon: Icons.pie_chart_outline,
                           label: 'Perkiraan Luas',
                           value: '${item.perkiraanLuasHa.toStringAsFixed(2)} Ha',
                         ),
                         const SizedBox(height: 16),
-                        const Text(
+                        Text(
                           'Sub Total',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: isSmall ? 14 : 16,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF4A4A4A),
+                            color: const Color(0xFF4A4A4A),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmall ? 14 : 16,
+                            vertical: isSmall ? 12 : 14,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFEDEDED),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: const Color(0xFFC9C9C9)),
                           ),
                           child: Text(
                             notifier.formatCurrency(item.subTotal),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF7A7A7A),
+                            style: TextStyle(
+                              fontSize: isSmall ? 13 : 14,
+                              color: const Color(0xFF7A7A7A),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                         const SizedBox(height: 26),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: ElevatedButton(
-                                  onPressed: () => context.pop(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFF5B57),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Batalkan',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 28),
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    context.push('/proses-pembayaran/$pembayaranId');
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3E7F69),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Bayar Sekarang',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final localSmall = constraints.maxWidth < 360;
+                            final buttonHeight = localSmall ? 42.0 : 48.0;
+                            final fontSize = localSmall ? 11.5 : 13.5;
+
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: buttonHeight,
+                                    child: ElevatedButton(
+                                      onPressed: () => context.pop(),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFFF5B57),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          'Batalkan',
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
+                                SizedBox(width: localSmall ? 16 : 24),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: buttonHeight,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        context.push('/proses-pembayaran/$pembayaranId');
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF3E7F69),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          'Bayar Sekarang',
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                            fontSize: fontSize,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),

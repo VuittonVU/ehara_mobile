@@ -37,8 +37,12 @@ class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+    final legendWidth =
+        MediaQuery.of(context).size.width * (isSmall ? 0.42 : 0.36);
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(isSmall ? 14 : 18),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onScaleStart: (_) {
@@ -77,15 +81,15 @@ class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
             ),
             if (widget.showControls)
               Positioned(
-                left: 12,
-                top: 12,
+                left: isSmall ? 10 : 12,
+                top: isSmall ? 10 : 12,
                 child: Column(
                   children: [
                     _MapControlButton(
                       icon: Icons.add,
                       onTap: _zoomIn,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: isSmall ? 6 : 8),
                     _MapControlButton(
                       icon: Icons.remove,
                       onTap: _zoomOut,
@@ -95,11 +99,16 @@ class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
               ),
             if (widget.showLegend)
               Positioned(
-                right: 14,
-                bottom: 14,
+                right: isSmall ? 10 : 14,
+                bottom: isSmall ? 10 : 14,
                 child: Container(
-                  width: 154,
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  width: legendWidth,
+                  padding: EdgeInsets.fromLTRB(
+                    isSmall ? 10 : 12,
+                    isSmall ? 8 : 10,
+                    isSmall ? 10 : 12,
+                    isSmall ? 8 : 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -111,9 +120,9 @@ class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
                       ),
                     ],
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
                         'Keterangan',
                         style: TextStyle(
@@ -154,6 +163,8 @@ class _MapControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
@@ -161,11 +172,12 @@ class _MapControlButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(
-          width: 40,
-          height: 40,
+          width: isSmall ? 34 : 40,
+          height: isSmall ? 34 : 40,
           child: Icon(
             icon,
             color: const Color(0xFF333333),
+            size: isSmall ? 20 : 24,
           ),
         ),
       ),
@@ -184,24 +196,26 @@ class _LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: isSmall ? 10 : 12,
+          height: isSmall ? 10 : 12,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: isSmall ? 6 : 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: isSmall ? 11 : 12,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF223355),
+              color: const Color(0xFF223355),
             ),
           ),
         ),

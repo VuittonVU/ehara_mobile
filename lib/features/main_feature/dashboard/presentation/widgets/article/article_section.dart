@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/theme/app_text_styles.dart';
+import '../../../../../../core/utils/responsive.dart';
 import '../../../models/article_model.dart';
 import 'article_card.dart';
 
@@ -113,19 +114,28 @@ class _ArticleSectionState extends State<ArticleSection> {
       return const SizedBox.shrink();
     }
 
+    final isCompact = Responsive.isCompact(context);
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
+      padding: EdgeInsets.fromLTRB(
+        Responsive.w(context, 18),
+        Responsive.h(context, 15),
+        Responsive.w(context, 18),
+        Responsive.h(context, 15),
+      ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(28),
+        color: Colors.white.withOpacity(0.88),
+        borderRadius: BorderRadius.circular(
+          Responsive.r(context, 28),
+        ),
         border: Border.all(
-          color: AppColors.textPrimary.withValues(alpha: 0.18),
+          color: AppColors.textPrimary.withOpacity(0.18),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: Responsive.w(context, 8),
             offset: const Offset(0, 3),
           ),
         ],
@@ -134,18 +144,22 @@ class _ArticleSectionState extends State<ArticleSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: Responsive.w(context, 4),
+            ),
             child: Text(
               'Artikel',
-              style: AppTextStyles.titleMedium(),
+              style: AppTextStyles.titleMedium().copyWith(
+                fontSize: Responsive.sp(context, 16),
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: Responsive.h(context, 10)),
           GestureDetector(
             onPanDown: (_) => _pauseTemporarily(),
             onHorizontalDragStart: (_) => _pauseTemporarily(),
             child: AspectRatio(
-              aspectRatio: 15 / 8,
+              aspectRatio: isCompact ? 14 / 9.2 : 15 / 8,
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (index) {
@@ -164,7 +178,7 @@ class _ArticleSectionState extends State<ArticleSection> {
               ),
             ),
           ),
-          const SizedBox(height: 9),
+          SizedBox(height: Responsive.h(context, 9)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -173,9 +187,11 @@ class _ArticleSectionState extends State<ArticleSection> {
                 final isActive = index == _currentVisualIndex;
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: Responsive.w(context, 8),
+                  height: Responsive.w(context, 8),
+                  margin: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(context, 3),
+                  ),
                   decoration: BoxDecoration(
                     color: isActive
                         ? const Color(0xFF8A8A8A)
@@ -186,14 +202,31 @@ class _ArticleSectionState extends State<ArticleSection> {
               },
             ),
           ),
-          const SizedBox(height: 9),
+          SizedBox(height: Responsive.h(context, 9)),
           Center(
             child: InkWell(
               onTap: widget.onSeeMoreTap,
-              child: Text(
-                'Baca Artikel Selengkapnya ->',
-                style: AppTextStyles.caption(
-                  color: AppColors.accent,
+              borderRadius: BorderRadius.circular(
+                Responsive.r(context, 8),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.w(context, 6),
+                  vertical: Responsive.h(context, 4),
+                ),
+                child: Text(
+                  isCompact
+                      ? 'Baca Artikel\nSelengkapnya ->'
+                      : 'Baca Artikel Selengkapnya ->',
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption(
+                    color: AppColors.accent,
+                  ).copyWith(
+                    fontSize: Responsive.sp(context, isCompact ? 10.5 : 11),
+                    height: 1.2,
+                  ),
                 ),
               ),
             ),

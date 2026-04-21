@@ -49,4 +49,26 @@ class ProfileController extends StateNotifier<ProfileState> {
   Future<void> refreshProfile() async {
     await loadProfile();
   }
+
+  void updateProfilePhoto(String photoPath) {
+    if (state.profile == null) return;
+
+    state = state.copyWith(
+      profile: state.profile!.copyWith(
+        photoPath: photoPath,
+      ),
+      viewState: ProfileViewState.success,
+    );
+  }
+
+  void removeProfilePhoto() {
+    if (state.profile == null) return;
+
+    state = state.copyWith(
+      profile: state.profile!.copyWith(
+        photoPath: '',
+      ),
+      viewState: ProfileViewState.success,
+    );
+  }
 }

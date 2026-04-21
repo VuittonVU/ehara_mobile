@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../shared/widgets/analysis_carousel_page.dart';
-import '../../../shared/widgets/detail_kebun_card.dart';
+import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
+import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../widgets/ganoderma_map_section.dart';
 import '../widgets/ganoderma_summary_section.dart';
 
@@ -33,8 +33,8 @@ class _GanodermaSlideOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -91,8 +91,8 @@ class _GanodermaSlideTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -129,8 +129,8 @@ class _GanodermaSlideThree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -177,6 +177,8 @@ class _GanodermaSingleField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -184,10 +186,10 @@ class _GanodermaSingleField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: isSmall ? 11 : 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF7A7A7A),
+              color: const Color(0xFF7A7A7A),
               height: 1.05,
             ),
           ),
@@ -196,7 +198,7 @@ class _GanodermaSingleField extends StatelessWidget {
             value,
             softWrap: true,
             style: TextStyle(
-              fontSize: valueFontSize,
+              fontSize: isSmall ? valueFontSize - 1.5 : valueFontSize,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF333333),
               height: valueHeight,

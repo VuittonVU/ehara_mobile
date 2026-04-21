@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
 import '../../models/pembayaran_model.dart';
 
 class PembayaranCard extends StatelessWidget {
@@ -60,15 +61,17 @@ class PembayaranCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(
+          Responsive.r(context, 24),
+        ),
         border: Border.all(
           color: const Color(0xFF3E806D),
-          width: 2.6,
+          width: Responsive.w(context, 2.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: Responsive.w(context, 10),
             offset: const Offset(0, 5),
           ),
         ],
@@ -77,63 +80,78 @@ class PembayaranCard extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 20),
+              Responsive.h(context, 12),
+              Responsive.w(context, 20),
+              Responsive.h(context, 10),
+            ),
+            decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Color(0xFF3E806D),
-                  width: 2.2,
+                  color: const Color(0xFF3E806D),
+                  width: Responsive.w(context, 2),
                 ),
               ),
             ),
             child: Text(
               item.namaProjek,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 18),
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF303030),
+                color: const Color(0xFF303030),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 18),
+              Responsive.h(context, 14),
+              Responsive.w(context, 18),
+              Responsive.h(context, 18),
+            ),
             child: Column(
               children: [
                 _InfoRow(
                   iconPath: calendarIconPath,
                   leftText: tanggalText,
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: Responsive.h(context, 10)),
                 _InfoRow(
                   iconPath: kebunIconPath,
                   leftText: 'Kebun',
                   rightText: item.kebun,
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: Responsive.h(context, 10)),
                 _InfoRow(
                   iconPath: statusIconPath,
                   leftText: 'Status Pembayaran',
                   rightText: _statusText(item.status),
                   rightTextColor: statusColor,
                 ),
-                const SizedBox(height: 18),
+                SizedBox(height: Responsive.h(context, 18)),
                 SizedBox(
-                  width: 242,
-                  height: 42,
+                  width: double.infinity,
+                  height: Responsive.h(context, 44),
                   child: ElevatedButton(
                     onPressed: onPrimaryTap,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: const Color(0xFF4A8A76),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(
+                          Responsive.r(context, 10),
+                        ),
                       ),
                     ),
                     child: Text(
                       _buttonText(item.status),
-                      style: const TextStyle(
-                        fontSize: 14,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 0.2,
@@ -166,20 +184,26 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasRightText = rightText != null;
+    final textStyle = TextStyle(
+      fontSize: Responsive.sp(context, 14),
+      fontWeight: FontWeight.w600,
+      color: const Color(0xFF373737),
+      height: 1.25,
+    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 1),
+          padding: EdgeInsets.only(top: Responsive.h(context, 1)),
           child: Image.asset(
             iconPath,
-            width: 20,
-            height: 20,
+            width: Responsive.w(context, 20),
+            height: Responsive.w(context, 20),
             fit: BoxFit.contain,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: Responsive.w(context, 10)),
         Expanded(
           child: hasRightText
               ? Row(
@@ -188,32 +212,20 @@ class _InfoRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   leftText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF373737),
-                    height: 1.25,
-                  ),
+                  style: textStyle,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: Responsive.w(context, 8)),
+              Text(
                 ':',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF373737),
-                ),
+                style: textStyle.copyWith(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: Responsive.w(context, 8)),
               Expanded(
                 child: Text(
                   rightText!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  style: textStyle.copyWith(
                     color: rightTextColor ?? const Color(0xFF373737),
-                    height: 1.25,
                   ),
                 ),
               ),
@@ -221,11 +233,7 @@ class _InfoRow extends StatelessWidget {
           )
               : Text(
             leftText,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF373737),
-            ),
+            style: textStyle,
           ),
         ),
       ],

@@ -53,13 +53,32 @@ class AppStatusDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 380;
+
+    final horizontalPadding = isSmallScreen ? 18.0 : 24.0;
+    final dialogRadius = isSmallScreen ? 20.0 : 22.0;
+    final imageHeight = isSmallScreen ? 145.0 : 170.0;
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final messageFontSize = isSmallScreen ? 12.5 : 13.0;
+    final buttonFontSize = isSmallScreen ? 12.0 : 13.0;
+    final buttonHeight = isSmallScreen ? 50.0 : 54.0;
+
     return Dialog(
       backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 20 : 28,
+      ),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding,
+          isSmallScreen ? 22 : 28,
+          horizontalPadding,
+          isSmallScreen ? 24 : 30,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(dialogRadius),
           border: Border.all(
             color: borderColor,
             width: 2,
@@ -77,47 +96,57 @@ class AppStatusDialog extends StatelessWidget {
           children: [
             Image.asset(
               imagePath,
-              height: 170,
+              height: imageHeight,
               fit: BoxFit.contain,
             ),
-            const SizedBox(height: 18),
+            SizedBox(height: isSmallScreen ? 14 : 18),
             Text(
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w700,
                 color: textColor,
+                height: 1.25,
               ),
             ),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF6B6B6B),
+              style: TextStyle(
+                fontSize: messageFontSize,
+                color: const Color(0xFF6B6B6B),
+                height: 1.45,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: isSmallScreen ? 20 : 24),
             SizedBox(
               width: double.infinity,
-              height: 46,
+              height: buttonHeight,
               child: ElevatedButton(
                 onPressed: onPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   foregroundColor: Colors.white,
                   elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text(
-                  buttonText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    buttonText,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: buttonFontSize,
+                      height: 1.2,
+                    ),
                   ),
                 ),
               ),

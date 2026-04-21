@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../shared/widgets/analysis_carousel_page.dart';
-import '../../../shared/widgets/detail_kebun_card.dart';
+import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
+import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../widgets/rekomendasi_analisis_hara_chart.dart';
 import '../widgets/pemupukan_dosis_section.dart';
 
@@ -33,8 +33,8 @@ class _RekomSlideOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -91,8 +91,8 @@ class _RekomSlideTwo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -129,8 +129,8 @@ class _RekomSlideThree extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
+    return const Column(
+      children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
@@ -201,6 +201,8 @@ class _SingleColumnDetailField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -208,10 +210,10 @@ class _SingleColumnDetailField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
+            style: TextStyle(
+              fontSize: isSmall ? 12 : 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF787878),
+              color: const Color(0xFF787878),
             ),
           ),
           const SizedBox(height: 6),
@@ -219,7 +221,7 @@ class _SingleColumnDetailField extends StatelessWidget {
             value,
             softWrap: true,
             style: TextStyle(
-              fontSize: valueFontSize,
+              fontSize: isSmall ? valueFontSize - 1.5 : valueFontSize,
               fontWeight: FontWeight.w800,
               color: const Color(0xFF3A3A3A),
               height: valueHeight,

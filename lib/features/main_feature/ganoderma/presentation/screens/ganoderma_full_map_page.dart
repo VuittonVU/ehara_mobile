@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_background.dart';
-import '../../../shared/widgets/analysis_top_bar.dart';
+import '../../../shared_analysis/widgets/analysis_top_bar.dart';
 import '../widgets/ganoderma_interactive_map.dart';
 
 class GanodermaFullMapPage extends StatelessWidget {
@@ -10,6 +10,8 @@ class GanodermaFullMapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -20,15 +22,20 @@ class GanodermaFullMapPage extends StatelessWidget {
                 onBackTap: () => context.pop(),
                 onPdfTap: () {},
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isSmall ? 12 : 16),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    isSmall ? 14 : 20,
+                    0,
+                    isSmall ? 14 : 20,
+                    isSmall ? 14 : 20,
+                  ),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
+                      borderRadius: BorderRadius.circular(isSmall ? 24 : 28),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x14000000),
@@ -37,9 +44,9 @@ class GanodermaFullMapPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(14),
-                      child: GanodermaInteractiveMap(
+                    child: Padding(
+                      padding: EdgeInsets.all(isSmall ? 10 : 14),
+                      child: const GanodermaInteractiveMap(
                         showLegend: true,
                         showControls: true,
                       ),

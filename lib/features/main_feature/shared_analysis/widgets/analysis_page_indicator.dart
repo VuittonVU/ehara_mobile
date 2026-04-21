@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/utils/responsive.dart';
+
 class AnalysisPageIndicator extends StatelessWidget {
   final int total;
   final int currentIndex;
@@ -19,9 +21,13 @@ class AnalysisPageIndicator extends StatelessWidget {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.symmetric(horizontal: 5),
-          width: isActive ? 40 : 16,
-          height: 16,
+          margin: EdgeInsets.symmetric(
+            horizontal: Responsive.w(context, 4),
+          ),
+          width: isActive
+              ? Responsive.w(context, 34)
+              : Responsive.w(context, 14),
+          height: Responsive.h(context, 12),
           decoration: BoxDecoration(
             color: isActive
                 ? const Color(0xFF387867)

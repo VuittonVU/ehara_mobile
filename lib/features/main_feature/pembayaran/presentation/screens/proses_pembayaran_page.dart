@@ -69,25 +69,28 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
   }
 
   Widget _buildMethodSection({
+    required BuildContext context,
     required String title,
     required List<String> assetPaths,
     required VoidCallback onTapAny,
     double logoHeight = 22,
   }) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 15,
+          style: TextStyle(
+            fontSize: isSmall ? 14 : 15,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF454545),
+            color: const Color(0xFF454545),
           ),
         ),
         const SizedBox(height: 10),
         Wrap(
-          spacing: 12,
+          spacing: isSmall ? 8 : 12,
           runSpacing: 10,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: assetPaths.map((path) {
@@ -95,8 +98,8 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
               borderRadius: BorderRadius.circular(10),
               onTap: onTapAny,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmall ? 6 : 8,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
@@ -105,7 +108,7 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                 ),
                 child: Image.asset(
                   path,
-                  height: logoHeight,
+                  height: isSmall ? logoHeight - 2 : logoHeight,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -150,6 +153,8 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
     }
 
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
 
     return Scaffold(
       body: AppBackground(
@@ -158,7 +163,12 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                padding: EdgeInsets.fromLTRB(
+                  isSmall ? 16 : 20,
+                  18,
+                  isSmall ? 16 : 20,
+                  8,
+                ),
                 child: Row(
                   children: [
                     InkWell(
@@ -168,27 +178,27 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                         padding: const EdgeInsets.all(4),
                         child: Image.asset(
                           'assets/icons/arrow_back.png',
-                          width: 32,
-                          height: 32,
+                          width: isSmall ? 28 : 32,
+                          height: isSmall ? 28 : 32,
                           fit: BoxFit.contain,
                         ),
                       ),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Center(
                         child: Text(
                           'Proses\nPembayaran',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            height: 0.95,
-                            fontSize: 28,
+                            height: 0.98,
+                            fontSize: isSmall ? 22 : 28,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF333333),
+                            color: const Color(0xFF333333),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 40),
+                    SizedBox(width: isSmall ? 34 : 40),
                   ],
                 ),
               ),
@@ -198,19 +208,24 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                     Positioned.fill(
                       child: SingleChildScrollView(
                         padding: EdgeInsets.fromLTRB(
-                          18,
+                          isSmall ? 14 : 18,
                           24,
-                          18,
+                          isSmall ? 14 : 18,
                           132 + bottomInset,
                         ),
                         child: Column(
                           children: [
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.fromLTRB(18, 22, 18, 20),
+                              padding: EdgeInsets.fromLTRB(
+                                isSmall ? 14 : 18,
+                                isSmall ? 18 : 22,
+                                isSmall ? 14 : 18,
+                                isSmall ? 18 : 20,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(26),
+                                borderRadius: BorderRadius.circular(isSmall ? 22 : 26),
                                 border: Border.all(
                                   color: const Color(0xFFBDBDBD),
                                   width: 1.5,
@@ -226,24 +241,24 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Sub Total',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: isSmall ? 15 : 16,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF444444),
+                                      color: const Color(0xFF444444),
                                     ),
                                   ),
                                   const SizedBox(height: 10),
                                   Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 18,
-                                      vertical: 14,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: isSmall ? 14 : 18,
+                                      vertical: isSmall ? 12 : 14,
                                     ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFEDEDED),
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
                                         color: const Color(0xFFC7C7C7),
                                       ),
@@ -253,9 +268,9 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                         Expanded(
                                           child: Text(
                                             notifier.formatCurrency(item.subTotal),
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              color: Color(0xFF7A7A7A),
+                                            style: TextStyle(
+                                              fontSize: isSmall ? 13.5 : 15,
+                                              color: const Color(0xFF7A7A7A),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -267,8 +282,8 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                           ),
                                           child: Image.asset(
                                             'assets/icons/copy.png',
-                                            width: 22,
-                                            height: 22,
+                                            width: isSmall ? 20 : 22,
+                                            height: isSmall ? 20 : 22,
                                             fit: BoxFit.contain,
                                           ),
                                         ),
@@ -278,20 +293,20 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                   const SizedBox(height: 12),
                                   Row(
                                     children: [
-                                      const Text(
+                                      Text(
                                         'Order ID:    ',
                                         style: TextStyle(
-                                          fontSize: 16,
-                                          color: Color(0xFF444444),
+                                          fontSize: isSmall ? 14 : 16,
+                                          color: const Color(0xFF444444),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       Expanded(
                                         child: Text(
                                           item.orderId,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: Color(0xFF555555),
+                                          style: TextStyle(
+                                            fontSize: isSmall ? 14 : 16,
+                                            color: const Color(0xFF555555),
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -301,8 +316,8 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                             _copyText(item.orderId, 'Order ID'),
                                         child: Image.asset(
                                           'assets/icons/copy.png',
-                                          width: 22,
-                                          height: 22,
+                                          width: isSmall ? 20 : 22,
+                                          height: isSmall ? 20 : 22,
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -311,13 +326,18 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 36),
+                            SizedBox(height: isSmall ? 28 : 36),
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+                              padding: EdgeInsets.fromLTRB(
+                                isSmall ? 14 : 18,
+                                isSmall ? 18 : 22,
+                                isSmall ? 14 : 18,
+                                isSmall ? 16 : 18,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(26),
+                                borderRadius: BorderRadius.circular(isSmall ? 22 : 26),
                                 border: Border.all(
                                   color: const Color(0xFFBDBDBD),
                                   width: 1.5,
@@ -333,16 +353,17 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Semua Metode Pembayaran',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: isSmall ? 15 : 16,
                                       fontWeight: FontWeight.w800,
-                                      color: Color(0xFF333333),
+                                      color: const Color(0xFF333333),
                                     ),
                                   ),
                                   const SizedBox(height: 18),
                                   _buildMethodSection(
+                                    context: context,
                                     title: 'QRIS',
                                     assetPaths: const [
                                       'assets/icons/qris.png',
@@ -351,6 +372,7 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                     logoHeight: 20,
                                   ),
                                   _buildMethodSection(
+                                    context: context,
                                     title: 'Virtual Account',
                                     assetPaths: const [
                                       'assets/icons/mandiri.png',
@@ -361,6 +383,7 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                                     logoHeight: 20,
                                   ),
                                   _buildMethodSection(
+                                    context: context,
                                     title: 'GoPay',
                                     assetPaths: const [
                                       'assets/icons/gopay.png',
@@ -381,10 +404,10 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                       bottom: 0,
                       child: Container(
                         padding: EdgeInsets.fromLTRB(
-                          28,
-                          20,
-                          28,
-                          20 + bottomInset,
+                          isSmall ? 20 : 28,
+                          isSmall ? 16 : 20,
+                          isSmall ? 20 : 28,
+                          (isSmall ? 16 : 20) + bottomInset,
                         ),
                         decoration: const BoxDecoration(
                           color: Color(0xFFF5F5F5),
@@ -405,22 +428,25 @@ class _ProsesPembayaranPageState extends ConsumerState<ProsesPembayaranPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
+                            Text(
                               'Pembayaran akan ditutup dalam:',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF333333),
+                                fontSize: isSmall ? 14 : 16,
+                                color: const Color(0xFF333333),
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              _formatDuration(_remaining),
-                              style: const TextStyle(
-                                fontSize: 22,
-                                color: Color(0xFF333333),
-                                fontWeight: FontWeight.w800,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatDuration(_remaining),
+                                style: TextStyle(
+                                  fontSize: isSmall ? 20 : 22,
+                                  color: const Color(0xFF333333),
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ],

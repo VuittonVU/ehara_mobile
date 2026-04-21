@@ -49,6 +49,8 @@ class ListKebunPage extends ConsumerWidget {
     final selection = ref.watch(kebunSelectionControllerProvider);
     final feature = selection.selectedFeature;
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
 
     return Scaffold(
       body: AppBackground(
@@ -65,13 +67,14 @@ class ListKebunPage extends ConsumerWidget {
               Expanded(
                 child: ListView.separated(
                   padding: EdgeInsets.fromLTRB(
-                    20,
+                    isSmall ? 14 : 20,
                     18,
-                    20,
+                    isSmall ? 14 : 20,
                     90 + bottomSafeArea,
                   ),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 28),
+                  separatorBuilder: (_, __) =>
+                      SizedBox(height: isSmall ? 18 : 28),
                   itemBuilder: (context, index) {
                     final item = items[index];
 
@@ -80,7 +83,12 @@ class ListKebunPage extends ConsumerWidget {
                       onTap: () => _handleTapKebun(context, ref, item, feature),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                        padding: EdgeInsets.fromLTRB(
+                          isSmall ? 14 : 20,
+                          isSmall ? 16 : 20,
+                          isSmall ? 14 : 20,
+                          isSmall ? 14 : 18,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(22),
@@ -105,19 +113,19 @@ class ListKebunPage extends ConsumerWidget {
                                   child: _InfoBlock(
                                     label: 'Nama Kebun',
                                     value: item.namaKebun,
-                                    valueFontSize: 18,
+                                    valueFontSize: isSmall ? 16 : 18,
                                   ),
                                 ),
-                                const SizedBox(width: 18),
+                                SizedBox(width: isSmall ? 12 : 18),
                                 _InfoBlock(
                                   label: 'Total Pohon',
                                   value: item.totalPohon.toString(),
-                                  valueFontSize: 18,
+                                  valueFontSize: isSmall ? 16 : 18,
                                   textAlign: TextAlign.right,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            SizedBox(height: isSmall ? 18 : 24),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -125,15 +133,15 @@ class ListKebunPage extends ConsumerWidget {
                                   child: _InfoBlock(
                                     label: 'Tanggal Analisis',
                                     value: _formatDate(item.tanggalAnalisis),
-                                    valueFontSize: 14,
+                                    valueFontSize: isSmall ? 13 : 14,
                                   ),
                                 ),
-                                const SizedBox(width: 18),
+                                SizedBox(width: isSmall ? 12 : 18),
                                 Expanded(
                                   child: _InfoBlock(
                                     label: 'Date Pengambilan Data',
                                     value: _formatDate(item.tanggalPengambilanData),
-                                    valueFontSize: 14,
+                                    valueFontSize: isSmall ? 13 : 14,
                                     textAlign: TextAlign.right,
                                   ),
                                 ),
@@ -170,6 +178,7 @@ class _InfoBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRight = textAlign == TextAlign.right;
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
     return Column(
       crossAxisAlignment:
@@ -178,16 +187,18 @@ class _InfoBlock extends StatelessWidget {
         Text(
           label,
           textAlign: textAlign,
-          style: const TextStyle(
-            fontSize: 12,
+          style: TextStyle(
+            fontSize: isSmall ? 11 : 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF7A7A7A),
+            color: const Color(0xFF7A7A7A),
           ),
         ),
         const SizedBox(height: 6),
         Text(
           value,
           textAlign: textAlign,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: valueFontSize,
             fontWeight: FontWeight.w800,

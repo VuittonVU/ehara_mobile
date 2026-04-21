@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/analysis_section_card.dart';
+import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class EHaraStatusSection extends StatelessWidget {
   const EHaraStatusSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return AnalysisSectionCard(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+        isSmall ? 10 : 14,
+      ),
       child: const Column(
         children: [
           _StatusRow(
@@ -74,10 +81,11 @@ class _StatusRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
+        final isSmall = MediaQuery.of(context).size.width < 360;
         final labelWidth = label.length > 1 ? 34.0 : 24.0;
-        final gap = 8.0;
+        final gap = isSmall ? 6.0 : 8.0;
         final barWidth = totalWidth - labelWidth - gap;
-        final safeBarWidth = barWidth < 180 ? 180.0 : barWidth;
+        final safeBarWidth = barWidth;
 
         final fraction = (value / maxScale).clamp(0.0, 1.0);
         final minStop = (minOptimal / maxScale).clamp(0.0, 1.0);
@@ -87,7 +95,7 @@ class _StatusRow extends StatelessWidget {
 
         final topFont = safeBarWidth < 250 ? 8.0 : 9.5;
         final bubbleFont = safeBarWidth < 250 ? 10.0 : 11.0;
-        final labelFont = label.length > 1 ? 16.0 : 18.0;
+        final labelFont = label.length > 1 ? (isSmall ? 14.0 : 16.0) : (isSmall ? 16.0 : 18.0);
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
