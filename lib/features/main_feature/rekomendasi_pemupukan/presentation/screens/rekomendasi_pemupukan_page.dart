@@ -1,16 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
+import '../../models/rekomendasi_pemupukan_model.dart';
+import '../../providers/rekomendasi_pemupukan_controller.dart';
 import '../widgets/rekomendasi_analisis_hara_chart.dart';
 import '../widgets/pemupukan_dosis_section.dart';
 
-class RekomendasiPemupukanPage extends StatelessWidget {
-  const RekomendasiPemupukanPage({super.key});
+class RekomendasiPemupukanPage extends ConsumerStatefulWidget {
+  final String eHaraUuid;
+
+  const RekomendasiPemupukanPage({
+    super.key,
+    required this.eHaraUuid,
+  });
+
+  @override
+  ConsumerState<RekomendasiPemupukanPage> createState() =>
+      _RekomendasiPemupukanPageState();
+}
+
+class _RekomendasiPemupukanPageState
+    extends ConsumerState<RekomendasiPemupukanPage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(rekomendasiPemupukanControllerProvider.notifier).load(
+        eHaraUuid: widget.eHaraUuid,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(rekomendasiPemupukanControllerProvider);
+
+    if (state.isLoading && state.data == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.errorMessage != null && state.data == null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.errorMessage!,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(rekomendasiPemupukanControllerProvider.notifier).load(
+                      eHaraUuid: widget.eHaraUuid,
+                    );
+                  },
+                  child: const Text('Coba Lagi'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final data = state.data;
+    if (data == null) {
+      return const Scaffold(
+        body: Center(child: Text('Data rekomendasi tidak ditemukan')),
+      );
+    }
+
     return AnalysisCarouselPage(
       titles: const [
         'Detail Kebun',
@@ -19,65 +87,66 @@ class RekomendasiPemupukanPage extends StatelessWidget {
       ],
       onBackTap: () => context.pop(),
       onPdfTap: () {},
-      slides: const [
-        _RekomSlideOne(),
-        _RekomSlideTwo(),
-        _RekomSlideThree(),
+      slides: [
+        _RekomSlideOne(data: data),
+        _RekomSlideTwo(data: data),
+        _RekomSlideThree(data: data),
       ],
     );
   }
 }
 
 class _RekomSlideOne extends StatelessWidget {
-  const _RekomSlideOne();
+  final RekomendasiPemupukanModel data;
+
+  const _RekomSlideOne({
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: data.namaKebun,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: data.tanggalAnalisis,
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             _SingleColumnDetailField(
               label: 'Lokasi',
-              value:
-              'Jl. Brigjend Katamso No.51, Kp. Baru, Kec. Medan Maimun, Kota Medan, Sumatera Utara 20158',
+              value: data.lokasi,
               valueFontSize: 15,
               valueHeight: 1.12,
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             DetailKebunTwoColumnRow(
               leftLabel: 'Tahun Tanam',
-              leftValue: '2018',
+              leftValue: data.tahunTanam,
               rightLabel: 'Nomor Blok',
-              rightValue: 'A-01',
+              rightValue: data.nomorBlok,
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             DetailKebunTwoColumnRow(
               leftLabel: 'Jumlah Pohon/Ha',
-              leftValue: '143',
+              leftValue: data.jumlahPohonPerHa,
               rightLabel: 'Nomor KCD',
-              rightValue: 'Kwala Sawit',
+              rightValue: data.nomorKcd,
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             DetailKebunTwoColumnRow(
-              leftLabel: 'Nama Kebun',
-              leftValue: '12',
+              leftLabel: 'Umur Tanaman',
+              leftValue: data.umurTanaman,
               rightLabel: 'Luas Ha',
-              rightValue: '25',
+              rightValue: data.luasHa,
             ),
-            SizedBox(height: 18),
-            DetailKebunTwoColumnRow(
-              leftLabel: 'Produktivitas Tahunan\n(ton/Ha)',
-              leftValue: '22',
-              rightLabel: '',
-              rightValue: '',
+            const SizedBox(height: 18),
+            _SingleColumnDetailField(
+              label: 'Produktivitas Tahunan (ton/Ha)',
+              value: data.produktivitasTahunan,
             ),
           ],
         ),
@@ -87,99 +156,98 @@ class _RekomSlideOne extends StatelessWidget {
 }
 
 class _RekomSlideTwo extends StatelessWidget {
-  const _RekomSlideTwo();
+  final RekomendasiPemupukanModel data;
+
+  const _RekomSlideTwo({
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: data.namaKebun,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: data.tanggalAnalisis,
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             DetailKebunTwoColumnRow(
               leftLabel: 'Tahun Tanam',
-              leftValue: '2018',
+              leftValue: data.tahunTanam,
               rightLabel: 'Luas Ha',
-              rightValue: '25',
+              rightValue: data.luasHa,
             ),
-            SizedBox(height: 12),
-            DetailKebunTwoColumnRow(
-              leftLabel: 'Produktivitas Tahunan\n(ton/Ha)',
-              leftValue: '22',
-              rightLabel: '',
-              rightValue: '',
+            const SizedBox(height: 12),
+            _SingleColumnDetailField(
+              label: 'Produktivitas Tahunan (ton/Ha)',
+              value: data.produktivitasTahunan,
             ),
           ],
         ),
-        SizedBox(height: 22),
-        RekomendasiAnalisisHaraChart(),
+        const SizedBox(height: 22),
+        RekomendasiAnalisisHaraChart(
+          hasil: [data.n, data.p, data.k, data.mg],
+          standar: [
+            data.nStandar,
+            data.pStandar,
+            data.kStandar,
+            data.mgStandar,
+          ],
+        ),
       ],
     );
   }
 }
 
 class _RekomSlideThree extends StatelessWidget {
-  const _RekomSlideThree();
+  final RekomendasiPemupukanModel data;
+
+  const _RekomSlideThree({
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: data.namaKebun,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: data.tanggalAnalisis,
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             DetailKebunTwoColumnRow(
               leftLabel: 'Tahun Tanam',
-              leftValue: '2018',
+              leftValue: data.tahunTanam,
               rightLabel: 'Luas Ha',
-              rightValue: '25',
+              rightValue: data.luasHa,
             ),
-            SizedBox(height: 12),
-            DetailKebunTwoColumnRow(
-              leftLabel: 'Produktivitas Tahunan\n(ton/Ha)',
-              leftValue: '22',
-              rightLabel: '',
-              rightValue: '',
+            const SizedBox(height: 12),
+            _SingleColumnDetailField(
+              label: 'Produktivitas Tahunan (ton/Ha)',
+              value: data.produktivitasTahunan,
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         PemupukanDosisSection(
           title: 'Dosis/Total Area',
-          items: [
-            PemupukanDoseItem(
-              title: 'Urea',
-              minimum: '2.75',
-              maksimum: '2.75',
+          items: data.dosis
+              .map(
+                (e) => PemupukanDoseItem(
+              title: e.title,
+              minimum: e.minimum,
+              maksimum: e.maksimum,
             ),
-            PemupukanDoseItem(
-              title: 'TSP',
-              minimum: '2.75',
-              maksimum: '2.75',
-            ),
-            PemupukanDoseItem(
-              title: 'MSP',
-              minimum: '2.75',
-              maksimum: '2.75',
-            ),
-            PemupukanDoseItem(
-              title: 'Dolomit',
-              minimum: '2.25',
-              maksimum: '2.25',
-            ),
-          ],
+          )
+              .toList(),
         ),
       ],
     );

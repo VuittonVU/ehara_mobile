@@ -1,18 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
+import '../../models/ehara_model.dart';
+import '../../providers/ehara_controller.dart';
 import '../widgets/ehara_mapping_section.dart';
 import '../widgets/ehara_npkmg_section.dart';
 import '../widgets/ehara_status_section.dart';
 
-class EHaraPage extends StatelessWidget {
-  const EHaraPage({super.key});
+class EHaraPage extends ConsumerStatefulWidget {
+  final String eHaraUuid;
+
+  const EHaraPage({
+    super.key,
+    required this.eHaraUuid,
+  });
+
+  @override
+  ConsumerState<EHaraPage> createState() => _EHaraPageState();
+}
+
+class _EHaraPageState extends ConsumerState<EHaraPage> {
+  @override
+  void initState() {
+    super.initState();
+    debugPrint('=== EHARA PAGE UUID: ${widget.eHaraUuid} ===');
+
+    Future.microtask(() {
+      ref.read(eharaControllerProvider.notifier).loadDashboard(
+        eHaraUuid: widget.eHaraUuid,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(eharaControllerProvider);
+
+    if (state.isLoading && state.dashboard == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.errorMessage != null && state.dashboard == null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.errorMessage!,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.read(eharaControllerProvider.notifier).loadDashboard(
+                      eHaraUuid: widget.eHaraUuid,
+                    );
+                  },
+                  child: const Text('Coba Lagi'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final dashboard = state.dashboard;
+    if (dashboard == null) {
+      return const Scaffold(
+        body: Center(child: Text('Data E-HARA tidak ditemukan')),
+      );
+    }
+
     return AnalysisCarouselPage(
       titles: const [
         'Detail Kebun',
@@ -22,103 +90,123 @@ class EHaraPage extends StatelessWidget {
       ],
       onBackTap: () => context.pop(),
       onPdfTap: () {},
-      slides: const [
-        _EHaraSlideOne(),
-        _EHaraSlideTwo(),
-        _EHaraSlideThree(),
-        _EHaraSlideFour(),
+      slides: [
+        _EHaraSlideOne(dashboard: dashboard),
+        _EHaraSlideTwo(dashboard: dashboard),
+        _EHaraSlideThree(dashboard: dashboard),
+        _EHaraSlideFour(dashboard: dashboard),
       ],
     );
   }
 }
 
 class _EHaraSlideOne extends StatelessWidget {
-  const _EHaraSlideOne();
+  final EHaraModel dashboard;
+
+  const _EHaraSlideOne({
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        _EHaraDetailKebunCard(),
+        _EHaraDetailKebunCard(dashboard: dashboard),
       ],
     );
   }
 }
 
 class _EHaraSlideTwo extends StatelessWidget {
-  const _EHaraSlideTwo();
+  final EHaraModel dashboard;
+
+  const _EHaraSlideTwo({
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: dashboard.estateName,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: dashboard.analysisDate,
             ),
           ],
         ),
-        SizedBox(height: 26),
-        EHaraNpkmgSection(),
+        const SizedBox(height: 26),
+        EHaraNpkmgSection(dashboard: dashboard),
       ],
     );
   }
 }
 
 class _EHaraSlideThree extends StatelessWidget {
-  const _EHaraSlideThree();
+  final EHaraModel dashboard;
+
+  const _EHaraSlideThree({
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: dashboard.estateName,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: dashboard.analysisDate,
             ),
           ],
         ),
-        SizedBox(height: 26),
-        EHaraStatusSection(),
+        const SizedBox(height: 26),
+        EHaraStatusSection(dashboard: dashboard),
       ],
     );
   }
 }
 
 class _EHaraSlideFour extends StatelessWidget {
-  const _EHaraSlideFour();
+  final EHaraModel dashboard;
+
+  const _EHaraSlideFour({
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
         DetailKebunCard(
           children: [
             DetailKebunTwoColumnRow(
               leftLabel: 'Nama Kebun',
-              leftValue: 'Kwala Sawit',
+              leftValue: dashboard.estateName,
               rightLabel: 'Tanggal Analisis',
-              rightValue: '09-03-2026',
+              rightValue: dashboard.analysisDate,
             ),
           ],
         ),
-        SizedBox(height: 26),
-        EHaraMappingSection(),
+        const SizedBox(height: 26),
+        EHaraMappingSection(dashboard: dashboard),
       ],
     );
   }
 }
 
 class _EHaraDetailKebunCard extends StatelessWidget {
-  const _EHaraDetailKebunCard();
+  final EHaraModel dashboard;
+
+  const _EHaraDetailKebunCard({
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,38 +221,37 @@ class _EHaraDetailKebunCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           _IconInfoRow(
             iconPath: 'assets/icons/pohon.png',
             label: 'Total Pohon:',
-            value: '286',
+            value: dashboard.totalTrees.toString(),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _IconInfoRow(
             iconPath: 'assets/icons/camera.png',
             label: 'Jenis Sensor:',
-            value: 'MicaSense',
+            value: dashboard.sensorType,
           ),
-          SizedBox(height: 36),
+          const SizedBox(height: 36),
           _SingleField(
             label: 'Nama Kebun',
-            value: 'Kwala Sawit',
+            value: dashboard.estateName,
           ),
-          SizedBox(height: 28),
+          const SizedBox(height: 28),
           _SingleField(
             label: 'No. Sertifikat',
-            value: 'EH/001/III/2026',
+            value: dashboard.certificateNumber,
           ),
-          SizedBox(height: 28),
+          const SizedBox(height: 28),
           _SingleField(
             label: 'Tanggal Analisis',
-            value: '09-03-2026',
+            value: dashboard.analysisDate,
           ),
-          SizedBox(height: 28),
+          const SizedBox(height: 28),
           _SingleField(
             label: 'Lokasi',
-            value:
-            'Jl. Brigjend Katamso No.51, Kp. Baru, Kec. Medan Maimun, Kota Medan, Sumatera Utara 20158',
+            value: dashboard.location,
             valueFontSize: 15,
             valueHeight: 1.2,
           ),

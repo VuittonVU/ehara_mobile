@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
+import '../../models/ganoderma_model.dart';
 
 class GanodermaSummarySection extends StatelessWidget {
-  const GanodermaSummarySection({super.key});
+  final GanodermaModel data;
+
+  const GanodermaSummarySection({
+    super.key,
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,20 +40,20 @@ class GanodermaSummarySection extends StatelessWidget {
           ),
           SizedBox(height: isSmall ? 14 : 18),
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: _SummaryCard(
-                  color: Color(0xFFE53935),
+                  color: const Color(0xFFE53935),
                   label: 'Terdeteksi',
-                  value: '18',
+                  value: data.detectedCount.toString(),
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: _SummaryCard(
-                  color: Color(0xFF1DB954),
+                  color: const Color(0xFF1DB954),
                   label: 'Tidak Terdeteksi',
-                  value: '268',
+                  value: data.healthyCount.toString(),
                 ),
               ),
             ],

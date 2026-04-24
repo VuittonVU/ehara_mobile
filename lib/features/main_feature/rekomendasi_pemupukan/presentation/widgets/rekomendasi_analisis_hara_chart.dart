@@ -4,7 +4,14 @@ import 'package:flutter/material.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class RekomendasiAnalisisHaraChart extends StatefulWidget {
-  const RekomendasiAnalisisHaraChart({super.key});
+  final List<double> hasil;
+  final List<double> standar;
+
+  const RekomendasiAnalisisHaraChart({
+    super.key,
+    required this.hasil,
+    required this.standar,
+  });
 
   @override
   State<RekomendasiAnalisisHaraChart> createState() =>
@@ -17,8 +24,6 @@ class _RekomendasiAnalisisHaraChartState
   Offset? _hoverPosition;
 
   static const _labels = ['N', 'P', 'K', 'Mg'];
-  static const _hasil = [2.75, 0.10, 2.45, 0.06];
-  static const _standar = [0.25, 1.05, 1.35, 0.12];
   static const _maxY = 3.0;
 
   void _updateHover(Offset localPosition, Size size) {
@@ -56,7 +61,7 @@ class _RekomendasiAnalisisHaraChartState
   }
 
   String _statusText(int index) {
-    final diff = _hasil[index] - _standar[index];
+    final diff = widget.hasil[index] - widget.standar[index];
     if (diff >= 0.5) return 'Sangat Baik';
     if (diff >= 0.0) return 'Cukup';
     if (diff <= -0.8) return 'Sangat Kurang';
@@ -64,7 +69,7 @@ class _RekomendasiAnalisisHaraChartState
   }
 
   Color _statusColor(int index) {
-    final diff = _hasil[index] - _standar[index];
+    final diff = widget.hasil[index] - widget.standar[index];
     if (diff >= 0.0) return const Color(0xFF4CAF50);
     if (diff <= -0.8) return const Color(0xFFE35D5D);
     return const Color(0xFFE39A25);
@@ -109,8 +114,8 @@ class _RekomendasiAnalisisHaraChartState
                         size: chartSize,
                         painter: _AnalisisChartPainter(
                           labels: _labels,
-                          hasil: _hasil,
-                          standar: _standar,
+                          hasil: widget.hasil,
+                          standar: widget.standar,
                           maxY: _maxY,
                         ),
                       ),
@@ -120,8 +125,8 @@ class _RekomendasiAnalisisHaraChartState
                         chartSize: chartSize,
                         position: _hoverPosition!,
                         label: _labels[_hoveredIndex!],
-                        hasil: _hasil[_hoveredIndex!],
-                        standar: _standar[_hoveredIndex!],
+                        hasil: widget.hasil[_hoveredIndex!],
+                        standar: widget.standar[_hoveredIndex!],
                         status: _statusText(_hoveredIndex!),
                         statusColor: _statusColor(_hoveredIndex!),
                       ),
@@ -422,5 +427,7 @@ class _AnalisisChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _AnalisisChartPainter oldDelegate) {
+    return oldDelegate.hasil != hasil || oldDelegate.standar != standar;
+  }
 }

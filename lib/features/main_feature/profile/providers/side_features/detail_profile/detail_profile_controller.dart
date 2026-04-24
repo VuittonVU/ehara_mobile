@@ -11,13 +11,12 @@ StateNotifierProvider.autoDispose<DetailProfileController, DetailProfileState>(
 
     return DetailProfileController(
       DetailProfileState(
-        fullName: profile?.name ?? 'Vuitton Varian Utomo',
-        username: 'VVU',
-        address:
-        'Jl. Brigjend Katamso No.51, Kp. Baru, Kec. Medan Maimun, Kota Medan, Sumatera Utara 20158',
-        email: profile?.email ?? 'vuittonvarianu@gmail.com',
-        phoneNumber: '0895622924083',
-        whatsappNumber: '0895622924083',
+        fullName: profile?.name ?? '',
+        username: profile?.username ?? '',
+        address: profile?.address ?? '',
+        email: profile?.email ?? '',
+        phoneNumber: profile?.phoneNumber ?? '',
+        whatsappNumber: profile?.whatsappNumber ?? '',
         isSaving: false,
       ),
     );

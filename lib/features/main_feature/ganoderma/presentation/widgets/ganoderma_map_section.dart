@@ -4,14 +4,19 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/routes/app_routes.dart';
 import '../../../shared_analysis/widgets/analysis_primary_button.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
+import '../../models/ganoderma_model.dart';
 import 'ganoderma_interactive_map.dart';
 
 class GanodermaMapSection extends StatelessWidget {
-  const GanodermaMapSection({super.key});
+  final GanodermaModel data;
+
+  const GanodermaMapSection({
+    super.key,
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final mapHeight = MediaQuery.of(context).size.width * 0.86;
     final isSmall = MediaQuery.of(context).size.width < 360;
 
     return Column(
@@ -23,10 +28,10 @@ class GanodermaMapSection extends StatelessWidget {
             isSmall ? 10 : 12,
             isSmall ? 10 : 12,
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: mapHeight,
-            child: const GanodermaInteractiveMap(
+          child: AspectRatio(
+            aspectRatio: 1.65,
+            child: GanodermaInteractiveMap(
+              points: data.points,
               showLegend: true,
               showControls: true,
             ),
@@ -35,7 +40,10 @@ class GanodermaMapSection extends StatelessWidget {
         SizedBox(height: isSmall ? 14 : 18),
         AnalysisPrimaryButton(
           label: 'Lihat Peta',
-          onTap: () => context.push(AppRoutes.ganodermaFullMap),
+          onTap: () => context.push(
+            AppRoutes.ganodermaFullMap,
+            extra: data,
+          ),
         ),
       ],
     );

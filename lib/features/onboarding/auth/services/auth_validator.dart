@@ -20,9 +20,9 @@ class AuthValidator {
       return 'Email wajib diisi.';
     }
 
-    final emailRegex = RegExp(r'^[A-Za-z0-9._%+-]+@gmail\.com$');
+    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
     if (!emailRegex.hasMatch(trimmed)) {
-      return 'Email harus menggunakan @gmail.com.';
+      return 'Format email tidak valid.';
     }
 
     return null;
@@ -114,11 +114,6 @@ class AuthValidator {
 
     if (password.length < 8) {
       return 'Password minimal 8 karakter.';
-    }
-
-    final hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
-    if (!hasUppercase) {
-      return 'Password harus punya minimal 1 huruf besar.';
     }
 
     final hasNumber = RegExp(r'[0-9]').hasMatch(password);

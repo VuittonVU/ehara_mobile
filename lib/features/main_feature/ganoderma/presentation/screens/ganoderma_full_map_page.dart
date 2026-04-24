@@ -3,10 +3,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_background.dart';
 import '../../../shared_analysis/widgets/analysis_top_bar.dart';
+import '../../models/ganoderma_model.dart';
 import '../widgets/ganoderma_interactive_map.dart';
 
 class GanodermaFullMapPage extends StatelessWidget {
-  const GanodermaFullMapPage({super.key});
+  final GanodermaModel data;
+
+  const GanodermaFullMapPage({
+    super.key,
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +52,8 @@ class GanodermaFullMapPage extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: EdgeInsets.all(isSmall ? 10 : 14),
-                      child: const GanodermaInteractiveMap(
+                      child: GanodermaInteractiveMap(
+                        points: data.points,
                         showLegend: true,
                         showControls: true,
                       ),

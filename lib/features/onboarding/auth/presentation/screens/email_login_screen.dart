@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/routes/app_routes.dart';
+import '../../../../../core/auth/auth_controller.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../services/auth_validator.dart';
 import '../widgets/login_text_field.dart';
 
-class EmailLoginScreen extends StatefulWidget {
+class EmailLoginScreen extends ConsumerStatefulWidget {
   const EmailLoginScreen({super.key});
 
   @override
-  State<EmailLoginScreen> createState() => _EmailLoginScreenState();
+  ConsumerState<EmailLoginScreen> createState() => _EmailLoginScreenState();
 }
 
-class _EmailLoginScreenState extends State<EmailLoginScreen> {
+class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isPasswordHidden = true;
-  bool _isLoading = false;
 
   String? _emailError;
   String? _passwordError;
@@ -41,8 +42,9 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
   void _validateEmail(String value) {
     setState(() {
-      _emailError =
-      value.isEmpty ? null : AuthValidator.validateGmail(value);
+      _emailError = value.isEmpty
+          ? null
+          : AuthValidator.validateLoginIdentifier(value);
     });
   }
 
@@ -54,7 +56,8 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateGmail(emailController.text.trim()) == null &&
+    return AuthValidator.validateLoginIdentifier(emailController.text.trim()) ==
+        null &&
         AuthValidator.validatePassword(passwordController.text) == null;
   }
 
@@ -62,16 +65,23 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     _validateEmail(emailController.text.trim());
     _validatePassword(passwordController.text);
 
-    if (!_isFormValid || _isLoading) return;
+    if (!_isFormValid) return;
 
-    setState(() => _isLoading = true);
-
-    await Future.delayed(const Duration(milliseconds: 500));
+    final success = await ref.read(authControllerProvider.notifier).login(
+      identifier: emailController.text.trim(),
+      password: passwordController.text,
+    );
 
     if (!mounted) return;
 
-    setState(() => _isLoading = false);
-    context.go(AppRoutes.dashboard);
+    final authState = ref.read(authControllerProvider);
+
+    if (success) {
+      _showInfo('Login berhasil');
+      context.go(AppRoutes.dashboard);
+    } else {
+      _showInfo(authState.errorMessage ?? 'Terjadi kesalahan.');
+    }
   }
 
   void _handleResetPassword() {
@@ -84,11 +94,12 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight =
-        mediaQuery.size.height -
-            mediaQuery.padding.top -
-            mediaQuery.padding.bottom;
+    final screenHeight = mediaQuery.size.height -
+        mediaQuery.padding.top -
+        mediaQuery.padding.bottom;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -133,7 +144,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                           const SizedBox(height: 42),
                           LoginTextField(
                             controller: emailController,
-                            hintText: 'Email Gmail',
+                            hintText: 'Email atau Username',
                             iconPath: 'assets/icons/email.png',
                             keyboardType: TextInputType.emailAddress,
                             errorText: _emailError,
@@ -188,7 +199,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : handleLogin,
+                              onPressed: authState.isLoading ? null : handleLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -199,7 +210,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
-                              child: _isLoading
+                              child: authState.isLoading
                                   ? const SizedBox(
                                 width: 20,
                                 height: 20,

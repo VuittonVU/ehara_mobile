@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../app/routes/app_routes.dart';
+import '../../../../../core/auth/auth_controller.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/pressable_button.dart';
 import '../../providers/profile_controller.dart';
@@ -32,7 +33,11 @@ class ProfilePage extends ConsumerWidget {
     context.push(AppRoutes.aboutApp);
   }
 
-  void _showFullScreenAvatar(BuildContext context, String? photoPath, String? photoUrl) {
+  void _showFullScreenAvatar(
+      BuildContext context,
+      String? photoPath,
+      String? photoUrl,
+      ) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -107,7 +112,7 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  void _onLogoutTap(BuildContext context) {
+  void _onLogoutTap(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -167,9 +172,12 @@ class ProfilePage extends ConsumerWidget {
                       child: _LogoutDialogButton(
                         label: 'Ya',
                         backgroundColor: const Color(0xFFE95B59),
-                        onTap: () {
+                        onTap: () async {
                           Navigator.of(dialogContext).pop();
-                          context.go(AppRoutes.login);
+                          await ref.read(authControllerProvider.notifier).logout();
+                          if (context.mounted) {
+                            context.go(AppRoutes.login);
+                          }
                         },
                       ),
                     ),
@@ -211,8 +219,7 @@ class ProfilePage extends ConsumerWidget {
                   return const _ProfileLoadingView();
                 }
 
-                if (state.viewState == ProfileViewState.error &&
-                    profile == null) {
+                if (state.viewState == ProfileViewState.error && profile == null) {
                   return _ProfileErrorView(
                     onRetry: () =>
                         ref.read(profileControllerProvider.notifier).loadProfile(),
@@ -279,7 +286,7 @@ class ProfilePage extends ConsumerWidget {
                             ProfileActionButton(
                               label: 'Keluar',
                               iconPath: 'assets/icons/logout.png',
-                              onTap: () => _onLogoutTap(context),
+                              onTap: () => _onLogoutTap(context, ref),
                             ),
                             const SizedBox(height: 12),
                           ],

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../models/ehara_model.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class EHaraNpkmgSection extends StatelessWidget {
-  const EHaraNpkmgSection({super.key});
+  final EHaraModel dashboard;
+
+  const EHaraNpkmgSection({
+    super.key,
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +27,14 @@ class EHaraNpkmgSection extends StatelessWidget {
         width: double.infinity,
         height: chartHeight,
         child: CustomPaint(
-          painter: _NpkmgPainter(),
+          painter: _NpkmgPainter(
+            values: [
+              dashboard.nValue,
+              dashboard.pValue,
+              dashboard.kValue,
+              dashboard.mgValue,
+            ],
+          ),
         ),
       ),
     );
@@ -29,6 +42,12 @@ class EHaraNpkmgSection extends StatelessWidget {
 }
 
 class _NpkmgPainter extends CustomPainter {
+  final List<double> values;
+
+  _NpkmgPainter({
+    required this.values,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     const leftPad = 34.0;
@@ -52,7 +71,6 @@ class _NpkmgPainter extends CustomPainter {
       );
     }
 
-    const values = [2.27, 0.13, 0.75, 0.24];
     const labels = ['N', 'P', 'K', 'Mg'];
     const maxY = 3.0;
 
@@ -79,8 +97,9 @@ class _NpkmgPainter extends CustomPainter {
     final barWidth = xStep * 0.58;
 
     for (int i = 0; i < labels.length; i++) {
+      final value = i < values.length ? values[i] : 0.0;
       final centerX = leftPad + xStep * i + xStep / 2;
-      final barHeight = (values[i] / maxY) * chartHeight;
+      final barHeight = (value / maxY).clamp(0.0, 1.0) * chartHeight;
 
       final rect = Rect.fromLTWH(
         centerX - barWidth / 2,
@@ -92,7 +111,7 @@ class _NpkmgPainter extends CustomPainter {
       canvas.drawRect(rect, barPaint);
 
       final valuePainter = TextPainter(
-        text: TextSpan(text: values[i].toString(), style: valueStyle),
+        text: TextSpan(text: value.toStringAsFixed(2), style: valueStyle),
         textDirection: TextDirection.ltr,
       )..layout();
 
@@ -126,5 +145,7 @@ class _NpkmgPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _NpkmgPainter oldDelegate) {
+    return oldDelegate.values != values;
+  }
 }

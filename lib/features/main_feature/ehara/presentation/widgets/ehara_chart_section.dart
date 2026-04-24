@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../models/ehara_model.dart';
+
 class EHaraChartSection extends StatelessWidget {
-  const EHaraChartSection({super.key});
+  final EHaraModel dashboard;
+
+  const EHaraChartSection({
+    super.key,
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +22,14 @@ class EHaraChartSection extends StatelessWidget {
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: _EHaraChartPainter(),
+                painter: _EHaraChartPainter(
+                  hasil: [
+                    dashboard.nValue,
+                    dashboard.pValue,
+                    dashboard.kValue,
+                    dashboard.mgValue,
+                  ],
+                ),
               ),
             ),
             Positioned(
@@ -113,6 +127,12 @@ class _LegendLine extends StatelessWidget {
 }
 
 class _EHaraChartPainter extends CustomPainter {
+  final List<double> hasil;
+
+  _EHaraChartPainter({
+    required this.hasil,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     const leftPad = 30.0;
@@ -143,9 +163,8 @@ class _EHaraChartPainter extends CustomPainter {
     }
 
     final labels = ['N', 'P', 'K', 'Mg'];
-    final hasil = [2.75, 0.10, 2.45, 0.06];
     final standar = [0.25, 1.05, 1.35, 0.12];
-    final maxY = 3.0;
+    const maxY = 3.0;
 
     final barPaint = Paint()..color = const Color(0xFFBFECEF);
     final linePaint = Paint()
@@ -159,8 +178,9 @@ class _EHaraChartPainter extends CustomPainter {
     final linePath = Path();
 
     for (int i = 0; i < labels.length; i++) {
+      final value = i < hasil.length ? hasil[i] : 0.0;
       final centerX = leftPad + xStep * i + xStep / 2;
-      final barHeight = (hasil[i] / maxY) * chartHeight;
+      final barHeight = (value / maxY).clamp(0.0, 1.0) * chartHeight;
       final barRect = Rect.fromLTWH(
         centerX - barWidth / 2,
         topPad + chartHeight - barHeight,
@@ -184,7 +204,11 @@ class _EHaraChartPainter extends CustomPainter {
         text: TextSpan(text: labels[i], style: axisTextStyle),
         textDirection: TextDirection.ltr,
       )..layout();
-      tp.paint(canvas, Offset(centerX - tp.width / 2, topPad + chartHeight + 8));
+
+      tp.paint(
+        canvas,
+        Offset(centerX - tp.width / 2, topPad + chartHeight + 8),
+      );
     }
 
     canvas.drawPath(linePath, linePaint);
@@ -196,10 +220,13 @@ class _EHaraChartPainter extends CustomPainter {
         text: TextSpan(text: yLabels[i], style: axisTextStyle),
         textDirection: TextDirection.ltr,
       )..layout();
+
       tp.paint(canvas, Offset(0, y - tp.height / 2));
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _EHaraChartPainter oldDelegate) {
+    return oldDelegate.hasil != hasil;
+  }
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_top_bar.dart';
 import '../../models/sertifikat_model.dart';
 import '../../providers/sertifikat_controller.dart';
 import '../../providers/sertifikat_state.dart';
+import '../../services/sertifikat_service.dart';
 import '../widgets/sertifikat_card.dart';
 import '../widgets/sertifikat_empty_state.dart';
 import '../widgets/sertifikat_filter_dialog.dart';
@@ -39,13 +41,122 @@ class SertifikatPage extends ConsumerWidget {
     }
   }
 
-  void _onDownload(BuildContext context, SertifikatModel sertifikat) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Download sertifikat ${sertifikat.eHaraCertificateNumber}',
-        ),
-      ),
+  Future<void> _downloadSinglePdf({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String filename,
+    required String suggestedName,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final service = ref.read(sertifikatServiceProvider);
+
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Sedang mengunduh sertifikat...')),
+    );
+
+    try {
+      final file = await service.downloadCertificatePdf(
+        filename: filename,
+        suggestedName: suggestedName,
+      );
+
+      await OpenFilex.open(file.path);
+
+      messenger.showSnackBar(
+        SnackBar(content: Text('PDF dibuka: ${file.path.split('/').last}')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Gagal download PDF: $e')),
+      );
+    }
+  }
+
+  Future<void> _onDownload(
+      BuildContext context,
+      WidgetRef ref,
+      SertifikatModel sertifikat,
+      ) async {
+    final hasEhara = sertifikat.hasEHarapdf;
+    final hasGanomon = sertifikat.hasGanomonPdf;
+
+    if (!hasEhara && !hasGanomon) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('File PDF belum tersedia')),
+      );
+      return;
+    }
+
+    if (hasEhara && !hasGanomon) {
+      await _downloadSinglePdf(
+        context: context,
+        ref: ref,
+        filename: sertifikat.eHaraPdfFilename!,
+        suggestedName: '${sertifikat.projectName}_EHARA',
+      );
+      return;
+    }
+
+    if (!hasEhara && hasGanomon) {
+      await _downloadSinglePdf(
+        context: context,
+        ref: ref,
+        filename: sertifikat.ganomonPdfFilename!,
+        suggestedName: '${sertifikat.projectName}_GANODERMA',
+      );
+      return;
+    }
+
+    await showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Pilih Sertifikat',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.picture_as_pdf),
+                  title: const Text('Sertifikat E-Hara'),
+                  subtitle: Text(sertifikat.eHaraCertificateNumber),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    await _downloadSinglePdf(
+                      context: context,
+                      ref: ref,
+                      filename: sertifikat.eHaraPdfFilename!,
+                      suggestedName: '${sertifikat.projectName}_EHARA',
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.picture_as_pdf),
+                  title: const Text('Sertifikat Ganoderma'),
+                  subtitle: Text(sertifikat.ganomonCertificateNumber),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    await _downloadSinglePdf(
+                      context: context,
+                      ref: ref,
+                      filename: sertifikat.ganomonPdfFilename!,
+                      suggestedName: '${sertifikat.projectName}_GANODERMA',
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -112,7 +223,7 @@ class SertifikatPage extends ConsumerWidget {
                               final item = certificates[index];
                               return SertifikatCard(
                                 sertifikat: item,
-                                onDownload: () => _onDownload(context, item),
+                                onDownload: () => _onDownload(context, ref, item),
                                 calendarIconPath: 'assets/icons/calendar.png',
                                 kebunIconPath: 'assets/icons/kebun.png',
                                 sertifikatIconPath:

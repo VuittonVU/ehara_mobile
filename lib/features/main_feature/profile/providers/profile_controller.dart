@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/profile_placeholder_repository.dart';
+import '../../../onboarding/auth/services/auth_service.dart';
+import '../data/profile_api_repository.dart';
 import '../models/profile_model.dart';
 import 'profile_state.dart';
 
-final profileRepositoryProvider = Provider<ProfilePlaceholderRepository>(
-      (ref) => ProfilePlaceholderRepository(),
+final profileRepositoryProvider = Provider<ProfileApiRepository>(
+      (ref) => ProfileApiRepository(
+    authService: AuthService(),
+  ),
 );
 
 final profileControllerProvider =
@@ -16,7 +19,7 @@ StateNotifierProvider<ProfileController, ProfileState>(
 );
 
 class ProfileController extends StateNotifier<ProfileState> {
-  final ProfilePlaceholderRepository repository;
+  final ProfileApiRepository repository;
 
   ProfileController({
     required this.repository,
@@ -32,15 +35,19 @@ class ProfileController extends StateNotifier<ProfileState> {
     try {
       final ProfileModel profile = await repository.getProfile();
 
+      print('=== LOAD PROFILE SUCCESS: ${profile.name}, ${profile.email} ===');
+
       state = state.copyWith(
         profile: profile,
         isLoading: false,
         viewState: ProfileViewState.success,
       );
-    } catch (_) {
+    } catch (e) {
+      print('=== LOAD PROFILE ERROR: $e ===');
+
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Gagal memuat data profil',
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
         viewState: ProfileViewState.error,
       );
     }

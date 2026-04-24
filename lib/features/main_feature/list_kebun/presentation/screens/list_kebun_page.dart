@@ -1,0 +1,269 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../../../../app/routes/app_routes.dart';
+import '../../../../../../../core/widgets/app_background.dart';
+import '../../../../../../../core/widgets/app_top_bar.dart';
+import '../../models/kebun_feature_type.dart';
+import '../../models/kebun_model.dart';
+import '../../providers/kebun_controller.dart';
+import '../../providers/kebun_selection_controller.dart';
+
+class ListKebunPage extends ConsumerWidget {
+  const ListKebunPage({super.key});
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '-';
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    return '$day-$month-$year';
+  }
+
+  void _handleTapKebun(
+      BuildContext context,
+      WidgetRef ref,
+      KebunModel item,
+      KebunFeatureType? feature,
+      ) {
+    if (feature == null) return;
+
+    ref.read(kebunSelectionControllerProvider.notifier).setSelectedKebun(item);
+
+    switch (feature) {
+      case KebunFeatureType.ehara:
+        context.pushNamed(
+          'ehara',
+          pathParameters: {
+            'uuid': item.eHaraUuid,
+          },
+        );
+        break;
+      case KebunFeatureType.rekomendasiPemupukan:
+        context.pushNamed(
+          'rekomendasiPemupukan',
+          pathParameters: {
+            'uuid': item.eHaraUuid,
+          },
+        );
+        break;
+      case KebunFeatureType.ganoderma:
+        context.pushNamed(
+          'ganoderma',
+          pathParameters: {
+            'uuid': item.eHaraUuid,
+          },
+        );
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kebunState = ref.watch(kebunControllerProvider);
+    final selection = ref.watch(kebunSelectionControllerProvider);
+    final feature = selection.selectedFeature;
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmall = screenWidth < 360;
+
+    return Scaffold(
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              AppTopBar(
+                title: 'List Kebun',
+                onBackTap: () => context.pop(),
+                onActionTap: () {
+                  ref.read(kebunControllerProvider.notifier).refresh();
+                },
+                backIconPath: 'assets/icons/arrow_back.png',
+                actionIconPath: 'assets/icons/filter.png',
+              ),
+              Expanded(
+                child: kebunState.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (error, _) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            error.toString(),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              ref.read(kebunControllerProvider.notifier).refresh();
+                            },
+                            child: const Text('Coba Lagi'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return const Center(
+                        child: Text('Tidak ada data kebun'),
+                      );
+                    }
+
+                    return RefreshIndicator(
+                      onRefresh: () =>
+                          ref.read(kebunControllerProvider.notifier).refresh(),
+                      child: ListView.separated(
+                        padding: EdgeInsets.fromLTRB(
+                          isSmall ? 14 : 20,
+                          18,
+                          isSmall ? 14 : 20,
+                          90 + bottomSafeArea,
+                        ),
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(height: isSmall ? 18 : 28),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(22),
+                            onTap: () =>
+                                _handleTapKebun(context, ref, item, feature),
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.fromLTRB(
+                                isSmall ? 14 : 20,
+                                isSmall ? 16 : 20,
+                                isSmall ? 14 : 20,
+                                isSmall ? 14 : 18,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(
+                                  color: const Color(0xFFE0E0E0),
+                                  width: 1,
+                                ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x1A000000),
+                                    blurRadius: 12,
+                                    offset: Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _InfoBlock(
+                                          label: 'Nama Kebun',
+                                          value: item.namaKebun,
+                                          valueFontSize: isSmall ? 16 : 18,
+                                        ),
+                                      ),
+                                      SizedBox(width: isSmall ? 12 : 18),
+                                      _InfoBlock(
+                                        label: 'Total Pohon',
+                                        value: item.totalPohon.toString(),
+                                        valueFontSize: isSmall ? 16 : 18,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: isSmall ? 18 : 24),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: _InfoBlock(
+                                          label: 'Tanggal Analisis',
+                                          value: _formatDate(item.tanggalAnalisis),
+                                          valueFontSize: isSmall ? 13 : 14,
+                                        ),
+                                      ),
+                                      SizedBox(width: isSmall ? 12 : 18),
+                                      Expanded(
+                                        child: _InfoBlock(
+                                          label: 'No. Sertifikat',
+                                          value: item.nomorSertifikat,
+                                          valueFontSize: isSmall ? 13 : 14,
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoBlock extends StatelessWidget {
+  final String label;
+  final String value;
+  final double valueFontSize;
+  final TextAlign textAlign;
+
+  const _InfoBlock({
+    required this.label,
+    required this.value,
+    required this.valueFontSize,
+    this.textAlign = TextAlign.left,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isRight = textAlign == TextAlign.right;
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
+    return Column(
+      crossAxisAlignment:
+      isRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          textAlign: textAlign,
+          style: TextStyle(
+            fontSize: isSmall ? 11 : 12,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF7A7A7A),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          textAlign: textAlign,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: valueFontSize,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF333333),
+            height: 1.15,
+          ),
+        ),
+      ],
+    );
+  }
+}

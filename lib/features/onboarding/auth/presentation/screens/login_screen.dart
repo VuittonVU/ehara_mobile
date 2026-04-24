@@ -29,12 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isGoogleLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (!mounted) return;
 
     setState(() => _isGoogleLoading = false);
-    context.go(AppRoutes.dashboard);
+    _showInfo('Login Google belum tersedia.');
   }
 
   @override

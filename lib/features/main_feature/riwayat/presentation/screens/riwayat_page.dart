@@ -42,14 +42,15 @@ class RiwayatPage extends ConsumerWidget {
     }
   }
 
-  /// 🔥 FLOW BARU → LANGSUNG KE E-HARA
+  /// FLOW:
+  /// Riwayat -> List Kebun
+  /// dan feature yang dipilih tetap EHARA
   void _onTapHasilAnalisis(
       BuildContext context,
       WidgetRef ref,
       RiwayatModel item,
       ) {
-    final controller =
-    ref.read(kebunSelectionControllerProvider.notifier);
+    final controller = ref.read(kebunSelectionControllerProvider.notifier);
 
     controller.setSelectedFeature(KebunFeatureType.ehara);
 
@@ -60,11 +61,12 @@ class RiwayatPage extends ConsumerWidget {
         totalPohon: 0,
         tanggalAnalisis: item.date,
         tanggalPengambilanData: item.date,
+        eHaraUuid: item.eHaraUuid,
+        nomorSertifikat: '',
       ),
     );
 
-    // 🚀 langsung ke E-HARA
-    context.push(AppRoutes.ehara);
+    context.push(AppRoutes.listKebun);
   }
 
   @override

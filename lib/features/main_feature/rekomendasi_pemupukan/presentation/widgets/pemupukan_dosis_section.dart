@@ -107,9 +107,7 @@ class PemupukanDosisSection extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           SizedBox(height: isSmall ? 2 : 3),
-
                           Flexible(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -123,14 +121,14 @@ class PemupukanDosisSection extends StatelessWidget {
                               ),
                             ),
                           ),
-
-                          Text('|',
-                              style: TextStyle(
-                                fontSize: isSmall ? 14 : 17,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              )),
-
+                          Text(
+                            '|',
+                            style: TextStyle(
+                              fontSize: isSmall ? 14 : 17,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
                           Flexible(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -144,9 +142,7 @@ class PemupukanDosisSection extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           SizedBox(height: isSmall ? 2 : 3),
-
                           Flexible(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,

@@ -20,7 +20,7 @@ import '../features/main_feature/dashboard/presentation/screens/article/article_
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
 import '../features/main_feature/sertifikat/presentation/screens/sertifikat_page.dart';
 import '../features/main_feature/dashboard/presentation/screens/hitung_pohon_page.dart';
-import '../features/main_feature/list_kebun/kebun_list_page.dart';
+import '../features/main_feature/list_kebun/presentation/screens/list_kebun_page.dart';
 
 import '../features/main_feature/riwayat/presentation/screens/riwayat_page.dart';
 
@@ -42,9 +42,11 @@ import '../features/main_feature/profile/presentation/screens/side_features/lega
 
 import '../features/main_feature/ehara/presentation/screens/ehara_page.dart';
 import '../features/main_feature/ehara/presentation/screens/ehara_full_map_page.dart';
+import '../features/main_feature/ehara/models/ehara_model.dart';
 import '../features/main_feature/rekomendasi_pemupukan/presentation/screens/rekomendasi_pemupukan_page.dart';
 import '../features/main_feature/ganoderma/presentation/screens/ganoderma_page.dart';
 import '../features/main_feature/ganoderma/presentation/screens/ganoderma_full_map_page.dart';
+import '../features/main_feature/ganoderma/models/ganoderma_model.dart';
 
 class EHaraApp extends StatelessWidget {
   const EHaraApp({super.key});
@@ -155,29 +157,44 @@ class EHaraApp extends StatelessWidget {
         builder: (context, state) => const ListKebunPage(),
       ),
       GoRoute(
-        path: AppRoutes.ehara,
+        path: '${AppRoutes.ehara}/:uuid',
         name: 'ehara',
-        builder: (context, state) => const EHaraPage(),
+        builder: (context, state) {
+          final uuid = state.pathParameters['uuid']!;
+          return EHaraPage(eHaraUuid: uuid);
+        },
       ),
       GoRoute(
         path: AppRoutes.eharaFullMap,
         name: 'eharaFullMap',
-        builder: (context, state) => const EHaraFullMapPage(),
+        builder: (context, state) {
+          final dashboard = state.extra as EHaraModel;
+          return EHaraFullMapPage(dashboard: dashboard);
+        },
       ),
       GoRoute(
-        path: AppRoutes.rekomendasiPemupukan,
+        path: '${AppRoutes.rekomendasiPemupukan}/:uuid',
         name: 'rekomendasiPemupukan',
-        builder: (context, state) => const RekomendasiPemupukanPage(),
+        builder: (context, state) {
+          final uuid = state.pathParameters['uuid']!;
+          return RekomendasiPemupukanPage(eHaraUuid: uuid);
+        },
       ),
       GoRoute(
-        path: AppRoutes.ganoderma,
+        path: '${AppRoutes.ganoderma}/:uuid',
         name: 'ganoderma',
-        builder: (context, state) => const GanodermaPage(),
+        builder: (context, state) {
+          final uuid = state.pathParameters['uuid']!;
+          return GanodermaPage(eHaraUuid: uuid);
+        },
       ),
       GoRoute(
         path: AppRoutes.ganodermaFullMap,
         name: 'ganodermaFullMap',
-        builder: (context, state) => const GanodermaFullMapPage(),
+        builder: (context, state) {
+          final data = state.extra as GanodermaModel;
+          return GanodermaFullMapPage(data: data);
+        },
       ),
       GoRoute(
         path: AppRoutes.form1,

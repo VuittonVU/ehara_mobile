@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../onboarding/auth/services/auth_service.dart';
 import '../models/riwayat_model.dart';
 import '../services/riwayat_service.dart';
 import 'riwayat_state.dart';
 
 final riwayatServiceProvider = Provider<RiwayatService>(
-      (ref) => RiwayatService(),
+      (ref) => RiwayatService(
+    authService: AuthService(),
+  ),
 );
 
 final riwayatControllerProvider =
@@ -34,8 +37,8 @@ class RiwayatController extends StateNotifier<RiwayatState> {
       if (data.isEmpty) {
         state = state.copyWith(
           viewState: RiwayatViewState.empty,
-          allItems: [],
-          filteredItems: [],
+          allItems: const [],
+          filteredItems: const [],
         );
         return;
       }
@@ -56,7 +59,7 @@ class RiwayatController extends StateNotifier<RiwayatState> {
     } catch (e) {
       state = state.copyWith(
         viewState: RiwayatViewState.error,
-        errorMessage: e.toString(),
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
     }
   }

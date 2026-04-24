@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../models/ehara_model.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
 
 class EHaraStatusSection extends StatelessWidget {
-  const EHaraStatusSection({super.key});
+  final EHaraModel dashboard;
+
+  const EHaraStatusSection({
+    super.key,
+    required this.dashboard,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,42 +22,42 @@ class EHaraStatusSection extends StatelessWidget {
         isSmall ? 10 : 14,
         isSmall ? 10 : 14,
       ),
-      child: const Column(
+      child: Column(
         children: [
           _StatusRow(
             label: 'N',
-            value: 2.27,
+            value: dashboard.nValue,
             minOptimal: 1.0,
             maxOptimal: 2.0,
             maxScale: 3.0,
-            markerColor: Color(0xFF4E8C8A),
+            markerColor: const Color(0xFF4E8C8A),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _StatusRow(
             label: 'P',
-            value: 0.13,
+            value: dashboard.pValue,
             minOptimal: 1.0,
             maxOptimal: 2.0,
             maxScale: 3.0,
-            markerColor: Color(0xFF4E8C8A),
+            markerColor: const Color(0xFF4E8C8A),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _StatusRow(
             label: 'K',
-            value: 0.75,
+            value: dashboard.kValue,
             minOptimal: 1.0,
             maxOptimal: 2.0,
             maxScale: 3.0,
-            markerColor: Color(0xFF4E8C8A),
+            markerColor: const Color(0xFF4E8C8A),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _StatusRow(
             label: 'Mg',
-            value: 0.24,
+            value: dashboard.mgValue,
             minOptimal: 1.0,
             maxOptimal: 2.0,
             maxScale: 3.0,
-            markerColor: Color(0xFF4E8C8A),
+            markerColor: const Color(0xFF4E8C8A),
           ),
         ],
       ),
@@ -91,11 +97,14 @@ class _StatusRow extends StatelessWidget {
         final minStop = (minOptimal / maxScale).clamp(0.0, 1.0);
         final maxStop = (maxOptimal / maxScale).clamp(0.0, 1.0);
 
-        final markerX = (safeBarWidth * fraction).clamp(10.0, safeBarWidth - 10.0);
+        final markerX =
+        (safeBarWidth * fraction).clamp(10.0, safeBarWidth - 10.0);
 
         final topFont = safeBarWidth < 250 ? 8.0 : 9.5;
         final bubbleFont = safeBarWidth < 250 ? 10.0 : 11.0;
-        final labelFont = label.length > 1 ? (isSmall ? 14.0 : 16.0) : (isSmall ? 16.0 : 18.0);
+        final labelFont = label.length > 1
+            ? (isSmall ? 14.0 : 16.0)
+            : (isSmall ? 16.0 : 18.0);
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,

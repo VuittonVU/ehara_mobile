@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../onboarding/auth/services/auth_service.dart';
 import '../models/sertifikat_model.dart';
 import '../services/sertifikat_service.dart';
 import 'sertifikat_state.dart';
 
 final sertifikatServiceProvider = Provider<SertifikatService>(
-      (ref) => SertifikatService(),
+      (ref) => SertifikatService(
+    authService: AuthService(),
+  ),
 );
 
 final sertifikatControllerProvider =
@@ -34,8 +37,8 @@ class SertifikatController extends StateNotifier<SertifikatState> {
       if (data.isEmpty) {
         state = state.copyWith(
           viewState: SertifikatViewState.empty,
-          allCertificates: [],
-          filteredCertificates: [],
+          allCertificates: const [],
+          filteredCertificates: const [],
         );
         return;
       }
@@ -58,7 +61,7 @@ class SertifikatController extends StateNotifier<SertifikatState> {
     } catch (e) {
       state = state.copyWith(
         viewState: SertifikatViewState.error,
-        errorMessage: e.toString(),
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
     }
   }

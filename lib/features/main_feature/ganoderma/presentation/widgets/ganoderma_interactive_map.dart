@@ -1,12 +1,20 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:proj4dart/proj4dart.dart' as proj4;
+
+import '../../models/ganoderma_model.dart';
 
 class GanodermaInteractiveMap extends StatefulWidget {
+  final List<GanodermaPointModel> points;
   final bool showLegend;
   final bool showControls;
 
   const GanodermaInteractiveMap({
     super.key,
+    required this.points,
     this.showLegend = true,
     this.showControls = true,
   });
@@ -16,23 +24,120 @@ class GanodermaInteractiveMap extends StatefulWidget {
 }
 
 class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
-  double _scale = 1.0;
-  Offset _offset = Offset.zero;
-  double _baseScale = 1.0;
+  static proj4.Projection? _epsg32647;
+  static proj4.Projection? _epsg4326;
 
-  void _zoomIn() {
-    setState(() {
-      _scale = (_scale + 0.2).clamp(1.0, 4.0);
+  late final MapController _mapController;
+  late final List<_ProjectedGanodermaPoint> _projectedPoints;
+
+  GanodermaPointModel? _selectedPoint;
+  bool _hasFit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+    _initProjection();
+    _projectedPoints = _buildProjectedPoints(widget.points);
+  }
+
+  void _initProjection() {
+    _epsg4326 ??=
+        proj4.Projection.get('EPSG:4326') ??
+            proj4.Projection.add(
+              'EPSG:4326',
+              '+proj=longlat +datum=WGS84 +no_defs',
+            );
+
+    _epsg32647 ??=
+        proj4.Projection.get('EPSG:32647') ??
+            proj4.Projection.add(
+              'EPSG:32647',
+              '+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs +type=crs',
+            );
+  }
+
+  List<_ProjectedGanodermaPoint> _buildProjectedPoints(
+      List<GanodermaPointModel> points,
+      ) {
+    final source = _epsg32647!;
+    final target = _epsg4326!;
+
+    return points.map((point) {
+      final converted = source.transform(
+        target,
+        proj4.Point(x: point.rawX, y: point.rawY),
+      );
+
+      return _ProjectedGanodermaPoint(
+        source: point,
+        latLng: LatLng(converted.y, converted.x),
+      );
+    }).toList();
+  }
+
+  void _fitBoundsIfNeeded() {
+    if (_hasFit || _projectedPoints.isEmpty) return;
+    _hasFit = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final latLngs = _projectedPoints.map((e) => e.latLng).toList();
+      final bounds = LatLngBounds.fromPoints(latLngs);
+
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.all(28),
+        ),
+      );
     });
   }
 
+  void _zoomIn() {
+    final camera = _mapController.camera;
+    _mapController.move(
+      camera.center,
+      camera.zoom + 0.5,
+    );
+  }
+
   void _zoomOut() {
-    setState(() {
-      _scale = (_scale - 0.2).clamp(1.0, 4.0);
-      if (_scale == 1.0) {
-        _offset = Offset.zero;
+    final camera = _mapController.camera;
+    _mapController.move(
+      camera.center,
+      math.max(1, camera.zoom - 0.5),
+    );
+  }
+
+  void _onMapTap(TapPosition tapPosition, LatLng latLng) {
+    if (_projectedPoints.isEmpty) return;
+
+    _ProjectedGanodermaPoint? nearest;
+    double nearestDistance = double.infinity;
+
+    for (final point in _projectedPoints) {
+      final dLat = point.latLng.latitude - latLng.latitude;
+      final dLng = point.latLng.longitude - latLng.longitude;
+      final dist = dLat * dLat + dLng * dLng;
+
+      if (dist < nearestDistance) {
+        nearestDistance = dist;
+        nearest = point;
       }
-    });
+    }
+
+    // threshold kira-kira supaya tap gak terlalu jauh
+    if (nearest != null && nearestDistance < 0.0000008) {
+      setState(() {
+        _selectedPoint = nearest!.source;
+      });
+    } else {
+      setState(() {
+        _selectedPoint = null;
+      });
+    }
   }
 
   @override
@@ -41,115 +146,166 @@ class _GanodermaInteractiveMapState extends State<GanodermaInteractiveMap> {
     final legendWidth =
         MediaQuery.of(context).size.width * (isSmall ? 0.42 : 0.36);
 
+    _fitBoundsIfNeeded();
+
+    final selectedProjected = _selectedPoint == null
+        ? null
+        : _projectedPoints.firstWhere(
+          (e) => identical(e.source, _selectedPoint),
+      orElse: () => _projectedPoints.first,
+    );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(isSmall ? 14 : 18),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onScaleStart: (_) {
-          _baseScale = _scale;
-        },
-        onScaleUpdate: (details) {
-          setState(() {
-            _scale = (_baseScale * details.scale).clamp(1.0, 4.0);
-            if (details.pointerCount == 1) {
-              _offset += details.focalPointDelta;
-            }
-          });
-        },
-        onDoubleTap: () {
-          setState(() {
-            _scale = 1.0;
-            _offset = Offset.zero;
-          });
-        },
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Container(
-                color: const Color(0xFFF0ECE6),
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..translate(_offset.dx, _offset.dy)
-                    ..scale(_scale),
-                  child: CustomPaint(
-                    painter: _GanodermaMapPainter(),
-                    child: const SizedBox.expand(),
-                  ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _projectedPoints.isNotEmpty
+                    ? _projectedPoints.first.latLng
+                    : const LatLng(3.59, 98.67),
+                initialZoom: 18,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.all,
                 ),
+                onTap: _onMapTap,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'app.ppks.ehara_mobile',
+                ),
+                CircleLayer(
+                  circles: [
+                    for (final point in _projectedPoints)
+                      CircleMarker(
+                        point: point.latLng,
+                        radius: 4.0,
+                        color: point.source.isDetected
+                            ? const Color(0xFFE60012)
+                            : const Color(0xFF2AF022),
+                        borderColor: const Color(0xFF2D4A1E),
+                        borderStrokeWidth: 1.0,
+                      ),
+                  ],
+                ),
+                if (selectedProjected != null)
+                  CircleLayer(
+                    circles: [
+                      CircleMarker(
+                        point: selectedProjected.latLng,
+                        radius: 7.5,
+                        color: Colors.transparent,
+                        borderColor: Colors.white,
+                        borderStrokeWidth: 2.2,
+                      ),
+                    ],
+                  ),
+                RichAttributionWidget(
+                  attributions: [
+                    TextSourceAttribution(
+                      'OpenStreetMap contributors',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (widget.showControls)
+            Positioned(
+              left: isSmall ? 10 : 12,
+              top: isSmall ? 10 : 12,
+              child: Column(
+                children: [
+                  _MapControlButton(
+                    icon: Icons.add,
+                    onTap: _zoomIn,
+                  ),
+                  SizedBox(height: isSmall ? 6 : 8),
+                  _MapControlButton(
+                    icon: Icons.remove,
+                    onTap: _zoomOut,
+                  ),
+                ],
               ),
             ),
-            if (widget.showControls)
-              Positioned(
-                left: isSmall ? 10 : 12,
-                top: isSmall ? 10 : 12,
-                child: Column(
-                  children: [
-                    _MapControlButton(
-                      icon: Icons.add,
-                      onTap: _zoomIn,
+          if (_selectedPoint != null)
+            Positioned(
+              top: isSmall ? 10 : 12,
+              right: isSmall ? 10 : 12,
+              child: _PointInfoCard(
+                point: _selectedPoint!,
+                onClose: () {
+                  setState(() {
+                    _selectedPoint = null;
+                  });
+                },
+              ),
+            ),
+          if (widget.showLegend)
+            Positioned(
+              right: isSmall ? 10 : 14,
+              bottom: isSmall ? 10 : 14,
+              child: Container(
+                width: legendWidth,
+                padding: EdgeInsets.fromLTRB(
+                  isSmall ? 10 : 12,
+                  isSmall ? 8 : 10,
+                  isSmall ? 10 : 12,
+                  isSmall ? 8 : 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x22000000),
+                      blurRadius: 8,
+                      offset: Offset(0, 3),
                     ),
-                    SizedBox(height: isSmall ? 6 : 8),
-                    _MapControlButton(
-                      icon: Icons.remove,
-                      onTap: _zoomOut,
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Keterangan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF334A6E),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    _LegendRow(
+                      color: Color(0xFFE60012),
+                      label: 'Ganoderma Terdeteksi',
+                    ),
+                    SizedBox(height: 6),
+                    _LegendRow(
+                      color: Color(0xFF2AF022),
+                      label: 'Tidak Terdeteksi',
                     ),
                   ],
                 ),
               ),
-            if (widget.showLegend)
-              Positioned(
-                right: isSmall ? 10 : 14,
-                bottom: isSmall ? 10 : 14,
-                child: Container(
-                  width: legendWidth,
-                  padding: EdgeInsets.fromLTRB(
-                    isSmall ? 10 : 12,
-                    isSmall ? 8 : 10,
-                    isSmall ? 10 : 12,
-                    isSmall ? 8 : 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x22000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Keterangan',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF334A6E),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      _LegendRow(
-                        color: Color(0xFFE60012),
-                        label: 'Ganoderma Terdeteksi',
-                      ),
-                      SizedBox(height: 6),
-                      _LegendRow(
-                        color: Color(0xFF11D91B),
-                        label: 'Tidak Terdeteksi',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
+}
+
+class _ProjectedGanodermaPoint {
+  final GanodermaPointModel source;
+  final LatLng latLng;
+
+  const _ProjectedGanodermaPoint({
+    required this.source,
+    required this.latLng,
+  });
 }
 
 class _MapControlButton extends StatelessWidget {
@@ -224,80 +380,85 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-class _GanodermaMapPainter extends CustomPainter {
+class _PointInfoCard extends StatelessWidget {
+  final GanodermaPointModel point;
+  final VoidCallback onClose;
+
+  const _PointInfoCard({
+    required this.point,
+    required this.onClose,
+  });
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = const Color(0xFFF29E84)
-      ..strokeWidth = 16
-      ..strokeCap = StrokeCap.round;
+  Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
-    final outlinePaint = Paint()
-      ..color = const Color(0xFFD4705F)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    final whiteRoadPaint = Paint()
-      ..color = const Color(0xFFFDFDFD)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-
-    final labelStyle = const TextStyle(
-      fontSize: 11,
-      color: Color(0xFF6D554A),
-      fontWeight: FontWeight.w600,
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: isSmall ? 190 : 220,
+      ),
+      padding: EdgeInsets.fromLTRB(
+        isSmall ? 10 : 12,
+        isSmall ? 8 : 10,
+        isSmall ? 10 : 12,
+        isSmall ? 8 : 10,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: DefaultTextStyle(
+        style: TextStyle(
+          fontSize: isSmall ? 11 : 12,
+          color: const Color(0xFF333333),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Detail Point',
+                    style: TextStyle(
+                      fontSize: isSmall ? 12 : 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: onClose,
+                  child: const Icon(
+                    Icons.close,
+                    size: 16,
+                    color: Color(0xFF666666),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text('No: ${point.pointNo}'),
+            Text('X: ${point.displayX.toStringAsFixed(8)}'),
+            Text('Y: ${point.displayY.toStringAsFixed(8)}'),
+            Text(
+              'Ganoderma: ${point.isDetected ? 'Terdeteksi' : 'Tidak Terdeteksi'}',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: point.isDetected
+                    ? const Color(0xFFE60012)
+                    : const Color(0xFF118A17),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-
-    final mainRoad = Path()
-      ..moveTo(36, size.height)
-      ..quadraticBezierTo(76, size.height - 100, 86, size.height - 220)
-      ..quadraticBezierTo(96, size.height - 300, 106, 0);
-
-    canvas.drawPath(mainRoad, roadPaint);
-    canvas.drawPath(mainRoad, outlinePaint);
-
-    final minorRoad = Path()
-      ..moveTo(140, 120)
-      ..lineTo(180, 120)
-      ..lineTo(220, 100)
-      ..lineTo(236, 56);
-
-    canvas.drawPath(minorRoad, whiteRoadPaint);
-
-    final tp = TextPainter(
-      text: TextSpan(text: 'Jl. Brigjend Katamso', style: labelStyle),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    canvas.save();
-    canvas.translate(78, 210);
-    canvas.rotate(-1.55);
-    tp.paint(canvas, Offset.zero);
-    canvas.restore();
-
-    final random = math.Random(7);
-
-    for (int i = 0; i < 22; i++) {
-      final dx = 135 + random.nextDouble() * 36;
-      final dy = size.height - 94 + random.nextDouble() * 18;
-      canvas.drawCircle(
-        Offset(dx, dy),
-        5,
-        Paint()..color = const Color(0xFFE60012),
-      );
-    }
-
-    for (int i = 0; i < 32; i++) {
-      final dx = 176 + random.nextDouble() * 48;
-      final dy = size.height - 120 + random.nextDouble() * 32;
-      canvas.drawCircle(
-        Offset(dx, dy),
-        4,
-        Paint()..color = const Color(0xFF11D91B),
-      );
-    }
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

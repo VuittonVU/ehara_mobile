@@ -6,6 +6,8 @@ import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../services/auth_error_mapper.dart';
+import '../../services/auth_service.dart';
 import '../../services/auth_validator.dart';
 import '../widgets/login_text_field.dart';
 import '../widgets/social_login_button.dart';
@@ -171,12 +173,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final authService = AuthService();
 
-    if (!mounted) return;
+      final result = await authService.register(
+        fullName: fullNameController.text.trim(),
+        username: usernameController.text.trim(),
+        address: addressController.text.trim(),
+        email: emailController.text.trim(),
+        phone: phoneController.text.trim(),
+        whatsapp: whatsappController.text.trim(),
+        password: passwordController.text,
+      );
 
-    setState(() => _isLoading = false);
-    context.go(AppRoutes.dashboard);
+      if (!mounted) return;
+
+      final message =
+          result['message']?.toString() ?? 'Pendaftaran berhasil.';
+      _showInfo(message);
+
+      context.go(AppRoutes.login);
+    } catch (e) {
+      if (!mounted) return;
+      _showInfo(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   bool _isGoogleLoading = false;
@@ -186,12 +210,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isGoogleLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (!mounted) return;
 
     setState(() => _isGoogleLoading = false);
-    context.go(AppRoutes.dashboard);
+    _showInfo('Pendaftaran Google belum tersedia.');
   }
 
   @override
@@ -469,7 +493,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 8),
                           TextButton(
                             onPressed: () {
-                              _showInfo('Privacy Policy belum tersedia.');
+                              context.push(AppRoutes.privacyPolicy);
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
