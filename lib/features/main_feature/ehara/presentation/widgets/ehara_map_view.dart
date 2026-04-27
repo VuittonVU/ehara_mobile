@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import '../../models/ehara_model.dart';
@@ -15,99 +12,86 @@ class EHaraMapView extends StatelessWidget {
     this.fullScreen = false,
   });
 
-  // WAJIB disesuaikan sekali dengan path public server map kamu.
-  // Contoh final bisa jadi:
-  // https://ehara.iopri.co.id/storage/maps/
-  // atau
-  // https://ehara.iopri.co.id/uploads/maps/
-  static const String _mapBaseUrl = 'https://ehara.iopri.co.id/storage/';
+  static const String _mapBaseUrl =
+      'https://iopri-storage-prod-ap-southeast-1-001.s3.ap-southeast-1.amazonaws.com/';
 
   String? _resolveMapUrl() {
-    if (dashboard.mapUrl.trim().isNotEmpty) {
-      return dashboard.mapUrl.trim();
-    }
+    final directUrl = dashboard.mapUrl.trim();
+    if (directUrl.isNotEmpty) return directUrl;
 
-    if (dashboard.mapFilename.trim().isNotEmpty) {
-      return '$_mapBaseUrl${Uri.encodeComponent(dashboard.mapFilename.trim())}';
-    }
+    final filename = dashboard.mapFilename.trim();
+    if (filename.isEmpty) return null;
 
-    return null;
+    return '$_mapBaseUrl${Uri.encodeComponent(filename)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final mapUrl = _resolveMapUrl();
 
-    if (mapUrl == null || mapUrl.isEmpty) {
-      return _MapFallback(
-        message: dashboard.mapFilename.isNotEmpty
-            ? 'Map filename ada, tapi URL public map belum disesuaikan.\nFilename: ${dashboard.mapFilename}'
-            : 'Map sebaran belum tersedia dari backend.',
-        fullScreen: fullScreen,
+    if (mapUrl == null) {
+      return const _MapFallback(
+        message: 'Peta unsur hara belum tersedia.',
       );
     }
 
-    final borderRadius = BorderRadius.circular(fullScreen ? 20 : 14);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(fullScreen ? 22 : 16),
+      child: Container(
+        color: const Color(0xFFF8F8F6),
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 5,
+          boundaryMargin: const EdgeInsets.all(80),
+          child: Center(
+            child: Image.network(
+              mapUrl,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
 
-    final image = ClipRRect(
-      borderRadius: borderRadius,
-      child: InteractiveViewer(
-        minScale: 1,
-        maxScale: 5,
-        child: Image.network(
-          mapUrl,
-          fit: BoxFit.contain,
-          width: double.infinity,
-          height: double.infinity,
-          errorBuilder: (context, error, stackTrace) {
-            return _MapFallback(
-              message:
-              'Gagal memuat map backend.\nCek path public file map di server.\nURL: $mapUrl',
-              fullScreen: fullScreen,
-            );
-          },
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF3E806D),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return _MapFallback(
+                  message: 'Gagal memuat peta dari server.\nURL: $mapUrl',
+                );
+              },
+            ),
+          ),
         ),
       ),
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: borderRadius,
-      ),
-      child: image,
     );
   }
 }
 
 class _MapFallback extends StatelessWidget {
   final String message;
-  final bool fullScreen;
 
   const _MapFallback({
     required this.message,
-    required this.fullScreen,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: const Color(0xFFF8F8F6),
       alignment: Alignment.center,
       padding: const EdgeInsets.all(20),
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: fullScreen ? 16 : 13,
-          color: const Color(0xFF666666),
+        style: const TextStyle(
+          fontSize: 13,
           height: 1.4,
+          color: Color(0xFF666666),
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

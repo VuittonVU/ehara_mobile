@@ -15,277 +15,226 @@ class EHaraStatusSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSmall = MediaQuery.of(context).size.width < 360;
 
+    final items = [
+      _HaraStatusData('N', dashboard.nValue, 0.19, const Color(0xFF4A8A76)),
+      _HaraStatusData('P', dashboard.pValue, 1.10, const Color(0xFFD8A441)),
+      _HaraStatusData('K', dashboard.kValue, 0.70, const Color(0xFF6FA8DC)),
+      _HaraStatusData('Mg', dashboard.mgValue, 0.30, const Color(0xFFB58A2F)),
+    ];
+
     return AnalysisSectionCard(
       padding: EdgeInsets.fromLTRB(
-        isSmall ? 10 : 14,
-        isSmall ? 10 : 14,
-        isSmall ? 10 : 14,
-        isSmall ? 10 : 14,
+        isSmall ? 14 : 18,
+        isSmall ? 18 : 22,
+        isSmall ? 14 : 18,
+        isSmall ? 18 : 22,
       ),
       child: Column(
         children: [
-          _StatusRow(
-            label: 'N',
-            value: dashboard.nValue,
-            minOptimal: 1.0,
-            maxOptimal: 2.0,
-            maxScale: 3.0,
-            markerColor: const Color(0xFF4E8C8A),
-          ),
-          const SizedBox(height: 16),
-          _StatusRow(
-            label: 'P',
-            value: dashboard.pValue,
-            minOptimal: 1.0,
-            maxOptimal: 2.0,
-            maxScale: 3.0,
-            markerColor: const Color(0xFF4E8C8A),
-          ),
-          const SizedBox(height: 16),
-          _StatusRow(
-            label: 'K',
-            value: dashboard.kValue,
-            minOptimal: 1.0,
-            maxOptimal: 2.0,
-            maxScale: 3.0,
-            markerColor: const Color(0xFF4E8C8A),
-          ),
-          const SizedBox(height: 16),
-          _StatusRow(
-            label: 'Mg',
-            value: dashboard.mgValue,
-            minOptimal: 1.0,
-            maxOptimal: 2.0,
-            maxScale: 3.0,
-            markerColor: const Color(0xFF4E8C8A),
-          ),
+          for (int i = 0; i < items.length; i++) ...[
+            _StatusRow(data: items[i]),
+            if (i != items.length - 1) const SizedBox(height: 18),
+          ],
         ],
       ),
     );
   }
 }
 
-class _StatusRow extends StatelessWidget {
+class _HaraStatusData {
   final String label;
   final double value;
-  final double minOptimal;
-  final double maxOptimal;
-  final double maxScale;
-  final Color markerColor;
+  final double standard;
+  final Color color;
 
-  const _StatusRow({
-    required this.label,
-    required this.value,
-    required this.minOptimal,
-    required this.maxOptimal,
-    required this.maxScale,
-    required this.markerColor,
-  });
+  const _HaraStatusData(
+      this.label,
+      this.value,
+      this.standard,
+      this.color,
+      );
+
+  double get maxScale {
+    final maxValue = value > standard ? value : standard;
+    return maxValue <= 0 ? 1 : maxValue * 1.35;
+  }
+
+  _HaraLevel get level {
+    if (standard <= 0) return _HaraLevel.optimal;
+
+    final ratio = value / standard;
+    if (ratio < 0.85) return _HaraLevel.kurang;
+    if (ratio > 1.15) return _HaraLevel.berlebih;
+    return _HaraLevel.optimal;
+  }
+}
+
+enum _HaraLevel { kurang, optimal, berlebih }
+
+extension _HaraLevelX on _HaraLevel {
+  String get text {
+    switch (this) {
+      case _HaraLevel.kurang:
+        return 'Kurang';
+      case _HaraLevel.optimal:
+        return 'Optimal';
+      case _HaraLevel.berlebih:
+        return 'Berlebih';
+    }
+  }
+}
+
+class _StatusRow extends StatelessWidget {
+  final _HaraStatusData data;
+
+  const _StatusRow({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        final isSmall = MediaQuery.of(context).size.width < 360;
-        final labelWidth = label.length > 1 ? 34.0 : 24.0;
-        final gap = isSmall ? 6.0 : 8.0;
-        final barWidth = totalWidth - labelWidth - gap;
-        final safeBarWidth = barWidth;
+    final isSmall = MediaQuery.of(context).size.width < 360;
 
-        final fraction = (value / maxScale).clamp(0.0, 1.0);
-        final minStop = (minOptimal / maxScale).clamp(0.0, 1.0);
-        final maxStop = (maxOptimal / maxScale).clamp(0.0, 1.0);
-
-        final markerX =
-        (safeBarWidth * fraction).clamp(10.0, safeBarWidth - 10.0);
-
-        final topFont = safeBarWidth < 250 ? 8.0 : 9.5;
-        final bubbleFont = safeBarWidth < 250 ? 10.0 : 11.0;
-        final labelFont = label.length > 1
-            ? (isSmall ? 14.0 : 16.0)
-            : (isSmall ? 16.0 : 18.0);
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: labelWidth,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: labelFont,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFB58A2F),
-                ),
-              ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: isSmall ? 46 : 54,
+          child: Text(
+            data.label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: data.label.length > 1 ? 24 : 27,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFFB58A2F),
             ),
-            SizedBox(width: gap),
-            Expanded(
-              child: SizedBox(
-                width: safeBarWidth,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Standar ${data.standard.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF777777),
+                    ),
+                  ),
+                  const Spacer(),
+                  _ValueBadge(data: data),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final width = constraints.maxWidth;
+                  final valueX =
+                      (data.value / data.maxScale).clamp(0.0, 1.0) * width;
+
+                  return SizedBox(
+                    height: 22,
+                    child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        SizedBox(
-                          height: 18,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                child: Text(
-                                  '0.0',
-                                  style: TextStyle(
-                                    fontSize: topFont,
-                                    color: const Color(0xFF6F6F6F),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: safeBarWidth * 0.28,
-                                child: Text(
-                                  'KURANG',
-                                  style: TextStyle(
-                                    fontSize: topFont,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFC28E78),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: safeBarWidth * 0.58,
-                                child: Text(
-                                  'OPTIMAL',
-                                  style: TextStyle(
-                                    fontSize: topFont,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF6C9A89),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: 28,
-                                child: Text(
-                                  'B',
-                                  style: TextStyle(
-                                    fontSize: topFont,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFFD2A553),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: 0,
-                                child: Text(
-                                  maxScale.toStringAsFixed(1),
-                                  style: TextStyle(
-                                    fontSize: topFont,
-                                    color: const Color(0xFF6F6F6F),
-                                  ),
-                                ),
-                              ),
-                            ],
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 5,
+                          child: Container(
+                            height: 13,
+                            decoration: BoxDecoration(
+                              color: data.color.withOpacity(0.16),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 3),
-                        Container(
-                          width: safeBarWidth,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x1F000000),
-                                blurRadius: 4,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
-                            gradient: LinearGradient(
-                              colors: const [
-                                Color(0xFFE5B291),
-                                Color(0xFFE5B291),
-                                Color(0xFFAEE3C2),
-                                Color(0xFFAEE3C2),
-                                Color(0xFFE8CF86),
-                                Color(0xFFE8CF86),
-                              ],
-                              stops: [
-                                0.0,
-                                minStop,
-                                minStop,
-                                maxStop,
-                                maxStop,
-                                1.0,
+                        Positioned(
+                          left: 0,
+                          top: 5,
+                          child: Container(
+                            width: valueX,
+                            height: 13,
+                            decoration: BoxDecoration(
+                              color: data.color,
+                              borderRadius: BorderRadius.circular(999),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: data.color.withOpacity(0.25),
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 2),
+                                ),
                               ],
                             ),
-                            border: Border.all(
-                              color: const Color(0xFFD0BD86),
-                              width: 1,
+                          ),
+                        ),
+                        Positioned(
+                          left: (valueX - 9).clamp(0.0, width - 18),
+                          top: 2,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: data.color,
+                                width: 2.8,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: data.color.withOpacity(0.35),
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                    Positioned(
-                      left: markerX - 6,
-                      top: 22,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: markerColor,
-                          shape: BoxShape.circle,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x22000000),
-                              blurRadius: 3,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: (markerX - 22).clamp(0.0, safeBarWidth - 44.0),
-                      top: -2,
-                      child: Container(
-                        constraints: const BoxConstraints(minWidth: 42),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x22000000),
-                              blurRadius: 4,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          '${value.toStringAsFixed(2)}%',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: bubbleFont,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF444444),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ],
     );
+  }
+}
+
+class _ValueBadge extends StatelessWidget {
+  final _HaraStatusData data;
+
+  const _ValueBadge({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: data.color.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        '${data.value.toStringAsFixed(2)} • ${data.level.text}',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: data.color.darken(),
+        ),
+      ),
+    );
+  }
+}
+
+extension _ColorDarken on Color {
+  Color darken([double amount = .22]) {
+    final hsl = HSLColor.fromColor(this);
+    return hsl
+        .withLightness((hsl.lightness - amount).clamp(0.0, 1.0))
+        .toColor();
   }
 }

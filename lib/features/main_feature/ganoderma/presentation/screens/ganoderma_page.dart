@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_filex/open_filex.dart';
 
+import '../../../shared_analysis/services/download_service.dart';
 import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../../models/ganoderma_model.dart';
@@ -22,9 +24,12 @@ class GanodermaPage extends ConsumerStatefulWidget {
 }
 
 class _GanodermaPageState extends ConsumerState<GanodermaPage> {
+  bool _isDownloading = false;
+
   @override
   void initState() {
     super.initState();
+
     Future.microtask(() {
       ref.read(ganodermaControllerProvider.notifier).load(
         eHaraUuid: widget.eHaraUuid,
@@ -32,17 +37,69 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
     });
   }
 
+  Future<void> _downloadCsv(GanodermaModel data) async {
+    if (_isDownloading) return;
+
+    setState(() => _isDownloading = true);
+
+    try {
+      if (data.csvUrl == null || data.csvUrl!.isEmpty) {
+        throw Exception('Link CSV ganoderma tidak ditemukan');
+      }
+
+      final filePath = await DownloadService.downloadToDownloadFolder(
+        url: data.csvUrl!,
+        fileName:
+        'ganoderma_${data.eHaraUuid.isEmpty ? 'data' : data.eHaraUuid}.csv',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          content: const Text('File berhasil diunduh.'),
+          action: SnackBarAction(
+            label: 'Buka',
+            onPressed: () async {
+              final result = await OpenFilex.open(filePath);
+
+              if (result.type != ResultType.done && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Tidak ada aplikasi untuk membuka file CSV. Install Excel atau Google Sheets.',
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDownloading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(ganodermaControllerProvider);
+    final data = state.data;
 
-    if (state.isLoading && state.data == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (state.errorMessage != null && state.data == null) {
+    if (state.errorMessage != null && data == null) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -70,25 +127,49 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
       );
     }
 
-    final data = state.data;
-    if (data == null) {
-      return const Scaffold(
-        body: Center(child: Text('Data ganoderma tidak ditemukan')),
-      );
-    }
+    return Stack(
+      children: [
+        if (data != null)
+          AnalysisCarouselPage(
+            titles: const [
+              'Detail Kebun',
+              'Ganoderma',
+              'Ganoderma',
+            ],
+            onBackTap: () => context.pop(),
+            onPdfTap: () => _downloadCsv(data),
+            slides: [
+              _GanodermaSlideOne(data: data),
+              _GanodermaSlideTwo(data: data),
+              _GanodermaSlideThree(data: data),
+            ],
+          )
+        else
+          const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
 
-    return AnalysisCarouselPage(
-      titles: const [
-        'Detail Kebun',
-        'Ganoderma',
-        'Ganoderma',
-      ],
-      onBackTap: () => context.pop(),
-      onPdfTap: () {},
-      slides: [
-        _GanodermaSlideOne(data: data),
-        _GanodermaSlideTwo(data: data),
-        _GanodermaSlideThree(data: data),
+        if (state.isLoading && data != null)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.10),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+
+        if (_isDownloading)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.18),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
       ],
     );
   }

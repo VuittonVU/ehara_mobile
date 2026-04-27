@@ -12,13 +12,19 @@ class RekomendasiPemupukanService {
     required this.authService,
   });
 
+  final Map<String, Map<String, dynamic>> _dashboardCache = {};
+  final Map<String, Map<String, dynamic>> _recommendationCache = {};
+
   Future<Map<String, dynamic>> fetchDashboard({
     required String eHaraUuid,
+    bool forceRefresh = false,
   }) async {
-    final token = await authService.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Token tidak ditemukan.');
+    if (_dashboardCache.containsKey(eHaraUuid) && !forceRefresh) {
+      debugPrint('=== REKOM DASHBOARD FROM CACHE: $eHaraUuid ===');
+      return _dashboardCache[eHaraUuid]!;
     }
+
+    final token = await _requireToken();
 
     final request = http.MultipartRequest(
       'POST',
@@ -36,7 +42,8 @@ class RekomendasiPemupukanService {
     debugPrint('=== REKOM DASHBOARD STATUS: ${response.statusCode} ===');
     debugPrint('=== REKOM DASHBOARD BODY: $body ===');
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if (_isSuccess(response.statusCode)) {
+      _dashboardCache[eHaraUuid] = decoded;
       return decoded;
     }
 
@@ -48,11 +55,14 @@ class RekomendasiPemupukanService {
 
   Future<Map<String, dynamic>> fetchRecommendation({
     required String eHaraUuid,
+    bool forceRefresh = false,
   }) async {
-    final token = await authService.getToken();
-    if (token == null || token.isEmpty) {
-      throw Exception('Token tidak ditemukan.');
+    if (_recommendationCache.containsKey(eHaraUuid) && !forceRefresh) {
+      debugPrint('=== REKOM FROM CACHE: $eHaraUuid ===');
+      return _recommendationCache[eHaraUuid]!;
     }
+
+    final token = await _requireToken();
 
     final request = http.MultipartRequest(
       'POST',
@@ -72,22 +82,8 @@ class RekomendasiPemupukanService {
     debugPrint('=== REKOM STATUS: ${response.statusCode} ===');
     debugPrint('=== REKOM BODY: $body ===');
 
-    if (decoded['data'] is Map<String, dynamic>) {
-      final data = decoded['data'];
-      if (data['fertilizer_recommendation'] is Map<String, dynamic>) {
-        final fert =
-        Map<String, dynamic>.from(data['fertilizer_recommendation']);
-
-        debugPrint('=== FERTILIZER KEYS ===');
-        debugPrint(fert.keys.toList().toString());
-
-        fert.forEach((key, value) {
-          debugPrint('KEY: $key => VALUE: $value');
-        });
-      }
-    }
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
+    if (_isSuccess(response.statusCode)) {
+      _recommendationCache[eHaraUuid] = decoded;
       return decoded;
     }
 
@@ -97,12 +93,22 @@ class RekomendasiPemupukanService {
     );
   }
 
+  Future<String> _requireToken() async {
+    final token = await authService.getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Token tidak ditemukan.');
+    }
+    return token;
+  }
+
+  bool _isSuccess(int statusCode) {
+    return statusCode >= 200 && statusCode < 300;
+  }
+
   Map<String, dynamic> _safeDecode(String body) {
     try {
       final decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
+      if (decoded is Map<String, dynamic>) return decoded;
       return {'data': decoded};
     } catch (_) {
       return {'raw': body};
@@ -110,18 +116,14 @@ class RekomendasiPemupukanService {
   }
 
   String? _extractMessage(Map<String, dynamic> json) {
-    if (json['message'] != null) {
-      return json['message']?.toString();
-    }
+    if (json['message'] != null) return json['message']?.toString();
 
     if (json['meta'] is Map<String, dynamic>) {
       final meta = json['meta'] as Map<String, dynamic>;
       return meta['message']?.toString();
     }
 
-    if (json['error'] != null) {
-      return json['error']?.toString();
-    }
+    if (json['error'] != null) return json['error']?.toString();
 
     return null;
   }

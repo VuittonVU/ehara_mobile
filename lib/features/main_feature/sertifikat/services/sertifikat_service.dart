@@ -14,6 +14,9 @@ class SertifikatService {
   SertifikatService({AuthService? authService})
       : authService = authService ?? AuthService();
 
+  static const String _s3BaseUrl =
+      'https://iopri-storage-prod-ap-southeast-1-001.s3.ap-southeast-1.amazonaws.com/';
+
   Future<List<SertifikatModel>> getCertificates() async {
     final token = await authService.getToken();
 
@@ -45,7 +48,6 @@ class SertifikatService {
     }
 
     final rows = _extractRows(decoded);
-
     return rows.map(SertifikatModel.fromMap).toList();
   }
 
@@ -53,56 +55,40 @@ class SertifikatService {
     required String filename,
     required String suggestedName,
   }) async {
-    final token = await authService.getToken();
-
-    final baseUrl = AuthService.baseUrl.replaceAll(RegExp(r'/$'), '');
     final cleanFilename = filename.replaceFirst(RegExp(r'^/+'), '');
+    final encodedFilename = cleanFilename
+        .split('/')
+        .map(Uri.encodeComponent)
+        .join('/');
 
-    final candidateUrls = <String>[
-      '$baseUrl/storage/$cleanFilename',
-      '$baseUrl/$cleanFilename',
-    ];
+    final url = '$_s3BaseUrl$encodedFilename';
 
-    final headers = <String, String>{
-      'Accept': 'application/pdf,*/*',
-      'api-key': AuthService.apiKey,
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
+    debugPrint('=== PDF DOWNLOAD URL: $url ===');
 
-    http.Response? successResponse;
-    String? successUrl;
+    final response = await http.get(
+      Uri.parse(url),
+      headers: const {
+        'Accept': 'application/pdf,*/*',
+      },
+    );
 
-    for (final url in candidateUrls) {
-      try {
-        final response = await http.get(Uri.parse(url), headers: headers);
+    debugPrint('=== PDF STATUS: ${response.statusCode} ===');
+    debugPrint('=== PDF CONTENT TYPE: ${response.headers['content-type']} ===');
+    debugPrint('=== PDF BYTE LENGTH: ${response.bodyBytes.length} ===');
 
-        debugPrint('=== PDF TRY URL: $url ===');
-        debugPrint('=== PDF STATUS: ${response.statusCode} ===');
-
-        if (response.statusCode >= 200 &&
-            response.statusCode < 300 &&
-            response.bodyBytes.isNotEmpty) {
-          successResponse = response;
-          successUrl = url;
-          break;
-        }
-      } catch (e) {
-        debugPrint('=== PDF ERROR URL $url : $e ===');
-      }
-    }
-
-    if (successResponse == null) {
-      throw Exception('File PDF tidak bisa diunduh. Cek URL / akses storage backend.');
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300 ||
+        response.bodyBytes.isEmpty) {
+      throw Exception('File PDF tidak bisa diunduh dari storage.');
     }
 
     final tempDir = await getTemporaryDirectory();
     final safeName = _sanitizeFileName(suggestedName);
     final file = File('${tempDir.path}/$safeName.pdf');
 
-    await file.writeAsBytes(successResponse.bodyBytes, flush: true);
+    await file.writeAsBytes(response.bodyBytes, flush: true);
 
-    debugPrint('=== PDF SAVED FROM: $successUrl ===');
-    debugPrint('=== PDF PATH: ${file.path} ===');
+    debugPrint('=== PDF SAVED PATH: ${file.path} ===');
 
     return file;
   }
@@ -124,9 +110,7 @@ class SertifikatService {
   Map<String, dynamic> _safeDecode(String body) {
     try {
       final decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
+      if (decoded is Map<String, dynamic>) return decoded;
       return {'data': decoded};
     } catch (_) {
       return {'raw': body};
@@ -134,18 +118,14 @@ class SertifikatService {
   }
 
   String? _extractMessage(Map<String, dynamic> json) {
-    if (json['message'] != null) {
-      return json['message']?.toString();
-    }
+    if (json['message'] != null) return json['message']?.toString();
 
     if (json['meta'] is Map<String, dynamic>) {
       final meta = json['meta'] as Map<String, dynamic>;
       return meta['message']?.toString();
     }
 
-    if (json['error'] != null) {
-      return json['error']?.toString();
-    }
+    if (json['error'] != null) return json['error']?.toString();
 
     return null;
   }

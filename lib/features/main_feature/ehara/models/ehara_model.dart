@@ -12,9 +12,10 @@ class EHaraModel {
   final double mgValue;
   final bool hasData;
 
-  // map backend
   final String mapFilename;
   final String mapUrl;
+
+  final String haraCsvFilename;
 
   const EHaraModel({
     required this.eHaraUuid,
@@ -31,7 +32,10 @@ class EHaraModel {
     required this.hasData,
     required this.mapFilename,
     required this.mapUrl,
+    required this.haraCsvFilename,
   });
+
+  bool get hasHaraCsv => haraCsvFilename.trim().isNotEmpty;
 
   factory EHaraModel.fromApi(Map<String, dynamic> json) {
     final root = _extractNestedData(json);
@@ -39,21 +43,6 @@ class EHaraModel {
     final eHara = root['e_hara'] is Map<String, dynamic>
         ? Map<String, dynamic>.from(root['e_hara'])
         : <String, dynamic>{};
-
-    final filename = _readString(
-      eHara,
-      ['map_filename'],
-    );
-
-    final urlFromResponse = _readString(
-      eHara,
-      [
-        'map_url',
-        'map_image_url',
-        'map_preview_url',
-        'map_full_url',
-      ],
-    );
 
     return EHaraModel(
       eHaraUuid: _readString(
@@ -106,8 +95,22 @@ class EHaraModel {
         ['predicted_mg', 'mg', 'magnesium'],
       ),
       hasData: _readBool(root, ['has_data']),
-      mapFilename: filename,
-      mapUrl: urlFromResponse,
+      mapFilename: _readString(eHara, ['map_filename']),
+      mapUrl: _readString(
+        eHara,
+        ['map_url', 'map_image_url', 'map_preview_url', 'map_full_url'],
+      ),
+
+      // CSV unsur hara dari S3
+      haraCsvFilename: _readString(
+        eHara,
+        [
+          'location_filename',
+          'filename_location',
+          'filename_location_csv',
+          'filename_unsur_hara_location',
+        ],
+      ),
     );
   }
 

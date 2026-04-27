@@ -79,7 +79,8 @@ class KebunModel {
         json['date'],
       ),
       tanggalPengambilanData: parseDate(
-        json['tanggal_pengambilan'] ??
+        json['collection_date'] ??
+            json['tanggal_pengambilan'] ??
             json['tanggal_pengambilan_data'] ??
             json['capture_date'],
       ),

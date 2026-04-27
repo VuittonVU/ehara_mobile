@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_filex/open_filex.dart';
 
+import '../../../shared_analysis/services/download_service.dart';
 import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../../models/ehara_model.dart';
 import '../../providers/ehara_controller.dart';
+import '../../services/ehara_service.dart';
 import '../widgets/ehara_mapping_section.dart';
 import '../widgets/ehara_npkmg_section.dart';
 import '../widgets/ehara_status_section.dart';
@@ -24,10 +27,11 @@ class EHaraPage extends ConsumerStatefulWidget {
 }
 
 class _EHaraPageState extends ConsumerState<EHaraPage> {
+  bool _isDownloading = false;
+
   @override
   void initState() {
     super.initState();
-    debugPrint('=== EHARA PAGE UUID: ${widget.eHaraUuid} ===');
 
     Future.microtask(() {
       ref.read(eharaControllerProvider.notifier).loadDashboard(
@@ -36,17 +40,87 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
     });
   }
 
+  Future<void> _downloadHaraCsv(EHaraModel dashboard) async {
+    if (_isDownloading) return;
+
+    if (!dashboard.hasHaraCsv) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('File CSV unsur hara belum tersedia.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isDownloading = true);
+
+    try {
+      final url = EHaraService.buildCsvUrl(
+        dashboard.haraCsvFilename,
+      );
+
+      final safeEstateName = dashboard.estateName
+          .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')
+          .replaceAll(' ', '_');
+
+      final filePath = await DownloadService.downloadToDownloadFolder(
+        url: url,
+        fileName: 'ehara_${safeEstateName}_${widget.eHaraUuid}.csv',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          content: const Text(
+            'File unsur hara berhasil diunduh.',
+          ),
+          action: SnackBarAction(
+            label: 'Buka',
+            onPressed: () async {
+              final result = await OpenFilex.open(filePath);
+
+              if (result.type != ResultType.done && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Tidak ada aplikasi untuk membuka file CSV. Install Excel atau Google Sheets.',
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+          content: Text(
+            e.toString().replaceFirst('Exception: ', ''),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDownloading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(eharaControllerProvider);
+    final dashboard = state.dashboard;
 
-    if (state.isLoading && state.dashboard == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (state.errorMessage != null && state.dashboard == null) {
+    if (state.errorMessage != null && dashboard == null) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -74,27 +148,51 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
       );
     }
 
-    final dashboard = state.dashboard;
-    if (dashboard == null) {
-      return const Scaffold(
-        body: Center(child: Text('Data E-HARA tidak ditemukan')),
-      );
-    }
+    return Stack(
+      children: [
+        if (dashboard != null)
+          AnalysisCarouselPage(
+            titles: const [
+              'Detail Kebun',
+              'Kandungan\nN,P,K,Mg',
+              'Status Hara',
+              'Pemetaan\nHara',
+            ],
+            onBackTap: () => context.pop(),
+            onPdfTap: () => _downloadHaraCsv(dashboard),
+            slides: [
+              _EHaraSlideOne(dashboard: dashboard),
+              _EHaraSlideTwo(dashboard: dashboard),
+              _EHaraSlideThree(dashboard: dashboard),
+              _EHaraSlideFour(dashboard: dashboard),
+            ],
+          )
+        else
+          const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
 
-    return AnalysisCarouselPage(
-      titles: const [
-        'Detail Kebun',
-        'Kandungan\nN,P,K,Mg',
-        'Status Hara',
-        'Pemetaan\nHara',
-      ],
-      onBackTap: () => context.pop(),
-      onPdfTap: () {},
-      slides: [
-        _EHaraSlideOne(dashboard: dashboard),
-        _EHaraSlideTwo(dashboard: dashboard),
-        _EHaraSlideThree(dashboard: dashboard),
-        _EHaraSlideFour(dashboard: dashboard),
+        if (state.isLoading && dashboard != null)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.10),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
+
+        if (_isDownloading)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.18),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -10,9 +10,21 @@ class RekomendasiPemupukanRepository {
 
   Future<RekomendasiPemupukanModel> getData({
     required String eHaraUuid,
+    bool forceRefresh = false,
   }) async {
-    final dashboard = await service.fetchDashboard(eHaraUuid: eHaraUuid);
-    final recommendation = await service.fetchRecommendation(eHaraUuid: eHaraUuid);
+    final results = await Future.wait<Map<String, dynamic>>([
+      service.fetchDashboard(
+        eHaraUuid: eHaraUuid,
+        forceRefresh: forceRefresh,
+      ),
+      service.fetchRecommendation(
+        eHaraUuid: eHaraUuid,
+        forceRefresh: forceRefresh,
+      ),
+    ]);
+
+    final dashboard = results[0];
+    final recommendation = results[1];
 
     return RekomendasiPemupukanModel.fromApi(
       dashboardJson: dashboard,

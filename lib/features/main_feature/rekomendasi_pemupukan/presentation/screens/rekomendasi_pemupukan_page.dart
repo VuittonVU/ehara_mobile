@@ -6,8 +6,8 @@ import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../../models/rekomendasi_pemupukan_model.dart';
 import '../../providers/rekomendasi_pemupukan_controller.dart';
-import '../widgets/rekomendasi_analisis_hara_chart.dart';
 import '../widgets/pemupukan_dosis_section.dart';
+import '../widgets/rekomendasi_analisis_hara_chart.dart';
 
 class RekomendasiPemupukanPage extends ConsumerStatefulWidget {
   final String eHaraUuid;
@@ -27,6 +27,7 @@ class _RekomendasiPemupukanPageState
   @override
   void initState() {
     super.initState();
+
     Future.microtask(() {
       ref.read(rekomendasiPemupukanControllerProvider.notifier).load(
         eHaraUuid: widget.eHaraUuid,
@@ -37,14 +38,9 @@ class _RekomendasiPemupukanPageState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(rekomendasiPemupukanControllerProvider);
+    final data = state.data;
 
-    if (state.isLoading && state.data == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (state.errorMessage != null && state.data == null) {
+    if (state.errorMessage != null && data == null) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -59,7 +55,9 @@ class _RekomendasiPemupukanPageState
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    ref.read(rekomendasiPemupukanControllerProvider.notifier).load(
+                    ref
+                        .read(rekomendasiPemupukanControllerProvider.notifier)
+                        .load(
                       eHaraUuid: widget.eHaraUuid,
                     );
                   },
@@ -72,25 +70,39 @@ class _RekomendasiPemupukanPageState
       );
     }
 
-    final data = state.data;
-    if (data == null) {
-      return const Scaffold(
-        body: Center(child: Text('Data rekomendasi tidak ditemukan')),
-      );
-    }
+    return Stack(
+      children: [
+        if (data != null)
+          AnalysisCarouselPage(
+            titles: const [
+              'Detail Kebun',
+              'Analisis Hara',
+              'Rekomendasi\nPemupukan',
+            ],
+            onBackTap: () => context.pop(),
+            onPdfTap: () {},
+            slides: [
+              _RekomSlideOne(data: data),
+              _RekomSlideTwo(data: data),
+              _RekomSlideThree(data: data),
+            ],
+          )
+        else
+          const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
 
-    return AnalysisCarouselPage(
-      titles: const [
-        'Detail Kebun',
-        'Analisis Hara',
-        'Rekomendasi\nPemupukan',
-      ],
-      onBackTap: () => context.pop(),
-      onPdfTap: () {},
-      slides: [
-        _RekomSlideOne(data: data),
-        _RekomSlideTwo(data: data),
-        _RekomSlideThree(data: data),
+        if (state.isLoading && data != null)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.10),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/responsive.dart';
+import '../../../../../core/widgets/pressable_button.dart';
 
 class AnalysisTopBar extends StatelessWidget {
   final String title;
@@ -17,7 +18,8 @@ class AnalysisTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sideBox = Responsive.w(context, 42);
-    final pdfBox = Responsive.w(context, 58);
+    final buttonSize = Responsive.w(context, 52);
+    final pdfIconSize = Responsive.w(context, 30);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -45,6 +47,7 @@ class AnalysisTopBar extends StatelessWidget {
               ),
             ),
           ),
+
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(top: Responsive.h(context, 6)),
@@ -62,29 +65,29 @@ class AnalysisTopBar extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onPdfTap,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              width: pdfBox,
-              height: pdfBox,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                  Responsive.r(context, 16),
-                ),
-                border: Border.all(
-                  color: const Color(0xFF8C8C8C),
-                  width: 1,
-                ),
+
+          SizedBox(
+            width: buttonSize,
+            height: buttonSize,
+            child: PressableButton(
+              onTap: onPdfTap,
+              borderRadius: BorderRadius.circular(
+                Responsive.r(context, 20),
               ),
-              child: Center(
-                child: Image.asset(
-                  'assets/icons/download.png',
-                  width: Responsive.w(context, 30),
-                  height: Responsive.w(context, 30),
-                  fit: BoxFit.contain,
-                ),
+              color: const Color(0xFFF9FAFB),
+              border: Border.all(
+                color: const Color(0xFF2F2F2F).withValues(alpha: 0.3),
+                width: Responsive.w(context, 1.4),
+              ),
+              padding: EdgeInsets.all(Responsive.w(context, 10)),
+              pressedScale: 0.96,
+              pressedTranslateY: 1.2,
+              idleTranslateY: -0.3,
+              child: Image.asset(
+                'assets/icons/csv.png',
+                width: pdfIconSize,
+                height: pdfIconSize,
+                fit: BoxFit.contain,
               ),
             ),
           ),

@@ -9,7 +9,11 @@ class EHaraRepository {
 
   Future<Map<String, dynamic>> getDashboard({
     required String eHaraUuid,
+    bool forceRefresh = false,
   }) {
-    return service.getDashboardData(eHaraUuid: eHaraUuid);
+    return service.getDashboardData(
+      eHaraUuid: eHaraUuid,
+      forceRefresh: forceRefresh,
+    );
   }
 }

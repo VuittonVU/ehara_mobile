@@ -5,7 +5,7 @@ import '../../../../../app/routes/app_routes.dart';
 import '../../models/ehara_model.dart';
 import '../../../shared_analysis/widgets/analysis_primary_button.dart';
 import '../../../shared_analysis/widgets/analysis_section_card.dart';
-import 'ehara_local_spread_map.dart';
+import 'ehara_map_view.dart';
 
 class EHaraMappingSection extends StatelessWidget {
   final EHaraModel dashboard;
@@ -22,15 +22,11 @@ class EHaraMappingSection extends StatelessWidget {
     return Column(
       children: [
         AnalysisSectionCard(
-          padding: EdgeInsets.fromLTRB(
-            isSmall ? 10 : 14,
-            isSmall ? 10 : 14,
-            isSmall ? 10 : 14,
-            isSmall ? 10 : 14,
-          ),
-          child: AspectRatio(
-            aspectRatio: 1.02,
-            child: const EHaraLocalSpreadMap(
+          padding: EdgeInsets.all(isSmall ? 10 : 14),
+          child: SizedBox(
+            height: isSmall ? 300 : 350,
+            child: EHaraMapView(
+              dashboard: dashboard,
               fullScreen: false,
             ),
           ),

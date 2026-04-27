@@ -57,6 +57,9 @@ class GanodermaPointModel {
 }
 
 class GanodermaModel {
+  static const String _baseS3Url =
+      'https://iopri-storage-prod-ap-southeast-1-001.s3.ap-southeast-1.amazonaws.com/';
+
   final String eHaraUuid;
   final String namaKebun;
   final String tanggalAnalisis;
@@ -68,6 +71,7 @@ class GanodermaModel {
   final String jumlahPohonPerHa;
   final String nomorKcd;
   final String sertifikat;
+  final String? csvUrl;
 
   final int totalPoints;
   final int detectedCount;
@@ -86,6 +90,7 @@ class GanodermaModel {
     required this.jumlahPohonPerHa,
     required this.nomorKcd,
     required this.sertifikat,
+    required this.csvUrl,
     required this.totalPoints,
     required this.detectedCount,
     required this.healthyCount,
@@ -95,6 +100,7 @@ class GanodermaModel {
   factory GanodermaModel.fromApi({
     required List<dynamic> ganodermaRows,
     Map<String, dynamic>? recommendationJson,
+    String? csvUrl,
   }) {
     final rows = ganodermaRows
         .whereType<Map>()
@@ -102,7 +108,7 @@ class GanodermaModel {
         .toList();
 
     if (rows.isEmpty) {
-      return const GanodermaModel(
+      return GanodermaModel(
         eHaraUuid: '',
         namaKebun: '-',
         tanggalAnalisis: '-',
@@ -114,10 +120,11 @@ class GanodermaModel {
         jumlahPohonPerHa: '-',
         nomorKcd: '-',
         sertifikat: '-',
+        csvUrl: csvUrl,
         totalPoints: 0,
         detectedCount: 0,
         healthyCount: 0,
-        points: [],
+        points: const [],
       );
     }
 
@@ -211,11 +218,69 @@ class GanodermaModel {
           fallback: '-',
         ),
       ),
+      csvUrl: csvUrl,
       totalPoints: points.length,
       detectedCount: detectedCount,
       healthyCount: healthyCount,
       points: points,
     );
+  }
+
+  static String? extractGanodermaCsvUrlFromDatatable({
+    required List<dynamic> rows,
+    required String eHaraUuid,
+  }) {
+    for (final row in rows) {
+      if (row is! Map) continue;
+
+      final map = Map<String, dynamic>.from(row);
+
+      final uuid = _readString(
+        map,
+        ['uuid', 'e_hara_uuid'],
+        fallback: _readNestedString(map, ['e_hara_transaction', 'e_hara_uuid']),
+      );
+
+      if (uuid != eHaraUuid) continue;
+
+      final filename = _readString(
+        map,
+        ['filename_ganoderma', 'ganoderma_filename', 'csv_ganoderma'],
+      );
+
+      if (filename.isEmpty) return null;
+
+      return _buildS3Url(filename);
+    }
+
+    return null;
+  }
+
+  static String _buildS3Url(String filename) {
+    final clean = filename.trim();
+
+    if (clean.startsWith('http://') || clean.startsWith('https://')) {
+      return clean;
+    }
+
+    return '$_baseS3Url$clean';
+  }
+
+  static String _readNestedString(
+      Map<String, dynamic> map,
+      List<String> keys,
+      ) {
+    dynamic current = map;
+
+    for (final key in keys) {
+      if (current is Map && current[key] != null) {
+        current = current[key];
+      } else {
+        return '';
+      }
+    }
+
+    return current?.toString() ?? '';
   }
 
   static Map<String, dynamic> _extractRecommendation(
@@ -230,6 +295,7 @@ class GanodermaModel {
         return Map<String, dynamic>.from(fertilizer);
       }
     }
+
     return <String, dynamic>{};
   }
 
@@ -244,6 +310,7 @@ class GanodermaModel {
         return value.toString();
       }
     }
+
     return fallback;
   }
 }
