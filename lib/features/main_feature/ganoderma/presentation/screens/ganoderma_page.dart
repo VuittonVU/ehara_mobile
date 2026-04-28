@@ -51,6 +51,7 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
         url: data.csvUrl!,
         fileName:
         'ganoderma_${data.eHaraUuid.isEmpty ? 'data' : data.eHaraUuid}.csv',
+        ref: ref,
       );
 
       if (!mounted) return;
@@ -59,7 +60,7 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
         SnackBar(
           duration: const Duration(seconds: 5),
           behavior: SnackBarBehavior.floating,
-          content: const Text('File berhasil diunduh.'),
+          content: const Text('File berhasil diunduh ke folder Download/EHARA.'),
           action: SnackBarAction(
             label: 'Buka',
             onPressed: () async {
@@ -137,7 +138,7 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
               'Ganoderma',
             ],
             onBackTap: () => context.pop(),
-            onPdfTap: () => _downloadCsv(data),
+            onDownloadTap: () => _downloadCsv(data),
             slides: [
               _GanodermaSlideOne(data: data),
               _GanodermaSlideTwo(data: data),

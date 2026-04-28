@@ -9,7 +9,7 @@ class AnalysisCarouselPage extends StatefulWidget {
   final List<String> titles;
   final List<Widget> slides;
   final VoidCallback? onBackTap;
-  final VoidCallback? onPdfTap;
+  final VoidCallback? onDownloadTap;
   final int initialIndex;
 
   const AnalysisCarouselPage({
@@ -17,7 +17,7 @@ class AnalysisCarouselPage extends StatefulWidget {
     required this.titles,
     required this.slides,
     this.onBackTap,
-    this.onPdfTap,
+    this.onDownloadTap,
     this.initialIndex = 0,
   });
 
@@ -54,7 +54,7 @@ class _AnalysisCarouselPageState extends State<AnalysisCarouselPage> {
               AnalysisTopBar(
                 title: widget.titles[_currentIndex],
                 onBackTap: widget.onBackTap,
-                onPdfTap: widget.onPdfTap,
+                onDownloadTap: widget.onDownloadTap,
               ),
               SizedBox(height: Responsive.h(context, 14)),
               Expanded(

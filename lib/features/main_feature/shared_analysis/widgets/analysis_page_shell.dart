@@ -8,7 +8,7 @@ import 'analysis_top_bar.dart';
 class AnalysisPageShell extends StatelessWidget {
   final String title;
   final VoidCallback? onBackTap;
-  final VoidCallback? onPdfTap;
+  final VoidCallback? onDownloadTap;
   final List<Widget> children;
   final int totalIndicators;
   final int currentIndicator;
@@ -17,7 +17,7 @@ class AnalysisPageShell extends StatelessWidget {
     super.key,
     required this.title,
     this.onBackTap,
-    this.onPdfTap,
+    this.onDownloadTap,
     required this.children,
     required this.totalIndicators,
     required this.currentIndicator,
@@ -42,7 +42,7 @@ class AnalysisPageShell extends StatelessWidget {
                 AnalysisTopBar(
                   title: title,
                   onBackTap: onBackTap,
-                  onPdfTap: onPdfTap,
+                  onDownloadTap: onDownloadTap,
                 ),
                 SizedBox(height: Responsive.h(context, 14)),
                 Padding(

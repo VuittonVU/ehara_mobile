@@ -66,6 +66,7 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
       final filePath = await DownloadService.downloadToDownloadFolder(
         url: url,
         fileName: 'ehara_${safeEstateName}_${widget.eHaraUuid}.csv',
+        ref: ref,
       );
 
       if (!mounted) return;
@@ -75,7 +76,7 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
           duration: const Duration(seconds: 5),
           behavior: SnackBarBehavior.floating,
           content: const Text(
-            'File unsur hara berhasil diunduh.',
+            'File berhasil diunduh ke folder Download/EHARA.',
           ),
           action: SnackBarAction(
             label: 'Buka',
@@ -159,7 +160,7 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
               'Pemetaan\nHara',
             ],
             onBackTap: () => context.pop(),
-            onPdfTap: () => _downloadHaraCsv(dashboard),
+            onDownloadTap: () => _downloadHaraCsv(dashboard),
             slides: [
               _EHaraSlideOne(dashboard: dashboard),
               _EHaraSlideTwo(dashboard: dashboard),

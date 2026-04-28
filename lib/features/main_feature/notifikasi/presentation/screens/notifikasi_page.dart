@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../../core/widgets/app_background.dart';
 import '../../data/notifikasi_data.dart';
+import '../../providers/notifikasi_controller.dart';
 import '../widgets/notifikasi_bubble.dart';
 
-class NotificationPage extends StatelessWidget {
+class NotificationPage extends ConsumerWidget {
   const NotificationPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final notifications = NotificationData.notifications;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dynamicNotifications = ref.watch(notificationControllerProvider);
+
+    final notifications = [
+      ...dynamicNotifications,
+      ...NotificationData.notifications,
+    ];
 
     return Scaffold(
       body: AppBackground(
@@ -55,9 +62,12 @@ class NotificationPage extends StatelessWidget {
                   itemCount: notifications.length,
                   itemBuilder: (context, index) {
                     final item = notifications[index];
+
                     return NotificationBubble(
+                      title: item.title,
                       message: item.message,
                       dateTime: item.dateTime,
+                      type: item.type,
                     );
                   },
                 ),

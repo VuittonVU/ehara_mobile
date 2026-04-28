@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/widgets/app_background.dart';
-import '../../../shared_analysis/widgets/analysis_top_bar.dart';
 import '../../../shared_analysis/services/download_service.dart';
+import '../../../shared_analysis/widgets/analysis_top_bar.dart';
 import '../../models/ganoderma_model.dart';
 import '../widgets/ganoderma_interactive_map.dart';
 
-class GanodermaFullMapPage extends StatefulWidget {
+class GanodermaFullMapPage extends ConsumerStatefulWidget {
   final GanodermaModel data;
 
   const GanodermaFullMapPage({
@@ -16,10 +17,11 @@ class GanodermaFullMapPage extends StatefulWidget {
   });
 
   @override
-  State<GanodermaFullMapPage> createState() => _GanodermaFullMapPageState();
+  ConsumerState<GanodermaFullMapPage> createState() =>
+      _GanodermaFullMapPageState();
 }
 
-class _GanodermaFullMapPageState extends State<GanodermaFullMapPage> {
+class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
   bool _isDownloading = false;
 
   Future<void> _downloadCsv() async {
@@ -28,28 +30,27 @@ class _GanodermaFullMapPageState extends State<GanodermaFullMapPage> {
     if (csvUrl == null || csvUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Link CSV ganoderma belum tersedia dari API.'),
+          content: Text('Link CSV ganoderma belum tersedia.'),
         ),
       );
       return;
     }
 
-    setState(() {
-      _isDownloading = true;
-    });
+    setState(() => _isDownloading = true);
 
     try {
       await DownloadService.downloadToDownloadFolder(
         url: csvUrl,
         fileName:
         'ganoderma_${widget.data.eHaraUuid.isEmpty ? 'data' : widget.data.eHaraUuid}.csv',
+        ref: ref,
       );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('CSV berhasil didownload ke folder Download.'),
+          content: Text('File berhasil diunduh ke folder Download/EHARA.'),
         ),
       );
     } catch (e) {
@@ -62,9 +63,7 @@ class _GanodermaFullMapPageState extends State<GanodermaFullMapPage> {
       );
     } finally {
       if (mounted) {
-        setState(() {
-          _isDownloading = false;
-        });
+        setState(() => _isDownloading = false);
       }
     }
   }
@@ -83,7 +82,7 @@ class _GanodermaFullMapPageState extends State<GanodermaFullMapPage> {
                   AnalysisTopBar(
                     title: 'Peta Ganoderma',
                     onBackTap: () => context.pop(),
-                    onPdfTap: _downloadCsv,
+                    onDownloadTap: _downloadCsv,
                   ),
                   SizedBox(height: isSmall ? 12 : 16),
                   Expanded(

@@ -6,20 +6,20 @@ import '../../../../../core/widgets/pressable_button.dart';
 class AnalysisTopBar extends StatelessWidget {
   final String title;
   final VoidCallback? onBackTap;
-  final VoidCallback? onPdfTap;
+  final VoidCallback? onDownloadTap;
 
   const AnalysisTopBar({
     super.key,
     required this.title,
     this.onBackTap,
-    this.onPdfTap,
+    this.onDownloadTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final sideBox = Responsive.w(context, 42);
     final buttonSize = Responsive.w(context, 52);
-    final pdfIconSize = Responsive.w(context, 30);
+    final downloadIconSize = Responsive.w(context, 30);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -70,7 +70,7 @@ class AnalysisTopBar extends StatelessWidget {
             width: buttonSize,
             height: buttonSize,
             child: PressableButton(
-              onTap: onPdfTap,
+              onTap: onDownloadTap,
               borderRadius: BorderRadius.circular(
                 Responsive.r(context, 20),
               ),
@@ -85,8 +85,8 @@ class AnalysisTopBar extends StatelessWidget {
               idleTranslateY: -0.3,
               child: Image.asset(
                 'assets/icons/csv.png',
-                width: pdfIconSize,
-                height: pdfIconSize,
+                width: downloadIconSize,
+                height: downloadIconSize,
                 fit: BoxFit.contain,
               ),
             ),

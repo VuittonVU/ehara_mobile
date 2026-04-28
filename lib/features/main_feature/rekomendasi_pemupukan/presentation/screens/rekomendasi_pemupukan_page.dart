@@ -80,7 +80,7 @@ class _RekomendasiPemupukanPageState
               'Rekomendasi\nPemupukan',
             ],
             onBackTap: () => context.pop(),
-            onPdfTap: () {},
+            onDownloadTap: () {},
             slides: [
               _RekomSlideOne(data: data),
               _RekomSlideTwo(data: data),
