@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
@@ -29,12 +30,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isGoogleLoading = true);
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
 
-    if (!mounted) return;
+      await googleSignIn.signOut();
 
-    setState(() => _isGoogleLoading = false);
-    _showInfo('Login Google belum tersedia.');
+      final googleUser = await googleSignIn.signIn();
+
+      if (!mounted) return;
+
+      if (googleUser == null) {
+        _showInfo('Login Google dibatalkan.');
+        return;
+      }
+
+      context.push(
+        AppRoutes.emailLogin,
+        extra: {
+          'email': googleUser.email,
+          'name': googleUser.displayName ?? '',
+          'from_google': true,
+        },
+      );
+    } catch (e) {
+      debugPrint('GOOGLE ERROR: $e');
+
+      if (!mounted) return;
+      _showInfo('Gagal membuka akun Google.');
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
   }
 
   @override

@@ -18,6 +18,8 @@ class AppRoutes {
   static const String sertifikat = '/sertifikat';
   static const String listKebun = '/list-kebun';
   static const hitungPohon = '/hitung-pohon';
+  static const hitungPohonHistory = '/hitung-pohon/history';
+  static const hitungPohonResult = '/hitung-pohon/result';
 
   static const String ehara = '/ehara';
   static const String eharaFullMap = '/ehara-full-map';

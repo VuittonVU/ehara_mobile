@@ -23,8 +23,34 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
 
   bool isPasswordHidden = true;
 
+  bool _fromGoogle = false;
+  String _googleName = '';
+
   String? _emailError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      final extra = GoRouterState.of(context).extra;
+
+      if (extra is Map) {
+        final email = extra['email']?.toString() ?? '';
+        final name = extra['name']?.toString() ?? '';
+        final fromGoogle = extra['from_google'] == true;
+
+        if (email.isNotEmpty) {
+          emailController.text = email;
+          _validateEmail(email);
+        }
+
+        _googleName = name;
+        _fromGoogle = fromGoogle;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -80,7 +106,9 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
       _showInfo('Login berhasil');
       context.go(AppRoutes.dashboard);
     } else {
-      _showInfo(authState.errorMessage ?? 'Terjadi kesalahan.');
+      final message = authState.errorMessage ?? '';
+
+      _showInfo(message.isEmpty ? 'Email atau password salah.' : message);
     }
   }
 

@@ -44,6 +44,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _confirmPasswordError;
 
   @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      final extra = GoRouterState.of(context).extra;
+
+      if (extra is Map) {
+        final email = extra['email']?.toString() ?? '';
+        final name = extra['name']?.toString() ?? '';
+
+        if (name.isNotEmpty) {
+          fullNameController.text = name;
+          _validateFullName(name);
+        }
+
+        if (email.isNotEmpty) {
+          emailController.text = email;
+          _validateEmail(email);
+        }
+      }
+    });
+  }
+
+  @override
   void dispose() {
     fullNameController.dispose();
     usernameController.dispose();

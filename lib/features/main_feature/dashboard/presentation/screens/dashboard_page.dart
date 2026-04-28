@@ -55,6 +55,9 @@ class DashboardPage extends ConsumerWidget {
       onHitungPohonTap: () {
         context.push(AppRoutes.hitungPohon);
       },
+      onRiwayatHitungTap: () {
+        context.push(AppRoutes.hitungPohonHistory);
+      },
     );
 
     final horizontal = Responsive.w(context, 20);

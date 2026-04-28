@@ -6,6 +6,11 @@ class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
   FlutterLocalNotificationsPlugin();
 
+  static const String _channelId = 'ehara_general_channel';
+  static const String _channelName = 'E-HARA Notifications';
+  static const String _channelDescription =
+      'Notifikasi lokal untuk aktivitas E-HARA.';
+
   static Future<void> init() async {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -15,17 +20,20 @@ class LocalNotificationService {
 
     await _plugin.initialize(settings);
 
+    final androidPlugin =
+    _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.requestNotificationsPermission();
+
     const androidChannel = AndroidNotificationChannel(
-      'ehara_general_channel',
-      'E-HARA Notifications',
-      description: 'Notifikasi lokal untuk aktivitas E-HARA.',
+      _channelId,
+      _channelName,
+      description: _channelDescription,
       importance: Importance.high,
     );
 
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+    await androidPlugin?.createNotificationChannel(androidChannel);
   }
 
   static Future<void> show({
@@ -33,11 +41,12 @@ class LocalNotificationService {
     required String body,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'ehara_general_channel',
-      'E-HARA Notifications',
-      channelDescription: 'Notifikasi lokal untuk aktivitas E-HARA.',
+      _channelId,
+      _channelName,
+      channelDescription: _channelDescription,
       importance: Importance.high,
       priority: Priority.high,
+      ticker: 'E-HARA',
     );
 
     const details = NotificationDetails(
