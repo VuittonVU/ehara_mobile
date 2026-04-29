@@ -9,7 +9,7 @@ import '../../providers/sertifikat_controller.dart';
 import '../../providers/sertifikat_state.dart';
 import '../../services/sertifikat_service.dart';
 import '../widgets/sertifikat_card.dart';
-import '../widgets/sertifikat_empty_state.dart';
+import '../../../../../core/widgets/app_state_view.dart';
 import '../widgets/sertifikat_filter_dialog.dart';
 
 class SertifikatPage extends ConsumerWidget {
@@ -187,18 +187,18 @@ class SertifikatPage extends ConsumerWidget {
                         );
 
                       case SertifikatViewState.empty:
-                        return const SertifikatEmptyState(
-                          title: 'Data belum ditemukan!',
-                          description:
-                          'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu dan optimalkan hasil panen sekarang!',
+                        return AppStateView(
+                          type: state.filteredCertificates.isEmpty && state.allCertificates.isNotEmpty
+                              ? AppStateType.filterEmpty
+                              : AppStateType.empty,
                         );
 
                       case SertifikatViewState.error:
-                        return SertifikatEmptyState(
-                          title: 'Data belum ditemukan!',
-                          description: state.errorMessage ??
-                              'Coba sesuaikan pencarian atau filter anda!',
-                          showClockBadge: true,
+                        return AppStateView.fromError(
+                          message: state.errorMessage,
+                          onRetry: () => ref
+                              .read(sertifikatControllerProvider.notifier)
+                              .loadCertificates(),
                         );
 
                       case SertifikatViewState.success:

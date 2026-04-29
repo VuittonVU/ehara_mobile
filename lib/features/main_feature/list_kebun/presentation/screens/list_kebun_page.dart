@@ -13,7 +13,7 @@ import '../../models/kebun_feature_type.dart';
 import '../../models/kebun_model.dart';
 import '../../providers/kebun_controller.dart';
 import '../../providers/kebun_selection_controller.dart';
-import '../widgets/kebun_empty_state.dart';
+import '../../../../../../../core/widgets/app_state_view.dart';
 import '../widgets/kebun_filter_dialog.dart';
 
 class ListKebunPage extends ConsumerWidget {
@@ -142,19 +142,20 @@ class ListKebunPage extends ConsumerWidget {
                   loading: () => const Center(
                     child: CircularProgressIndicator(),
                   ),
-                  error: (error, _) => const KebunEmptyState(
-                    title: 'Data belum ditemukan!',
-                    description: 'Coba sesuaikan pencarian atau filter anda!',
-                    showClockBadge: true,
-                    imagePath: 'assets/images/ehara_robot_empty.png',
+                  error: (error, _) => AppStateView.fromError(
+                    message: error.toString(),
+                    onRetry: () =>
+                        ref.read(kebunControllerProvider.notifier).refresh(),
                   ),
                   data: (items) {
                     if (items.isEmpty) {
-                      return const KebunEmptyState(
-                        title: 'Data belum ditemukan!',
-                        description:
-                        'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu dan optimalkan hasil panen sekarang!',
-                        imagePath: 'assets/images/ehara_robot_empty.png',
+                      return AppStateView(
+                        type: ref
+                                .read(kebunControllerProvider.notifier)
+                                .filter
+                                .hasActiveFilter
+                            ? AppStateType.filterEmpty
+                            : AppStateType.empty,
                       );
                     }
 

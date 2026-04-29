@@ -12,7 +12,7 @@ import '../../models/riwayat_model.dart';
 import '../../providers/riwayat_controller.dart';
 import '../../providers/riwayat_state.dart';
 import '../widgets/riwayat_card.dart';
-import '../widgets/riwayat_empty_state.dart';
+import '../../../../../core/widgets/app_state_view.dart';
 import '../widgets/riwayat_filter_dialog.dart';
 
 class RiwayatPage extends ConsumerWidget {
@@ -97,20 +97,18 @@ class RiwayatPage extends ConsumerWidget {
                         );
 
                       case RiwayatViewState.empty:
-                        return const RiwayatEmptyState(
-                          title: 'Data belum ditemukan!',
-                          description:
-                          'Klik tombol “Tambah Analisis” untuk mulai tambah analisis pertama kamu!',
-                          imagePath: 'assets/images/ehara_robot_empty.png',
+                        return AppStateView(
+                          type: state.allItems.isEmpty
+                              ? AppStateType.empty
+                              : AppStateType.filterEmpty,
                         );
 
                       case RiwayatViewState.error:
-                        return RiwayatEmptyState(
-                          title: 'Data belum ditemukan!',
-                          description: state.errorMessage ??
-                              'Coba sesuaikan filter kamu!',
-                          showClockBadge: true,
-                          imagePath: 'assets/images/ehara_robot_empty.png',
+                        return AppStateView.fromError(
+                          message: state.errorMessage,
+                          onRetry: () => ref
+                              .read(riwayatControllerProvider.notifier)
+                              .loadRiwayat(),
                         );
 
                       case RiwayatViewState.success:

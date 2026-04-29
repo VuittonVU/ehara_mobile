@@ -89,51 +89,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _validateFullName(String value) {
     setState(() {
-      _fullNameError =
-      value.isEmpty ? null : AuthValidator.validateFullName(value);
+      _fullNameError = AuthValidator.validateFullName(value);
     });
   }
 
   void _validateUsername(String value) {
     setState(() {
-      _usernameError =
-      value.isEmpty ? null : AuthValidator.validateUsername(value);
+      _usernameError = AuthValidator.validateUsername(value);
     });
   }
 
   void _validateAddress(String value) {
     setState(() {
-      _addressError =
-      value.isEmpty ? null : AuthValidator.validateAddress(value);
+      _addressError = AuthValidator.validateAddress(value);
     });
   }
 
   void _validateEmail(String value) {
     setState(() {
-      _emailError = value.isEmpty ? null : AuthValidator.validateGmail(value);
+      _emailError = AuthValidator.validateGmail(value);
     });
   }
 
   void _validatePhone(String value) {
     setState(() {
-      _phoneError = value.isEmpty
-          ? null
-          : AuthValidator.validatePhoneNumber(value, 'Nomor handphone');
+      _phoneError = AuthValidator.validatePhoneNumber(
+        value,
+        'Nomor handphone',
+      );
     });
   }
 
   void _validateWhatsapp(String value) {
     setState(() {
-      _whatsappError = value.isEmpty
-          ? null
-          : AuthValidator.validatePhoneNumber(value, 'Nomor WhatsApp');
+      _whatsappError = AuthValidator.validatePhoneNumber(
+        value,
+        'Nomor WhatsApp',
+      );
     });
   }
 
   void _validatePassword(String value) {
     setState(() {
-      _passwordError =
-      value.isEmpty ? null : AuthValidator.validatePassword(value);
+      _passwordError = AuthValidator.validatePassword(value);
 
       if (confirmPasswordController.text.isNotEmpty) {
         _confirmPasswordError = AuthValidator.validateConfirmPassword(
@@ -146,9 +144,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _validateConfirmPassword(String value) {
     setState(() {
-      _confirmPasswordError = value.isEmpty
-          ? null
-          : AuthValidator.validateConfirmPassword(
+      _confirmPasswordError = AuthValidator.validateConfirmPassword(
         passwordController.text,
         value,
       );
@@ -156,18 +152,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateFullName(fullNameController.text.trim()) ==
-        null &&
-        AuthValidator.validateUsername(usernameController.text.trim()) == null &&
-        AuthValidator.validateAddress(addressController.text.trim()) == null &&
-        AuthValidator.validateGmail(emailController.text.trim()) == null &&
+    return AuthValidator.validateFullName(fullNameController.text) == null &&
+        AuthValidator.validateUsername(usernameController.text) == null &&
+        AuthValidator.validateAddress(addressController.text) == null &&
+        AuthValidator.validateGmail(emailController.text) == null &&
         AuthValidator.validatePhoneNumber(
-          phoneController.text.trim(),
+          phoneController.text,
           'Nomor handphone',
         ) ==
             null &&
         AuthValidator.validatePhoneNumber(
-          whatsappController.text.trim(),
+          whatsappController.text,
           'Nomor WhatsApp',
         ) ==
             null &&
@@ -180,12 +175,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _validateAll() {
-    _validateFullName(fullNameController.text.trim());
-    _validateUsername(usernameController.text.trim());
-    _validateAddress(addressController.text.trim());
-    _validateEmail(emailController.text.trim());
-    _validatePhone(phoneController.text.trim());
-    _validateWhatsapp(whatsappController.text.trim());
+    _validateFullName(fullNameController.text);
+    _validateUsername(usernameController.text);
+    _validateAddress(addressController.text);
+    _validateEmail(emailController.text);
+    _validatePhone(phoneController.text);
+    _validateWhatsapp(whatsappController.text);
     _validatePassword(passwordController.text);
     _validateConfirmPassword(confirmPasswordController.text);
   }
@@ -193,7 +188,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> handleRegister() async {
     _validateAll();
 
-    if (!_isFormValid || _isLoading) return;
+    if (!_isFormValid) {
+      _showInfo('Mohon lengkapi data pendaftaran dengan benar.');
+      return;
+    }
+
+    if (_isLoading) return;
 
     setState(() => _isLoading = true);
 
@@ -219,7 +219,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context.go(AppRoutes.login);
     } catch (e) {
       if (!mounted) return;
-      _showInfo(e.toString().replaceFirst('Exception: ', ''));
+      _showInfo(mapAuthError(e));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -497,7 +497,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 'Sudah punya akun? ',
                                 style: AppTextStyles.regular(
                                   fontSize: 14,
-                                  color: AppColors.textPrimary.withOpacity(0.80),
+                                  color:
+                                  AppColors.textPrimary.withOpacity(0.80),
                                 ),
                               ),
                               GestureDetector(
@@ -528,7 +529,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               'Privacy Policy',
                               style: AppTextStyles.regular(
                                 fontSize: 12,
-                                color: AppColors.textPrimary.withOpacity(0.50),
+                                color:
+                                AppColors.textPrimary.withOpacity(0.50),
                               ),
                             ),
                           ),
@@ -643,7 +645,9 @@ class _WhatsappField extends StatelessWidget {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: errorText != null ? Colors.red : AppColors.primary,
+                      color: errorText != null
+                          ? Colors.red
+                          : AppColors.primary,
                       width: 1.2,
                     ),
                   ),

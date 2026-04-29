@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/widgets/app_background.dart';
+import '../../../../../core/widgets/app_state_view.dart';
 import '../../../shared_analysis/widgets/analysis_carousel_page.dart';
 import '../../../shared_analysis/widgets/detail_kebun_card.dart';
 import '../../models/rekomendasi_pemupukan_model.dart';
@@ -42,28 +44,17 @@ class _RekomendasiPemupukanPageState
 
     if (state.errorMessage != null && data == null) {
       return Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  state.errorMessage!,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref
-                        .read(rekomendasiPemupukanControllerProvider.notifier)
-                        .load(
-                      eHaraUuid: widget.eHaraUuid,
-                    );
-                  },
-                  child: const Text('Coba Lagi'),
-                ),
-              ],
+        body: AppBackground(
+          child: SafeArea(
+            child: AppStateView.fromError(
+              message: state.errorMessage,
+              onRetry: () {
+                ref
+                    .read(rekomendasiPemupukanControllerProvider.notifier)
+                    .load(
+                  eHaraUuid: widget.eHaraUuid,
+                );
+              },
             ),
           ),
         ),

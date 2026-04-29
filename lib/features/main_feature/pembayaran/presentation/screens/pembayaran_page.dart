@@ -8,7 +8,7 @@ import '../../models/pembayaran_model.dart';
 import '../../providers/pembayaran_controller.dart';
 import '../../providers/pembayaran_state.dart';
 import '../widgets/pembayaran_card.dart';
-import '../widgets/pembayaran_empty_state.dart';
+import '../../../../../core/widgets/app_state_view.dart';
 import '../widgets/pembayaran_filter_dialog.dart';
 
 class PembayaranPage extends ConsumerWidget {
@@ -82,20 +82,16 @@ class PembayaranPage extends ConsumerWidget {
                         );
 
                       case PembayaranViewState.empty:
-                        return const PembayaranEmptyState(
-                          title: 'Data belum ditemukan!',
-                          description:
-                          'Belum ada data pembayaran yang cocok. Coba ubah filter untuk melihat data lainnya.',
-                          imagePath: 'assets/images/ehara_robot_empty.png',
+                        return AppStateView(
+                          type: state.filter.hasActiveFilter
+                              ? AppStateType.filterEmpty
+                              : AppStateType.empty,
                         );
 
                       case PembayaranViewState.error:
-                        return PembayaranEmptyState(
-                          title: 'Terjadi kesalahan!',
-                          description: state.errorMessage ??
-                              'Gagal memuat data pembayaran. Coba lagi sebentar.',
-                          showClockBadge: true,
-                          imagePath: 'assets/images/ehara_robot_empty.png',
+                        return AppStateView.fromError(
+                          message: state.errorMessage,
+                          onRetry: () => controller.loadPembayaran(),
                         );
 
                       case PembayaranViewState.success:

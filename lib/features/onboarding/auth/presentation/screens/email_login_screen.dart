@@ -68,30 +68,30 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
 
   void _validateEmail(String value) {
     setState(() {
-      _emailError = value.isEmpty
-          ? null
-          : AuthValidator.validateLoginIdentifier(value);
+      _emailError = AuthValidator.validateLoginIdentifier(value);
     });
   }
 
   void _validatePassword(String value) {
     setState(() {
-      _passwordError =
-      value.isEmpty ? null : AuthValidator.validatePassword(value);
+      _passwordError = AuthValidator.validatePassword(value);
     });
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateLoginIdentifier(emailController.text.trim()) ==
+    return AuthValidator.validateLoginIdentifier(emailController.text) ==
         null &&
         AuthValidator.validatePassword(passwordController.text) == null;
   }
 
   Future<void> handleLogin() async {
-    _validateEmail(emailController.text.trim());
+    _validateEmail(emailController.text);
     _validatePassword(passwordController.text);
 
-    if (!_isFormValid) return;
+    if (!_isFormValid) {
+      _showInfo('Mohon isi email/username dan password dengan benar.');
+      return;
+    }
 
     final success = await ref.read(authControllerProvider.notifier).login(
       identifier: emailController.text.trim(),
@@ -107,7 +107,6 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
       context.go(AppRoutes.dashboard);
     } else {
       final message = authState.errorMessage ?? '';
-
       _showInfo(message.isEmpty ? 'Email atau password salah.' : message);
     }
   }
@@ -227,7 +226,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: authState.isLoading ? null : handleLogin,
+                              onPressed:
+                              authState.isLoading ? null : handleLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
@@ -264,7 +264,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                                 'Belum punya akun? ',
                                 style: AppTextStyles.regular(
                                   fontSize: 14,
-                                  color: AppColors.textPrimary.withOpacity(0.80),
+                                  color:
+                                  AppColors.textPrimary.withOpacity(0.80),
                                 ),
                               ),
                               GestureDetector(
@@ -293,7 +294,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                               'Privacy Policy',
                               style: AppTextStyles.regular(
                                 fontSize: 12,
-                                color: AppColors.textPrimary.withOpacity(0.50),
+                                color:
+                                AppColors.textPrimary.withOpacity(0.50),
                               ),
                             ),
                           ),

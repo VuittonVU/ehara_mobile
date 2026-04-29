@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/auth/auth_controller.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../../../../core/widgets/app_state_view.dart';
 import '../../../../../core/widgets/pressable_button.dart';
 import '../../providers/profile_controller.dart';
 import '../../providers/profile_state.dart';
@@ -220,14 +221,16 @@ class ProfilePage extends ConsumerWidget {
                 }
 
                 if (state.viewState == ProfileViewState.error && profile == null) {
-                  return _ProfileErrorView(
+                  return AppStateView.fromError(
+                    message: state.errorMessage,
                     onRetry: () =>
                         ref.read(profileControllerProvider.notifier).loadProfile(),
                   );
                 }
 
                 if (profile == null) {
-                  return _ProfileErrorView(
+                  return AppStateView(
+                    type: AppStateType.backendError,
                     onRetry: () =>
                         ref.read(profileControllerProvider.notifier).loadProfile(),
                   );
@@ -370,40 +373,3 @@ class _LogoutDialogButton extends StatelessWidget {
   }
 }
 
-class _ProfileErrorView extends StatelessWidget {
-  final Future<void> Function() onRetry;
-
-  const _ProfileErrorView({
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBackground(
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          const SizedBox(height: 100),
-          Image.asset(
-            'assets/images/logo/logo_ehara.png',
-            height: 64,
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'Gagal memuat data profil',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Coba Lagi'),
-          ),
-        ],
-      ),
-    );
-  }
-}

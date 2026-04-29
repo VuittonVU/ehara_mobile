@@ -20,6 +20,20 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
 
   final HitungPohonService _service;
 
+  Future<void> checkBackendConnection() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      await _service.checkConnection();
+      state = state.copyWith(isLoading: false, clearError: true);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
+  }
+
   Future<void> loadHistory() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -49,7 +63,11 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
   }
 
   Future<HitungPohonJobModel?> uploadAndWait(File file) async {
-    state = state.copyWith(isUploading: true, clearError: true, clearCurrentJob: true);
+    state = state.copyWith(
+      isUploading: true,
+      clearError: true,
+      clearCurrentJob: true,
+    );
 
     try {
       var job = await _service.uploadTif(file);
