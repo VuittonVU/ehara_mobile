@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:open_filex/open_filex.dart';
 
 import '../../../../../core/widgets/app_background.dart';
 import '../../../shared_analysis/services/download_service.dart';
@@ -50,7 +49,7 @@ class _EHaraFullMapPageState extends ConsumerState<EHaraFullMapPage> {
           .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')
           .replaceAll(' ', '_');
 
-      final filePath = await DownloadService.downloadToDownloadFolder(
+      await DownloadService.downloadAndOpenFile(
         url: url,
         fileName: 'ehara_${safeEstateName}_${dashboard.eHaraUuid}.csv',
         ref: ref,
@@ -59,28 +58,10 @@ class _EHaraFullMapPageState extends ConsumerState<EHaraFullMapPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 5),
+        const SnackBar(
+          duration: Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          content: const Text(
-            'File berhasil diunduh ke folder Download/EHARA.',
-          ),
-          action: SnackBarAction(
-            label: 'Buka',
-            onPressed: () async {
-              final result = await OpenFilex.open(filePath);
-
-              if (result.type != ResultType.done && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Tidak ada aplikasi untuk membuka file CSV.',
-                    ),
-                  ),
-                );
-              }
-            },
-          ),
+          content: Text('File berhasil diunduh dan dibuka.'),
         ),
       );
     } catch (e) {

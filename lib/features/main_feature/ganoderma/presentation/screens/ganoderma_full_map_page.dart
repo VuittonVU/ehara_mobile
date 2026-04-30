@@ -25,6 +25,8 @@ class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
   bool _isDownloading = false;
 
   Future<void> _downloadCsv() async {
+    if (_isDownloading) return;
+
     final csvUrl = widget.data.csvUrl;
 
     if (csvUrl == null || csvUrl.isEmpty) {
@@ -39,7 +41,7 @@ class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
     setState(() => _isDownloading = true);
 
     try {
-      await DownloadService.downloadToDownloadFolder(
+      await DownloadService.downloadAndOpenFile(
         url: csvUrl,
         fileName:
         'ganoderma_${widget.data.eHaraUuid.isEmpty ? 'data' : widget.data.eHaraUuid}.csv',
@@ -50,7 +52,9 @@ class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('File berhasil diunduh ke folder Download/EHARA.'),
+          duration: Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          content: Text('File berhasil diunduh dan dibuka.'),
         ),
       );
     } catch (e) {

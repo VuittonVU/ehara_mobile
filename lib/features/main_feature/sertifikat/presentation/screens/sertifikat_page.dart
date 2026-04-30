@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
 
+import '../../../shared_analysis/services/download_service.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../../core/widgets/app_top_bar.dart';
 import '../../models/sertifikat_model.dart';
 import '../../providers/sertifikat_controller.dart';
 import '../../providers/sertifikat_state.dart';
-import '../../services/sertifikat_service.dart';
 import '../widgets/sertifikat_card.dart';
 import '../../../../../core/widgets/app_state_view.dart';
 import '../widgets/sertifikat_filter_dialog.dart';
@@ -55,19 +54,27 @@ class SertifikatPage extends ConsumerWidget {
     );
 
     try {
-      final file = await service.downloadCertificatePdf(
-        filename: filename,
-        suggestedName: suggestedName,
+      final url = service.buildCertificatePdfUrl(filename);
+
+      final path = await DownloadService.downloadAndOpenFile(
+        url: url,
+        ref: ref,
+        fileName: '$suggestedName.pdf',
+        headers: const {
+          'Accept': 'application/pdf,*/*',
+        },
       );
 
-      await OpenFilex.open(file.path);
-
       messenger.showSnackBar(
-        SnackBar(content: Text('PDF dibuka: ${file.path.split('/').last}')),
+        SnackBar(content: Text('PDF berhasil diunduh: ${path.split('/').last}')),
       );
     } catch (e) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Gagal download PDF: $e')),
+        SnackBar(
+          content: Text(
+            'Gagal mengunduh PDF: ${e.toString().replaceFirst('Exception: ', '')}',
+          ),
+        ),
       );
     }
   }
