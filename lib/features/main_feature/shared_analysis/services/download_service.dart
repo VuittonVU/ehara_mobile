@@ -55,17 +55,11 @@ class DownloadService {
         final uri = saveInfo?.uri;
 
         if (uri != null) {
-          final path = await _mediaStore.getFilePathFromUri(
-            uriString: uri.toString(),
-          );
-
-          if (path != null && path.isNotEmpty) {
-            finalPath = path;
-          }
+          finalPath = uri.toString();
         }
       }
 
-      await OpenFilex.open(finalPath);
+      await OpenFilex.open(tempPath);
 
       await _notifySuccess(
         ref: ref,
@@ -109,6 +103,7 @@ class DownloadService {
       }
 
       final safeName = _safeFileName(fileName);
+
       final tempPath = await _saveToTemp(
         bytes: Uint8List.fromList(response.bodyBytes),
         fileName: safeName,
@@ -129,13 +124,7 @@ class DownloadService {
         final uri = saveInfo?.uri;
 
         if (uri != null) {
-          final path = await _mediaStore.getFilePathFromUri(
-            uriString: uri.toString(),
-          );
-
-          if (path != null && path.isNotEmpty) {
-            finalPath = path;
-          }
+          finalPath = uri.toString();
         }
       }
 
@@ -171,6 +160,7 @@ class DownloadService {
       }
 
       final safeName = _safeFileName(fileName);
+
       final path = await _saveToTemp(
         bytes: Uint8List.fromList(response.bodyBytes),
         fileName: safeName,
@@ -212,9 +202,11 @@ class DownloadService {
     final lower = fileName.toLowerCase();
 
     if (lower.contains('ganoderma')) return 'CSV Ganoderma';
+
     if (lower.contains('ehara') || lower.contains('hara')) {
       return 'CSV Unsur Hara';
     }
+
     if (lower.contains('sertifikat') || lower.endsWith('.pdf')) {
       return 'Sertifikat PDF';
     }

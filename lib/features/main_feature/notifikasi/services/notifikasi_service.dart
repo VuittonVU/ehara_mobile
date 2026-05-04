@@ -12,10 +12,18 @@ class LocalNotificationService {
       'Notifikasi lokal untuk aktivitas E-HARA.';
 
   static Future<void> init() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
     const settings = InitializationSettings(
       android: androidSettings,
+      iOS: iosSettings,
     );
 
     await _plugin.initialize(settings);
@@ -25,6 +33,16 @@ class LocalNotificationService {
         AndroidFlutterLocalNotificationsPlugin>();
 
     await androidPlugin?.requestNotificationsPermission();
+
+    final iosPlugin =
+    _plugin.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+
+    await iosPlugin?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     const androidChannel = AndroidNotificationChannel(
       _channelId,
@@ -49,8 +67,15 @@ class LocalNotificationService {
       ticker: 'E-HARA',
     );
 
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
     const details = NotificationDetails(
       android: androidDetails,
+      iOS: iosDetails,
     );
 
     await _plugin.show(

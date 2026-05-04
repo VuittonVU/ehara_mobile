@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,16 +11,19 @@ import 'features/main_feature/notifikasi/services/notifikasi_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await MediaStore.ensureInitialized();
+  if (Platform.isAndroid) {
+    await MediaStore.ensureInitialized();
+    MediaStore.appFolder = 'EHARA';
 
-  MediaStore.appFolder = 'EHARA';
+    await FlutterDownloader.initialize(
+      debug: true,
+      ignoreSsl: true,
+    );
+  }
 
-  await FlutterDownloader.initialize(
-    debug: true,
-    ignoreSsl: true,
-  );
-
-  await LocalNotificationService.init();
+  LocalNotificationService.init().catchError((e) {
+    debugPrint('Local notification init error: $e');
+  });
 
   runApp(
     const ProviderScope(

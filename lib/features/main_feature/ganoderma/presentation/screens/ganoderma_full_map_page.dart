@@ -41,10 +41,14 @@ class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
     setState(() => _isDownloading = true);
 
     try {
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour}${now.minute}${now.second}';
+
       await DownloadService.downloadAndOpenFile(
         url: csvUrl,
         fileName:
-        'ganoderma_${widget.data.eHaraUuid.isEmpty ? 'data' : widget.data.eHaraUuid}.csv',
+        'ganoderma_${widget.data.eHaraUuid.isEmpty ? 'data' : widget.data.eHaraUuid}_$timestamp.csv',
         ref: ref,
       );
 
@@ -54,7 +58,7 @@ class _GanodermaFullMapPageState extends ConsumerState<GanodermaFullMapPage> {
         const SnackBar(
           duration: Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          content: Text('File berhasil diunduh dan dibuka.'),
+          content: Text('File berhasil diunduh.'),
         ),
       );
     } catch (e) {

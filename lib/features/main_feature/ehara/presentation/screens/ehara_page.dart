@@ -64,9 +64,13 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
           .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')
           .replaceAll(' ', '_');
 
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour}${now.minute}${now.second}';
+
       await DownloadService.downloadAndOpenFile(
         url: url,
-        fileName: 'ehara_${safeEstateName}_${widget.eHaraUuid}.csv',
+        fileName: 'ehara_${safeEstateName}_${dashboard.eHaraUuid}_$timestamp.csv',
         ref: ref,
       );
 
@@ -76,7 +80,7 @@ class _EHaraPageState extends ConsumerState<EHaraPage> {
         const SnackBar(
           duration: Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          content: Text('File berhasil diunduh dan dibuka.'),
+          content: Text('File berhasil diunduh.'),
         ),
       );
     } catch (e) {

@@ -48,10 +48,14 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
         throw Exception('Link CSV ganoderma tidak ditemukan');
       }
 
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
+
       await DownloadService.downloadAndOpenFile(
         url: data.csvUrl!,
         fileName:
-        'ganoderma_${data.eHaraUuid.isEmpty ? 'data' : data.eHaraUuid}.csv',
+        'ganoderma_${data.eHaraUuid.isEmpty ? 'data' : data.eHaraUuid}_$timestamp.csv',
         ref: ref,
       );
 
@@ -61,7 +65,7 @@ class _GanodermaPageState extends ConsumerState<GanodermaPage> {
         const SnackBar(
           duration: Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
-          content: Text('File berhasil diunduh dan dibuka.'),
+          content: Text('File berhasil diunduh.'),
         ),
       );
     } catch (e) {
