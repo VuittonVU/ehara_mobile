@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1088379536347",
+    "project_id": "ehara-2f659",
+    "storage_bucket": "ehara-2f659.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088379536347:android:22e57d641f31b8b4f2ddfe",
+        "android_client_info": {
+          "package_name": "app.ppks.ehara_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1088379536347-upgn3p7fodrdnqh2cvd0rf6125ku1e0v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHCZN8zwF7ThcHGzMsEhyfPhEc_2aZj74"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088379536347-upgn3p7fodrdnqh2cvd0rf6125ku1e0v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

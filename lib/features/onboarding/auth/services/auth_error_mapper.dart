@@ -1,5 +1,5 @@
 String mapAuthError(Object error) {
-  final raw = error.toString();
+  final raw = error.toString().replaceFirst('Exception: ', '');
   final message = raw.toLowerCase();
 
   if (message.contains('endpoint pendaftaran belum tersedia')) {
@@ -20,8 +20,25 @@ String mapAuthError(Object error) {
     return 'Koneksi timeout. Coba lagi.';
   }
 
-  if (message.contains('401') || message.contains('unauthorized')) {
-    return 'Email/username atau password salah.';
+  if (message.contains('email has already') ||
+      message.contains('email already') ||
+      message.contains('email sudah') ||
+      message.contains('email telah')) {
+    return 'Email sudah terdaftar.';
+  }
+
+  if (message.contains('username has already') ||
+      message.contains('username already') ||
+      message.contains('username sudah') ||
+      message.contains('username telah')) {
+    return 'Username sudah digunakan.';
+  }
+
+  if (message.contains('validation') ||
+      message.contains('validator') ||
+      message.contains('invalid') ||
+      message.contains('422')) {
+    return 'Data belum sesuai. Periksa kembali input yang diisi.';
   }
 
   if (message.contains('403')) {
@@ -36,5 +53,5 @@ String mapAuthError(Object error) {
     return 'Server sedang bermasalah.';
   }
 
-  return raw.replaceFirst('Exception: ', '');
+  return raw;
 }

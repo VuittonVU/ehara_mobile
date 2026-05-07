@@ -22,7 +22,6 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   bool isPasswordHidden = true;
-
   bool _fromGoogle = false;
   String _googleName = '';
 
@@ -34,6 +33,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
     super.initState();
 
     Future.microtask(() {
+      if (!mounted) return;
+
       final extra = GoRouterState.of(context).extra;
 
       if (extra is Map) {
@@ -41,13 +42,21 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
         final name = extra['name']?.toString() ?? '';
         final fromGoogle = extra['from_google'] == true;
 
-        if (email.isNotEmpty) {
-          emailController.text = email;
-          _validateEmail(email);
-        }
+        setState(() {
+          _fromGoogle = fromGoogle;
+          _googleName = name;
 
-        _googleName = name;
-        _fromGoogle = fromGoogle;
+          if (email.isNotEmpty) {
+            emailController.text = email;
+            _emailError = AuthValidator.validateLoginIdentifier(email);
+          }
+        });
+
+        if (fromGoogle && email.isNotEmpty) {
+          _showInfo(
+            'Email Google berhasil dipilih. Silakan masukkan password E-HARA.',
+          );
+        }
       }
     });
   }
@@ -60,9 +69,14 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   }
 
   void _showInfo(String message) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -79,8 +93,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   }
 
   bool get _isFormValid {
-    return AuthValidator.validateLoginIdentifier(emailController.text) ==
-        null &&
+    return AuthValidator.validateLoginIdentifier(emailController.text) == null &&
         AuthValidator.validatePassword(passwordController.text) == null;
   }
 
@@ -119,6 +132,10 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
     context.push(AppRoutes.privacyPolicy);
   }
 
+  void _goBackToLogin() {
+    context.go(AppRoutes.login);
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
@@ -131,8 +148,21 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          onPressed: _goBackToLogin,
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
       body: AppBackground(
         child: SafeArea(
+          top: false,
           child: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
@@ -148,7 +178,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                     children: [
                       Column(
                         children: [
-                          const SizedBox(height: 46),
+                          const SizedBox(height: 16),
                           Image.asset(
                             'assets/images/logo/logo_ehara.png',
                             width: 160,
@@ -161,13 +191,42 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Silahkan masuk dengan akun Anda.',
+                            _fromGoogle
+                                ? 'Masukkan password akun E-HARA Anda untuk melanjutkan.'
+                                : 'Silahkan masuk dengan akun Anda.',
                             textAlign: TextAlign.center,
                             style: AppTextStyles.regular(
                               fontSize: 14,
                               color: AppColors.textPrimary.withOpacity(0.74),
                             ),
                           ),
+                          if (_fromGoogle) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.22),
+                                ),
+                              ),
+                              child: Text(
+                                _googleName.isNotEmpty
+                                    ? 'Akun Google: $_googleName\n${emailController.text}'
+                                    : 'Akun Google: ${emailController.text}',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.regular(
+                                  fontSize: 13,
+                                  color: AppColors.textPrimary.withOpacity(0.78),
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 42),
                           LoginTextField(
                             controller: emailController,

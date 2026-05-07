@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 import '../models/app_user_model.dart';
 
@@ -27,11 +31,22 @@ class AuthService {
     );
 
     request.headers['api-key'] = _apiKey;
+    request.headers['Accept'] = 'application/json';
+
     request.fields['email'] = identifier.trim();
     request.fields['password'] = password;
 
+    debugPrint('LOGIN CALLED');
+    debugPrint('LOGIN URL: ${request.url}');
+    debugPrint('LOGIN HEADER: ${request.headers}');
+    debugPrint('LOGIN FIELDS: ${request.fields}');
+
     final streamedResponse = await request.send();
     final body = await streamedResponse.stream.bytesToString();
+
+    debugPrint('LOGIN STATUS: ${streamedResponse.statusCode}');
+    debugPrint('LOGIN BODY: $body');
+
     final decoded = _safeDecode(body);
 
     if (streamedResponse.statusCode >= 200 &&
@@ -73,8 +88,48 @@ class AuthService {
     required String whatsapp,
     required String password,
   }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://ehara.iopri.co.id/api/auth/sign-up'),
+    );
+
+    request.headers['api-key'] = _apiKey;
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['name'] = fullName.trim();
+    request.fields['email'] = email.trim();
+    request.fields['whatsapp_no'] = whatsapp.trim();
+    request.fields['username'] = username.trim();
+    request.fields['password'] = password;
+    request.fields['confirm_password'] = password;
+    request.fields['role'] = 'user';
+
+    debugPrint('REGISTER CALLED');
+    debugPrint('REGISTER URL: ${request.url}');
+    debugPrint('REGISTER HEADER: ${request.headers}');
+    debugPrint('REGISTER FIELDS: ${request.fields}');
+
+    final streamedResponse = await request.send();
+    final body = await streamedResponse.stream.bytesToString();
+
+    debugPrint('REGISTER STATUS: ${streamedResponse.statusCode}');
+    debugPrint('REGISTER BODY: $body');
+
+    final decoded = _safeDecode(body);
+
+    if (streamedResponse.statusCode >= 200 &&
+        streamedResponse.statusCode < 300) {
+      return {
+        'success': true,
+        'message': _extractMessage(decoded) ??
+            'Pendaftaran berhasil. Verifikasi email sementara masih dalam perbaikan.',
+        'raw': decoded,
+      };
+    }
+
     throw Exception(
-      'Endpoint pendaftaran belum tersedia dari backend PPKS.',
+      _extractMessage(decoded) ??
+          'Pendaftaran gagal (${streamedResponse.statusCode})',
     );
   }
 
@@ -131,6 +186,7 @@ class AuthService {
       headers: {
         'Authorization': 'Bearer $token',
         'api-key': _apiKey,
+        'x-api-key': _apiKey,
         'Accept': 'application/json',
       },
     );
@@ -160,7 +216,7 @@ class AuthService {
     await _storage.write(key: _tokenKey, value: token);
   }
 
-  Future<String?> getToken() async {
+  Future<String?> getToken() {
     return _storage.read(key: _tokenKey);
   }
 
@@ -172,6 +228,11 @@ class AuthService {
   Future<void> logout() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _userKey);
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+    } catch (_) {}
   }
 
   Future<void> saveUser(Map<String, dynamic> user) async {
@@ -205,6 +266,7 @@ class AuthService {
 
     if (withApiKey) {
       headers['api-key'] = _apiKey;
+      headers['x-api-key'] = _apiKey;
     }
 
     return headers;
@@ -243,13 +305,67 @@ class AuthService {
   }
 
   String? _extractMessage(Map<String, dynamic> json) {
-    if (json['message'] != null) return json['message']?.toString();
+    if (json['error'] is Map<String, dynamic>) {
+      final errors = Map<String, dynamic>.from(json['error']);
+      final messages = <String>[];
+
+      errors.forEach((key, value) {
+        if (value is List) {
+          messages.addAll(value.map((e) => _translateBackendMessage(e.toString())));
+        } else if (value != null) {
+          messages.add(_translateBackendMessage(value.toString()));
+        }
+      });
+
+      if (messages.isNotEmpty) {
+        return messages.join('\n');
+      }
+    }
+
+    if (json['message'] != null) {
+      return _translateBackendMessage(json['message'].toString());
+    }
 
     if (json['meta'] is Map<String, dynamic>) {
-      return json['meta']['message']?.toString();
+      final message = json['meta']['message']?.toString();
+      if (message != null && message.isNotEmpty) {
+        return _translateBackendMessage(message);
+      }
+    }
+
+    if (json['errors'] != null) {
+      return _translateBackendMessage(json['errors'].toString());
     }
 
     return null;
+  }
+
+  String _translateBackendMessage(String message) {
+    final lower = message.toLowerCase();
+
+    if (lower.contains('whatsapp no has already been taken')) {
+      return 'Nomor WhatsApp sudah digunakan.';
+    }
+
+    if (lower.contains('email sudah pernah digunakan')) {
+      return 'Email sudah pernah digunakan.';
+    }
+
+    if (lower.contains('email has already been taken') ||
+        lower.contains('email already exists')) {
+      return 'Email sudah digunakan.';
+    }
+
+    if (lower.contains('username has already been taken') ||
+        lower.contains('username already exists')) {
+      return 'Username sudah digunakan.';
+    }
+
+    if (lower.contains('bad request')) {
+      return 'Data pendaftaran belum sesuai.';
+    }
+
+    return message;
   }
 
   Map<String, dynamic> _safeDecode(String body) {

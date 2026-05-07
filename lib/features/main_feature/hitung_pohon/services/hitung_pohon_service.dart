@@ -7,7 +7,7 @@ import '../models/hitung_pohon_job_model.dart';
 
 class HitungPohonService {
   HitungPohonService({
-    this.baseUrl = 'https://jubilant-knee-evergreen.ngrok-free.dev',
+    this.baseUrl = 'http://45.77.168.172:8000',
     this.apiKey = 'a',
     this.userId = 'anonymous',
   });

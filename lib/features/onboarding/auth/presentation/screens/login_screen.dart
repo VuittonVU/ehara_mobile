@@ -16,14 +16,25 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  void _showInfo(String message) {
+  bool _isGoogleLoading = false;
+
+  void _showSnackBar(
+      String message, {
+        Color? backgroundColor,
+        int seconds = 4,
+      }) {
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: Duration(seconds: seconds),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
-
-  bool _isGoogleLoading = false;
 
   Future<void> _handleGoogleLogin() async {
     if (_isGoogleLoading) return;
@@ -42,9 +53,22 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (googleUser == null) {
-        _showInfo('Login Google dibatalkan.');
+        _showSnackBar(
+          'Pemilihan akun Google dibatalkan.',
+          backgroundColor: Colors.orange,
+        );
         return;
       }
+
+      _showSnackBar(
+        'Email Google berhasil dipilih. Silakan masukkan password E-HARA.',
+        backgroundColor: Colors.green,
+        seconds: 3,
+      );
+
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      if (!mounted) return;
 
       context.push(
         AppRoutes.emailLogin,
@@ -54,11 +78,22 @@ class _LoginScreenState extends State<LoginScreen> {
           'from_google': true,
         },
       );
-    } catch (e) {
-      debugPrint('GOOGLE ERROR: $e');
+    } catch (e, stackTrace) {
+      debugPrint('GOOGLE PLACEHOLDER ERROR: $e');
+      debugPrint('GOOGLE PLACEHOLDER STACK: $stackTrace');
 
       if (!mounted) return;
-      _showInfo('Gagal membuka akun Google.');
+
+      _showSnackBar(
+        'Google belum bisa dipakai. Silakan masuk dengan email dan password.',
+        backgroundColor: Colors.orange,
+        seconds: 4,
+      );
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (!mounted) return;
+      context.push(AppRoutes.emailLogin);
     } finally {
       if (mounted) {
         setState(() => _isGoogleLoading = false);
@@ -69,10 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight =
-        mediaQuery.size.height -
-            mediaQuery.padding.top -
-            mediaQuery.padding.bottom;
+    final screenHeight = mediaQuery.size.height -
+        mediaQuery.padding.top -
+        mediaQuery.padding.bottom;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -119,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             absorbing: _isGoogleLoading,
                             child: SocialLoginButton(
                               text: _isGoogleLoading
-                                  ? 'Sedang masuk...'
+                                  ? 'Memilih akun...'
                                   : 'Sign in dengan Google',
                               iconPath: 'assets/icons/google.png',
                               onTap: _handleGoogleLogin,
@@ -142,7 +176,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'Atau',
                                   style: AppTextStyles.regular(
                                     fontSize: 13,
-                                    color: AppColors.textPrimary.withOpacity(0.72),
+                                    color: AppColors.textPrimary.withOpacity(
+                                      0.72,
+                                    ),
                                   ),
                                 ),
                               ),
