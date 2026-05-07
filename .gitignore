@@ -61,3 +61,7 @@ ios/**/*.perspectivev3
 .history/
 .atom/
 .swiftpm/
+
+# Firebase
+android/app/google-services.json
+lib/firebase_options.dart
