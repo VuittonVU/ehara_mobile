@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -6,6 +7,7 @@ import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../services/auth_service.dart';
 import '../widgets/social_login_button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -44,9 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
+        serverClientId:
+        '1088379536347-upgn3p7fodrdnqh2cvd0rf6125ku1e0v.apps.googleusercontent.com',
       );
 
       await googleSignIn.signOut();
+      await FirebaseAuth.instance.signOut();
 
       final googleUser = await googleSignIn.signIn();
 
@@ -54,46 +59,60 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (googleUser == null) {
         _showSnackBar(
-          'Pemilihan akun Google dibatalkan.',
+          'Login Google dibatalkan.',
           backgroundColor: Colors.orange,
         );
         return;
       }
 
+      final googleAuth = await googleUser.authentication;
+
+      if (googleAuth.idToken == null || googleAuth.accessToken == null) {
+        throw Exception('Token Google tidak ditemukan.');
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final firebaseIdToken = await userCredential.user?.getIdToken(true);
+
+      if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
+        throw Exception('Firebase ID Token tidak ditemukan.');
+      }
+
+      final result = await AuthService().loginWithGoogleIdToken(
+        idToken: firebaseIdToken,
+      );
+
+      if (!mounted) return;
+
       _showSnackBar(
-        'Email Google berhasil dipilih. Silakan masukkan password E-HARA.',
+        result['message']?.toString() ?? 'Login Google berhasil',
         backgroundColor: Colors.green,
-        seconds: 3,
+        seconds: 2,
       );
 
       await Future.delayed(const Duration(milliseconds: 400));
 
       if (!mounted) return;
-
-      context.push(
-        AppRoutes.emailLogin,
-        extra: {
-          'email': googleUser.email,
-          'name': googleUser.displayName ?? '',
-          'from_google': true,
-        },
-      );
+      context.go(AppRoutes.dashboard);
     } catch (e, stackTrace) {
-      debugPrint('GOOGLE PLACEHOLDER ERROR: $e');
-      debugPrint('GOOGLE PLACEHOLDER STACK: $stackTrace');
+      debugPrint('GOOGLE ERROR TYPE: ${e.runtimeType}');
+      debugPrint('GOOGLE ERROR: $e');
+      debugPrint('GOOGLE STACK: $stackTrace');
 
       if (!mounted) return;
 
       _showSnackBar(
-        'Google belum bisa dipakai. Silakan masuk dengan email dan password.',
-        backgroundColor: Colors.orange,
-        seconds: 4,
+        e.toString().replaceFirst('Exception: ', ''),
+        backgroundColor: Colors.red,
+        seconds: 5,
       );
-
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      if (!mounted) return;
-      context.push(AppRoutes.emailLogin);
     } finally {
       if (mounted) {
         setState(() => _isGoogleLoading = false);
@@ -153,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             absorbing: _isGoogleLoading,
                             child: SocialLoginButton(
                               text: _isGoogleLoading
-                                  ? 'Memilih akun...'
+                                  ? 'Sedang masuk...'
                                   : 'Sign in dengan Google',
                               iconPath: 'assets/icons/google.png',
                               onTap: _handleGoogleLogin,

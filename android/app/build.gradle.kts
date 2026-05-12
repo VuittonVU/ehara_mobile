@@ -45,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.ppks.ehara_mobile"
+        applicationId = "app.ppks.ehara"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
         versionCode = flutter.versionCode

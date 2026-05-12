@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/auth/auth_controller.dart';
+import '../../../../main_feature/profile/providers/profile_controller.dart';
+
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
@@ -116,7 +118,14 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
     final authState = ref.read(authControllerProvider);
 
     if (success) {
+      await ref
+          .read(profileControllerProvider.notifier)
+          .refreshProfile();
+
+      if (!mounted) return;
+
       _showInfo('Login berhasil');
+
       context.go(AppRoutes.dashboard);
     } else {
       final message = authState.errorMessage ?? '';

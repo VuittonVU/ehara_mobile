@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 
 import '../models/app_user_model.dart';
 
@@ -17,7 +17,7 @@ class AuthService {
   static const String _userKey = 'ehara_user';
   static const String _apiKey = 'ppks2020';
 
-  static const String baseUrl = 'https://ehara.iopri.co.id';
+    static const String baseUrl = 'https://ehara.iopri.co.id';
 
   static String get apiKey => _apiKey;
 
@@ -32,7 +32,6 @@ class AuthService {
 
     request.headers['api-key'] = _apiKey;
     request.headers['Accept'] = 'application/json';
-
     request.fields['email'] = identifier.trim();
     request.fields['password'] = password;
 
@@ -57,6 +56,7 @@ class AuthService {
         throw Exception('Token tidak ditemukan pada response login.');
       }
 
+      await _storage.delete(key: _userKey);
       await saveToken(token);
 
       final userMap = _extractUserMap(decoded);
@@ -79,6 +79,61 @@ class AuthService {
     );
   }
 
+  Future<Map<String, dynamic>> loginWithGoogleIdToken({
+    required String idToken,
+  }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/api/auth/google/mobile-callback'),
+    );
+
+    request.headers['x-api-key'] = _apiKey;
+    request.headers['Accept'] = 'application/json';
+    request.fields['id_token'] = idToken;
+
+    debugPrint('GOOGLE CALLBACK CALLED');
+    debugPrint('GOOGLE CALLBACK URL: ${request.url}');
+    debugPrint('GOOGLE CALLBACK HEADER: ${request.headers}');
+
+    final streamedResponse = await request.send();
+    final body = await streamedResponse.stream.bytesToString();
+
+    debugPrint('GOOGLE CALLBACK STATUS: ${streamedResponse.statusCode}');
+    debugPrint('GOOGLE CALLBACK BODY: $body');
+
+    final decoded = _safeDecode(body);
+
+    if (streamedResponse.statusCode >= 200 &&
+        streamedResponse.statusCode < 300) {
+      final token = _extractToken(decoded);
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Token tidak ditemukan pada response Google login.');
+      }
+
+      await _storage.delete(key: _userKey);
+      await saveToken(token);
+
+      final userMap = _extractUserMap(decoded);
+      if (userMap != null) {
+        await saveUser(userMap);
+      }
+
+      return {
+        'success': true,
+        'message': _extractMessage(decoded) ?? 'Login Google berhasil',
+        'token': token,
+        'user': userMap != null ? AppUserModel.fromMap(userMap) : null,
+        'raw': decoded,
+      };
+    }
+
+    throw Exception(
+      _extractMessage(decoded) ??
+          'Login Google gagal (${streamedResponse.statusCode})',
+    );
+  }
+
   Future<Map<String, dynamic>> register({
     required String fullName,
     required String username,
@@ -90,7 +145,7 @@ class AuthService {
   }) async {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('https://ehara.iopri.co.id/api/auth/sign-up'),
+      Uri.parse('$baseUrl/api/auth/sign-up'),
     );
 
     request.headers['api-key'] = _apiKey;
@@ -208,7 +263,7 @@ class AuthService {
     );
   }
 
-  Future<List<dynamic>> getCertificateList() async {
+  Future<List<dynamic>> getCertificateList() {
     return getAnalisisData(queryName: 'e_hara_certificate');
   }
 
@@ -311,7 +366,9 @@ class AuthService {
 
       errors.forEach((key, value) {
         if (value is List) {
-          messages.addAll(value.map((e) => _translateBackendMessage(e.toString())));
+          messages.addAll(
+            value.map((e) => _translateBackendMessage(e.toString())),
+          );
         } else if (value != null) {
           messages.add(_translateBackendMessage(value.toString()));
         }
