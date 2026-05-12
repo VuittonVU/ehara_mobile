@@ -11,10 +11,7 @@ class FormStepper extends StatelessWidget {
   static const Color _activeColor = Color(0xFF3E7F69);
   static const Color _inactiveColor = Color(0xFFDCE8E3);
   static const Color _inactiveTextColor = Color(0xFF9AA7A1);
-  static const Color _labelColor = Color(0xFF6B6B6B);
 
-  bool _isCompleted(int step) => currentStep > step;
-  bool _isCurrent(int step) => currentStep == step;
   bool _isActive(int step) => currentStep >= step;
 
   Widget _buildStepCircle(int step) {
@@ -39,11 +36,11 @@ class FormStepper extends StatelessWidget {
     );
   }
 
-  Widget _buildLine(bool isActive) {
+  Widget _buildConnector(bool isActive) {
     return Expanded(
       child: Container(
         height: 4,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: isActive ? _activeColor : _inactiveColor,
           borderRadius: BorderRadius.circular(999),
@@ -55,17 +52,28 @@ class FormStepper extends StatelessWidget {
   Widget _buildLabel(
       String text, {
         required bool isActive,
+        required Alignment alignment,
+        required TextAlign textAlign,
       }) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.visible,
-      style: TextStyle(
-        fontSize: 10.5,
-        height: 1.25,
-        color: isActive ? const Color(0xFF555555) : const Color(0xFF9A9A9A),
-        fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+    return SizedBox(
+      height: 34,
+      child: Align(
+        alignment: alignment,
+        child: Text(
+          text,
+          textAlign: textAlign,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 10.5,
+            height: 1.2,
+            color: isActive
+                ? const Color(0xFF555555)
+                : const Color(0xFF9A9A9A),
+            fontWeight:
+            isActive ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
@@ -77,32 +85,42 @@ class FormStepper extends StatelessWidget {
         Row(
           children: [
             _buildStepCircle(1),
-            _buildLine(currentStep >= 2),
+            _buildConnector(currentStep >= 2),
             _buildStepCircle(2),
-            _buildLine(currentStep >= 3),
+            _buildConnector(currentStep >= 3),
             _buildStepCircle(3),
           ],
         ),
-        const SizedBox(height: 8),
+
+        const SizedBox(height: 10),
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _buildLabel(
-                'Form 1: Upload File',
+                'Upload\nFile',
                 isActive: currentStep >= 1,
+                alignment: Alignment.centerLeft,
+                textAlign: TextAlign.left,
               ),
             ),
+
             Expanded(
               child: _buildLabel(
-                'Data dan Rekomendasi Pupuk',
+                'Mapping\nKolom',
                 isActive: currentStep >= 2,
+                alignment: Alignment.center,
+                textAlign: TextAlign.center,
               ),
             ),
+
             Expanded(
               child: _buildLabel(
-                'Validasi dan Simpan Hasil',
+                'Validasi &\nSimpan Hasil',
                 isActive: currentStep >= 3,
+                alignment: Alignment.centerRight,
+                textAlign: TextAlign.right,
               ),
             ),
           ],

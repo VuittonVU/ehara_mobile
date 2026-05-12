@@ -261,30 +261,6 @@ class _Form2PageState extends ConsumerState<Form2Page> {
                               hintText: 'Proyeksi Protas',
                             ),
                             const SizedBox(height: 18),
-                            const FormLabel(
-                              text: 'Tambahkan Analisis Deteksi Ganoderma?',
-                            ),
-                            const SizedBox(height: 8),
-                            FormDropdownField<String>(
-                              value: formState.ganodermaStep2,
-                              hintText: 'Pilih',
-                              items: const ['Ya', 'Tidak']
-                                  .map(
-                                    (item) => DropdownMenuItem<String>(
-                                  value: item,
-                                  child: Text(item),
-                                ),
-                              )
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  ref
-                                      .read(formNotifierProvider.notifier)
-                                      .setGanodermaStep2(value);
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 18),
                             const FormLabel(text: 'Status Hara Tanah'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(

@@ -136,7 +136,7 @@ class _Form3PageState extends ConsumerState<Form3Page> {
     AppStatusDialog.show(
       context: context,
       title: 'Data Berhasil Disimpan!',
-      message: 'Data analisis hara sudah berhasil disimpan.',
+      message: 'Data analisis hara berhasil diproses untuk demo. Data belum tersimpan permanen.',
       imagePath: 'assets/maskot/maskot2.png',
       buttonText: 'OK',
       onPressed: () async {
@@ -151,13 +151,11 @@ class _Form3PageState extends ConsumerState<Form3Page> {
   Future<void> _submitForm() async {
     final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!notifier.validateStep3()) {
-      _showFailedDialog();
-      return;
-    }
-
+    // DEMO MODE:
+    // Untuk presentasi, tombol Simpan langsung menampilkan popup berhasil.
+    // Data belum dikirim/tersimpan ke backend.
     final payload = notifier.buildSubmissionPayload();
-    debugPrint('FORM SUBMISSION PAYLOAD: $payload');
+    debugPrint('FORM SUBMISSION PAYLOAD (DEMO ONLY): $payload');
 
     await notifier.clearDraft();
 

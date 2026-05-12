@@ -381,7 +381,7 @@ class _Form3MapPageState extends ConsumerState<Form3MapPage> {
                                     ),
                                   ),
                                   child: const Text(
-                                    'Lanjut',
+                                    'Selanjutnya',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,

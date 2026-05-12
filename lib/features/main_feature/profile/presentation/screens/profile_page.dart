@@ -241,7 +241,7 @@ class ProfilePage extends ConsumerWidget {
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
                         child: Column(
                           children: [
                             Align(

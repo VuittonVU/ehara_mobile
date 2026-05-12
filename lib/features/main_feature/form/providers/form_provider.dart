@@ -427,7 +427,8 @@ class FormNotifier extends Notifier<TambahFormState> {
   }
 
   bool validateStep1() {
-    return state.namaProjek.trim().isNotEmpty &&
+    return state.fileName.trim().isNotEmpty &&
+        state.namaProjek.trim().isNotEmpty &&
         state.namaPerusahaan.trim().isNotEmpty &&
         state.namaKebun.trim().isNotEmpty &&
         state.selectedProvinsi != null &&
@@ -448,7 +449,6 @@ class FormNotifier extends Notifier<TambahFormState> {
         state.jumlahPohonHa.trim().isNotEmpty &&
         state.protas.trim().isNotEmpty &&
         state.proyeksiProtasStep2.trim().isNotEmpty &&
-        state.ganodermaStep2.trim().isNotEmpty &&
         state.statusHaraTanahStep2.trim().isNotEmpty;
 
     if (!basicValid) return false;

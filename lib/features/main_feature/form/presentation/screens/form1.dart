@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/widgets/app_background.dart';
@@ -165,35 +165,48 @@ class _Form1PageState extends ConsumerState<Form1Page> {
     }
   }
 
-  Future<void> _pickTemporaryImage() async {
+  Future<void> _pickSampleFile() async {
     try {
-      final picker = ImagePicker();
-      final XFile? picked = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'xlsx', 'xls'],
+        allowMultiple: false,
+        withData: false,
       );
 
-      if (picked == null) return;
+      if (result == null || result.files.isEmpty) return;
 
-      final bytes = await picked.readAsBytes();
+      final pickedFile = result.files.single;
+      final fileName = pickedFile.name;
+      final lowerName = fileName.toLowerCase();
+
+      final isValidFile = lowerName.endsWith('.csv') ||
+          lowerName.endsWith('.xlsx') ||
+          lowerName.endsWith('.xls');
+
+      if (!isValidFile) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Format file harus .xlsx, .xls, atau .csv'),
+          ),
+        );
+        return;
+      }
+
+      ref.read(formNotifierProvider.notifier).setFileName(fileName);
 
       if (!mounted) return;
-
-      ref.read(formNotifierProvider.notifier).setTemporaryImage(
-        bytes: bytes,
-        imageName: picked.name,
-      );
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gambar dipilih sementara'),
+        SnackBar(
+          content: Text('File dipilih: $fileName'),
         ),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal memilih gambar'),
+          content: Text('Gagal memilih file'),
         ),
       );
     }
@@ -292,7 +305,7 @@ class _Form1PageState extends ConsumerState<Form1Page> {
           ),
           SizedBox(height: 6),
           Text(
-            'Silakan isi data dengan lengkap sebelum lanjut ke tahap berikutnya.',
+            'Silakan upload file yang berisi koordinat (X dan Y optional) dan ekstraksi nilai reflectance (mandatory) dari kanopi sawit (band1 = band red, band2 = band green, dan band3 = band NIR).',
             style: TextStyle(
               fontSize: 13,
               height: 1.45,
@@ -327,31 +340,31 @@ class _Form1PageState extends ConsumerState<Form1Page> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildInfoCard(),
-                            _buildSectionTitle('Unggah File'),
+                            const FormLabel(text: 'Upload File Sampel *'),
+                            const SizedBox(height: 8),
                             UploadBox(
-                              title: formState.temporaryImageBytes != null
-                                  ? 'Preview Gambar'
-                                  : 'Unggah Gambar Sampel',
-                              subtitle: formState.temporaryImageBytes != null
-                                  ? formState.temporaryImageName
-                                  : 'Placeholder sementara, tidak disimpan permanen',
-                              imageBytes: formState.temporaryImageBytes,
-                              onTap: _pickTemporaryImage,
-                              onClear: formState.temporaryImageBytes == null
+                              title: formState.fileName.isNotEmpty
+                                  ? formState.fileName
+                                  : 'Choose File',
+                              subtitle: formState.fileName.isNotEmpty
+                                  ? 'Ketuk untuk mengganti file'
+                                  : 'No file chosen',
+                              onTap: _pickSampleFile,
+                              onClear: formState.fileName.isEmpty
                                   ? null
                                   : () {
-                                ref
-                                    .read(formNotifierProvider.notifier)
-                                    .clearTemporaryImage();
-                              },
+                                      ref
+                                          .read(formNotifierProvider.notifier)
+                                          .setFileName('');
+                                    },
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             const Text(
-                              'Format sementara: gambar dari galeri. Hanya preview lokal.',
+                              'File yang dipilih harus berformat .xlsx/.xls/.csv',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF666666),
-                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF7F86A7),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 24),
