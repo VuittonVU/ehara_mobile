@@ -85,6 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
         throw Exception('Firebase ID Token tidak ditemukan.');
       }
 
+      debugPrint('FIREBASE ID TOKEN: $firebaseIdToken');
+
       final result = await AuthService().loginWithGoogleIdToken(
         idToken: firebaseIdToken,
       );

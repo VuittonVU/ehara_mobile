@@ -11,7 +11,7 @@ final hitungPohonServiceProvider = Provider<HitungPohonService>((ref) {
 });
 
 final hitungPohonControllerProvider =
-    StateNotifierProvider<HitungPohonController, HitungPohonState>((ref) {
+StateNotifierProvider<HitungPohonController, HitungPohonState>((ref) {
   return HitungPohonController(ref.read(hitungPohonServiceProvider));
 });
 
@@ -19,6 +19,9 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
   HitungPohonController(this._service) : super(HitungPohonState.initial());
 
   final HitungPohonService _service;
+
+  static const String _serverErrorMessage =
+      'Server sedang mengalami gangguan.\nSilahkan coba beberapa saat lagi.';
 
   Future<void> checkBackendConnection() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -29,26 +32,28 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        errorMessage: _serverErrorMessage,
       );
     }
   }
 
   Future<void> loadHistory() async {
     state = state.copyWith(isLoading: true, clearError: true);
+
     try {
       final history = await _service.getHistory();
       state = state.copyWith(isLoading: false, history: history);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        errorMessage: _serverErrorMessage,
       );
     }
   }
 
   Future<HitungPohonJobModel?> loadJob(String id) async {
     state = state.copyWith(isLoading: true, clearError: true);
+
     try {
       final job = await _service.getJob(id);
       state = state.copyWith(isLoading: false, currentJob: job);
@@ -56,7 +61,7 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        errorMessage: _serverErrorMessage,
       );
       return null;
     }
@@ -75,22 +80,26 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
 
       for (var i = 0; i < 60; i++) {
         if (!job.isProcessing) break;
+
         await Future.delayed(const Duration(seconds: 2));
+
         job = await _service.getJob(job.id);
         state = state.copyWith(currentJob: job);
       }
 
       final history = await _service.getHistory();
+
       state = state.copyWith(
         isUploading: false,
         currentJob: job,
         history: history,
       );
+
       return job;
     } catch (e) {
       state = state.copyWith(
         isUploading: false,
-        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        errorMessage: _serverErrorMessage,
       );
       return null;
     }

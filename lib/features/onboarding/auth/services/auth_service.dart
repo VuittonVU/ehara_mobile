@@ -17,7 +17,7 @@ class AuthService {
   static const String _userKey = 'ehara_user';
   static const String _apiKey = 'ppks2020';
 
-    static const String baseUrl = 'https://ehara.iopri.co.id';
+  static const String baseUrl = 'https://ehara.iopri.co.id';
 
   static String get apiKey => _apiKey;
 
@@ -30,21 +30,13 @@ class AuthService {
       Uri.parse('$baseUrl/api/auth/sign-in'),
     );
 
-    request.headers['api-key'] = _apiKey;
+    request.headers['x-api-key'] = _apiKey;
     request.headers['Accept'] = 'application/json';
     request.fields['email'] = identifier.trim();
     request.fields['password'] = password;
 
-    debugPrint('LOGIN CALLED');
-    debugPrint('LOGIN URL: ${request.url}');
-    debugPrint('LOGIN HEADER: ${request.headers}');
-    debugPrint('LOGIN FIELDS: ${request.fields}');
-
     final streamedResponse = await request.send();
     final body = await streamedResponse.stream.bytesToString();
-
-    debugPrint('LOGIN STATUS: ${streamedResponse.statusCode}');
-    debugPrint('LOGIN BODY: $body');
 
     final decoded = _safeDecode(body);
 
@@ -90,10 +82,6 @@ class AuthService {
     request.headers['x-api-key'] = _apiKey;
     request.headers['Accept'] = 'application/json';
     request.fields['id_token'] = idToken;
-
-    debugPrint('GOOGLE CALLBACK CALLED');
-    debugPrint('GOOGLE CALLBACK URL: ${request.url}');
-    debugPrint('GOOGLE CALLBACK HEADER: ${request.headers}');
 
     final streamedResponse = await request.send();
     final body = await streamedResponse.stream.bytesToString();
@@ -159,16 +147,8 @@ class AuthService {
     request.fields['confirm_password'] = password;
     request.fields['role'] = 'user';
 
-    debugPrint('REGISTER CALLED');
-    debugPrint('REGISTER URL: ${request.url}');
-    debugPrint('REGISTER HEADER: ${request.headers}');
-    debugPrint('REGISTER FIELDS: ${request.fields}');
-
     final streamedResponse = await request.send();
     final body = await streamedResponse.stream.bytesToString();
-
-    debugPrint('REGISTER STATUS: ${streamedResponse.statusCode}');
-    debugPrint('REGISTER BODY: $body');
 
     final decoded = _safeDecode(body);
 
@@ -197,6 +177,7 @@ class AuthService {
     final response = await http.get(
       Uri.parse('$baseUrl/api/mobile/profile'),
       headers: {
+        'x-api-key': _apiKey,
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
       },
@@ -240,7 +221,6 @@ class AuthService {
       Uri.parse('$baseUrl/api/mobile/datatable?query_name=$queryName'),
       headers: {
         'Authorization': 'Bearer $token',
-        'api-key': _apiKey,
         'x-api-key': _apiKey,
         'Accept': 'application/json',
       },
@@ -340,6 +320,7 @@ class AuthService {
     for (final item in candidates) {
       if (item is String && item.isNotEmpty) return item;
     }
+
     return null;
   }
 
