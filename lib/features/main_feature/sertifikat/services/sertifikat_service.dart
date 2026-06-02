@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/network/api_headers.dart';
 import '../../../onboarding/auth/services/auth_service.dart';
 import '../models/sertifikat_model.dart';
 
@@ -26,11 +27,7 @@ class SertifikatService {
       Uri.parse(
         '${AuthService.baseUrl}/api/mobile/datatable?query_name=e_hara_certificate',
       ),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'api-key': AuthService.apiKey,
-        'Accept': 'application/json',
-      },
+      headers: ApiHeaders.withToken(token),
     );
 
     debugPrint('=== SERTIFIKAT STATUS: ${response.statusCode} ===');

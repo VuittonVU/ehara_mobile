@@ -136,7 +136,7 @@ class _Form3PageState extends ConsumerState<Form3Page> {
     AppStatusDialog.show(
       context: context,
       title: 'Data Berhasil Disimpan!',
-      message: 'Data analisis hara berhasil diproses untuk demo. Data belum tersimpan permanen.',
+      message: 'Data analisis hara berhasil disimpan ke server.',
       imagePath: 'assets/maskot/maskot2.png',
       buttonText: 'OK',
       onPressed: () async {
@@ -151,16 +151,26 @@ class _Form3PageState extends ConsumerState<Form3Page> {
   Future<void> _submitForm() async {
     final notifier = ref.read(formNotifierProvider.notifier);
 
-    // DEMO MODE:
-    // Untuk presentasi, tombol Simpan langsung menampilkan popup berhasil.
-    // Data belum dikirim/tersimpan ke backend.
-    final payload = notifier.buildSubmissionPayload();
-    debugPrint('FORM SUBMISSION PAYLOAD (DEMO ONLY): $payload');
+    final validationMessage = notifier.validateStep3Message();
+    if (validationMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validationMessage)),
+      );
+      return;
+    }
 
-    await notifier.clearDraft();
+    try {
+      await notifier.submitTambahAnalisis();
 
-    if (!mounted) return;
-    _showSuccessDialog();
+      if (!mounted) return;
+      _showSuccessDialog();
+    } catch (e) {
+      if (!mounted) return;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
   }
 
   @override
@@ -325,7 +335,7 @@ class _Form3PageState extends ConsumerState<Form3Page> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: _submitForm,
+                            onPressed: formState.isSavingDraft ? null : _submitForm,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF3E7F69),
                               foregroundColor: Colors.white,
@@ -334,9 +344,9 @@ class _Form3PageState extends ConsumerState<Form3Page> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text(
-                              'Simpan Data',
-                              style: TextStyle(
+                            child: Text(
+                              formState.isSavingDraft ? 'Menyimpan...' : 'Simpan Data',
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                               ),

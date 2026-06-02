@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/network/api_headers.dart';
 import '../../../onboarding/auth/services/auth_service.dart';
 
 class GanodermaService {
@@ -24,8 +25,7 @@ class GanodermaService {
       Uri.parse('${AuthService.baseUrl}/api/mobile/dashboard/ganoderma/get-data'),
     );
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['api-key'] = AuthService.apiKey;
+    request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
     final response = await request.send();
@@ -60,8 +60,7 @@ class GanodermaService {
       ),
     );
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['api-key'] = AuthService.apiKey;
+    request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
     final response = await request.send();
@@ -97,11 +96,7 @@ class GanodermaService {
 
     final response = await http.get(
       uri,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'api-key': AuthService.apiKey,
-        'Accept': 'application/json',
-      },
+      headers: ApiHeaders.withToken(token),
     );
 
     debugPrint('=== EHARA DATATABLE STATUS: ${response.statusCode} ===');

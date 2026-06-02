@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/wilayah_item.dart';
+import '../services/form_api_service.dart';
 import '../services/form_draft_service.dart';
 import '../services/wilayah_service.dart';
 import 'form_state.dart';
@@ -16,6 +17,10 @@ final formDraftServiceProvider = Provider<FormDraftService>((ref) {
   return FormDraftService();
 });
 
+final formApiServiceProvider = Provider<FormApiService>((ref) {
+  return FormApiService();
+});
+
 final formNotifierProvider =
 NotifierProvider<FormNotifier, TambahFormState>(FormNotifier.new);
 
@@ -24,6 +29,7 @@ class FormNotifier extends Notifier<TambahFormState> {
 
   WilayahService get _wilayahService => ref.read(wilayahServiceProvider);
   FormDraftService get _draftService => ref.read(formDraftServiceProvider);
+  FormApiService get _apiService => ref.read(formApiServiceProvider);
 
   @override
   TambahFormState build() {
@@ -260,8 +266,13 @@ class FormNotifier extends Notifier<TambahFormState> {
     _triggerFieldUpdate(state.copyWith(selectedKecamatan: value));
   }
 
-  void setFileName(String value) {
-    _triggerFieldUpdate(state.copyWith(fileName: value));
+  void setFileName(String value, {String filePath = ''}) {
+    _triggerFieldUpdate(
+      state.copyWith(
+        fileName: value,
+        filePath: filePath,
+      ),
+    );
   }
 
   void setTemporaryImage({
@@ -426,60 +437,78 @@ class FormNotifier extends Notifier<TambahFormState> {
     _triggerFieldUpdate(state.copyWith(nilaiMgStep3: value));
   }
 
+  String? validateStep1Message() {
+    if (state.fileName.trim().isEmpty || state.filePath.trim().isEmpty) {
+      return 'File analisis wajib dipilih dulu.';
+    }
+    if (state.namaProjek.trim().isEmpty) return 'Nama projek wajib diisi.';
+    if (state.namaPerusahaan.trim().isEmpty) return 'Nama perusahaan wajib diisi.';
+    if (state.namaKebun.trim().isEmpty) return 'Nama kebun wajib diisi.';
+    if (state.selectedProvinsi == null) return 'Provinsi wajib dipilih.';
+    if (state.selectedKabupaten == null) return 'Kota/Kabupaten wajib dipilih.';
+    if (state.selectedKecamatan == null) return 'Kecamatan wajib dipilih.';
+    if (state.detailLokasi.trim().isEmpty) return 'Detail lokasi wajib diisi.';
+    if (state.tanggalPengambilan.trim().isEmpty) return 'Tanggal pengambilan wajib diisi.';
+    if (state.tanggalAnalisis.trim().isEmpty) return 'Tanggal analisis wajib diisi.';
+    if (state.sensor.trim().isEmpty) return 'Sensor wajib dipilih.';
+    if (state.ganodermaStep1.trim().isEmpty) return 'Pilihan Ganoderma wajib dipilih.';
+    return null;
+  }
+
+  String? validateStep2Message() {
+    if (!_isInt(state.tahunTanam)) return 'Tahun tanam harus berupa angka bulat.';
+    if (state.nomorKcd.trim().isEmpty) return 'Nomor KCD wajib diisi.';
+    if (state.blok.trim().isEmpty) return 'Blok wajib diisi.';
+    if (!_isDecimal(state.luasHa)) return 'Luas HA harus berupa angka.';
+    if (!_isInt(state.jumlahPohonHa)) return 'Jumlah pohon/HA harus berupa angka bulat.';
+    if (!_isDecimal(state.protas)) return 'Protas harus berupa angka.';
+    if (!_isDecimal(state.proyeksiProtasStep2)) return 'Proyeksi protas harus berupa angka.';
+    if (state.statusHaraTanahStep2.trim().isEmpty) return 'Status hara tanah wajib dipilih.';
+
+    if (state.showSoilFieldsStep2) {
+      if (!_isDecimal(state.nilaiNStep2)) return 'Nilai N harus berupa angka.';
+      if (!_isDecimal(state.nilaiPStep2)) return 'Nilai P harus berupa angka.';
+      if (!_isDecimal(state.nilaiKStep2)) return 'Nilai K harus berupa angka.';
+      if (!_isDecimal(state.nilaiCaStep2)) return 'Nilai Ca harus berupa angka.';
+      if (!_isDecimal(state.nilaiMgStep2)) return 'Nilai Mg harus berupa angka.';
+    }
+
+    return null;
+  }
+
+  String? validateStep3Message() {
+    return _apiService.validateSubmission(state);
+  }
+
+  bool _isInt(String value) => int.tryParse(value.trim()) != null;
+
+  bool _isDecimal(String value) =>
+      double.tryParse(value.trim().replaceAll(',', '.')) != null;
+
   bool validateStep1() {
-    return state.fileName.trim().isNotEmpty &&
-        state.namaProjek.trim().isNotEmpty &&
-        state.namaPerusahaan.trim().isNotEmpty &&
-        state.namaKebun.trim().isNotEmpty &&
-        state.selectedProvinsi != null &&
-        state.selectedKabupaten != null &&
-        state.selectedKecamatan != null &&
-        state.detailLokasi.trim().isNotEmpty &&
-        state.tanggalPengambilan.trim().isNotEmpty &&
-        state.tanggalAnalisis.trim().isNotEmpty &&
-        state.sensor.trim().isNotEmpty &&
-        state.ganodermaStep1.trim().isNotEmpty;
+    return validateStep1Message() == null;
   }
 
   bool validateStep2() {
-    final basicValid = state.tahunTanam.trim().isNotEmpty &&
-        state.nomorKcd.trim().isNotEmpty &&
-        state.blok.trim().isNotEmpty &&
-        state.luasHa.trim().isNotEmpty &&
-        state.jumlahPohonHa.trim().isNotEmpty &&
-        state.protas.trim().isNotEmpty &&
-        state.proyeksiProtasStep2.trim().isNotEmpty &&
-        state.statusHaraTanahStep2.trim().isNotEmpty;
-
-    if (!basicValid) return false;
-    if (!state.showSoilFieldsStep2) return true;
-
-    return state.nilaiNStep2.trim().isNotEmpty &&
-        state.nilaiPStep2.trim().isNotEmpty &&
-        state.nilaiKStep2.trim().isNotEmpty &&
-        state.nilaiCaStep2.trim().isNotEmpty &&
-        state.nilaiMgStep2.trim().isNotEmpty;
+    return validateStep2Message() == null;
   }
 
   bool validateStep3() {
-    final basicValid = state.latitude != null &&
-        state.longitude != null &&
-        state.idTitik.trim().isNotEmpty &&
-        state.bandRed.trim().isNotEmpty &&
-        state.bandGreen.trim().isNotEmpty &&
-        state.bandNir.trim().isNotEmpty &&
-        state.proyeksiProtasStep3.trim().isNotEmpty &&
-        state.ganodermaStep3.trim().isNotEmpty &&
-        state.statusHaraTanahStep3.trim().isNotEmpty;
+    return validateStep3Message() == null;
+  }
 
-    if (!basicValid) return false;
-    if (!state.showSoilFieldsStep3) return true;
+  Future<void> submitTambahAnalisis() async {
+    state = state.copyWith(isSavingDraft: true, clearErrorMessage: true);
 
-    return state.nilaiNStep3.trim().isNotEmpty &&
-        state.nilaiPStep3.trim().isNotEmpty &&
-        state.nilaiKStep3.trim().isNotEmpty &&
-        state.nilaiCaStep3.trim().isNotEmpty &&
-        state.nilaiMgStep3.trim().isNotEmpty;
+    try {
+      await _apiService.submitTambahAnalisis(state);
+      await clearDraft();
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    } finally {
+      state = state.copyWith(isSavingDraft: false);
+    }
   }
 
   Map<String, dynamic> buildSubmissionPayload() {
@@ -540,6 +569,7 @@ class FormNotifier extends Notifier<TambahFormState> {
   Map<String, dynamic> _toDraftMap() {
     return {
       'fileName': state.fileName,
+      'filePath': state.filePath,
       'namaProjek': state.namaProjek,
       'namaPerusahaan': state.namaPerusahaan,
       'namaKebun': state.namaKebun,
@@ -597,6 +627,7 @@ class FormNotifier extends Notifier<TambahFormState> {
 
     return state.copyWith(
       fileName: (draft['fileName'] ?? '').toString(),
+      filePath: (draft['filePath'] ?? '').toString(),
       clearTemporaryImage: true,
       namaProjek: (draft['namaProjek'] ?? '').toString(),
       namaPerusahaan: (draft['namaPerusahaan'] ?? '').toString(),
@@ -604,8 +635,8 @@ class FormNotifier extends Notifier<TambahFormState> {
       detailLokasi: (draft['detailLokasi'] ?? '').toString(),
       tanggalPengambilan: (draft['tanggalPengambilan'] ?? '').toString(),
       tanggalAnalisis: (draft['tanggalAnalisis'] ?? '').toString(),
-      sensor: (draft['sensor'] ?? '').toString(),
-      ganodermaStep1: (draft['ganodermaStep1'] ?? '').toString(),
+      sensor: (draft['sensor'] ?? 'Micasense').toString(),
+      ganodermaStep1: (draft['ganodermaStep1'] ?? 'Ya').toString(),
       selectedProvinsi: (provCode.isNotEmpty || provName.isNotEmpty)
           ? WilayahItem(code: provCode, name: provName)
           : null,
@@ -637,14 +668,14 @@ class FormNotifier extends Notifier<TambahFormState> {
           ? (draft['longitude'] as num).toDouble()
           : double.tryParse((draft['longitude'] ?? '').toString()),
       idTitik: (draft['idTitik'] ?? '').toString(),
-      bandRed: (draft['bandRed'] ?? '').toString(),
-      bandGreen: (draft['bandGreen'] ?? '').toString(),
-      bandNir: (draft['bandNir'] ?? '').toString(),
+      bandRed: (draft['bandRed'] ?? 'Red').toString(),
+      bandGreen: (draft['bandGreen'] ?? 'Green').toString(),
+      bandNir: (draft['bandNir'] ?? 'NIR').toString(),
       proyeksiProtasStep3:
       (draft['proyeksiProtasStep3'] ?? '').toString(),
-      ganodermaStep3: (draft['ganodermaStep3'] ?? '').toString(),
+      ganodermaStep3: (draft['ganodermaStep3'] ?? 'Ya').toString(),
       statusHaraTanahStep3:
-      (draft['statusHaraTanahStep3'] ?? '').toString(),
+      (draft['statusHaraTanahStep3'] ?? 'Ada Nilai Hara Tanah').toString(),
       nilaiNStep3: (draft['nilaiNStep3'] ?? '').toString(),
       nilaiPStep3: (draft['nilaiPStep3'] ?? '').toString(),
       nilaiKStep3: (draft['nilaiKStep3'] ?? '').toString(),

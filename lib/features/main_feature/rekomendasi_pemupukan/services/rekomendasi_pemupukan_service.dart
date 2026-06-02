@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/network/api_headers.dart';
 import '../../../onboarding/auth/services/auth_service.dart';
 
 class RekomendasiPemupukanService {
@@ -31,8 +32,7 @@ class RekomendasiPemupukanService {
       Uri.parse('${AuthService.baseUrl}/api/mobile/dashboard/get-dashboard-data'),
     );
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['api-key'] = AuthService.apiKey;
+    request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
     final response = await request.send();
@@ -71,8 +71,7 @@ class RekomendasiPemupukanService {
       ),
     );
 
-    request.headers['Authorization'] = 'Bearer $token';
-    request.headers['api-key'] = AuthService.apiKey;
+    request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
     final response = await request.send();

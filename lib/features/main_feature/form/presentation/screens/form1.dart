@@ -178,6 +178,7 @@ class _Form1PageState extends ConsumerState<Form1Page> {
 
       final pickedFile = result.files.single;
       final fileName = pickedFile.name;
+      final filePath = pickedFile.path;
       final lowerName = fileName.toLowerCase();
 
       final isValidFile = lowerName.endsWith('.csv') ||
@@ -194,7 +195,20 @@ class _Form1PageState extends ConsumerState<Form1Page> {
         return;
       }
 
-      ref.read(formNotifierProvider.notifier).setFileName(fileName);
+      if (filePath == null || filePath.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Path file tidak terbaca. Silakan pilih file ulang.'),
+          ),
+        );
+        return;
+      }
+
+      ref.read(formNotifierProvider.notifier).setFileName(
+        fileName,
+        filePath: filePath,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -215,10 +229,11 @@ class _Form1PageState extends ConsumerState<Form1Page> {
   Future<void> _goNext() async {
     final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!notifier.validateStep1()) {
+    final validationMessage = notifier.validateStep1Message();
+    if (validationMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lengkapi dulu data Form 1 ya'),
+        SnackBar(
+          content: Text(validationMessage),
         ),
       );
       return;

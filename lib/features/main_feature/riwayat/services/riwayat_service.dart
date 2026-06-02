@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/network/api_headers.dart';
 import '../../../onboarding/auth/services/auth_service.dart';
 import '../models/riwayat_model.dart';
 
@@ -24,11 +25,7 @@ class RiwayatService {
       Uri.parse(
         '${AuthService.baseUrl}/api/mobile/datatable?query_name=e_hara_2',
       ),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'api-key': AuthService.apiKey,
-        'Accept': 'application/json',
-      },
+      headers: ApiHeaders.withToken(token),
     );
 
     debugPrint('=== RIWAYAT STATUS: ${response.statusCode} ===');

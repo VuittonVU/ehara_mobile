@@ -14,6 +14,7 @@ class TambahFormState {
   final String? errorMessage;
 
   final String fileName;
+  final String filePath;
   final Uint8List? temporaryImageBytes;
   final String temporaryImageName;
 
@@ -76,6 +77,7 @@ class TambahFormState {
     required this.hasDraft,
     required this.errorMessage,
     required this.fileName,
+    required this.filePath,
     required this.temporaryImageBytes,
     required this.temporaryImageName,
     required this.namaProjek,
@@ -132,6 +134,7 @@ class TambahFormState {
       hasDraft: false,
       errorMessage: null,
       fileName: '',
+      filePath: '',
       temporaryImageBytes: null,
       temporaryImageName: '',
       namaProjek: '',
@@ -140,8 +143,8 @@ class TambahFormState {
       detailLokasi: '',
       tanggalPengambilan: '',
       tanggalAnalisis: '',
-      sensor: '',
-      ganodermaStep1: '',
+      sensor: 'Micasense',
+      ganodermaStep1: 'Ya',
       provinsiList: [],
       kabupatenList: [],
       kecamatanList: [],
@@ -165,12 +168,12 @@ class TambahFormState {
       latitude: null,
       longitude: null,
       idTitik: '',
-      bandRed: '',
-      bandGreen: '',
-      bandNir: '',
+      bandRed: 'Red',
+      bandGreen: 'Green',
+      bandNir: 'NIR',
       proyeksiProtasStep3: '',
-      ganodermaStep3: '',
-      statusHaraTanahStep3: '',
+      ganodermaStep3: 'Ya',
+      statusHaraTanahStep3: 'Ada Nilai Hara Tanah',
       nilaiNStep3: '',
       nilaiPStep3: '',
       nilaiKStep3: '',
@@ -200,6 +203,7 @@ class TambahFormState {
     String? errorMessage,
     bool clearErrorMessage = false,
     String? fileName,
+    String? filePath,
     Uint8List? temporaryImageBytes,
     bool clearTemporaryImage = false,
     String? temporaryImageName,
@@ -260,6 +264,7 @@ class TambahFormState {
       hasDraft: hasDraft ?? this.hasDraft,
       errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
       fileName: fileName ?? this.fileName,
+      filePath: filePath ?? this.filePath,
       temporaryImageBytes: clearTemporaryImage
           ? null
           : (temporaryImageBytes ?? this.temporaryImageBytes),

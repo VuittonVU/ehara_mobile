@@ -216,7 +216,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           result['message']?.toString() ?? 'Pendaftaran berhasil.';
       _showInfo(message);
 
-      context.go(AppRoutes.login);
+      context.go(AppRoutes.walkthrough);
     } catch (e) {
       if (!mounted) return;
       _showInfo(mapAuthError(e));

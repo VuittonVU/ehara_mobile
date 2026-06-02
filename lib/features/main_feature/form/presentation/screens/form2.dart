@@ -149,9 +149,10 @@ class _Form2PageState extends ConsumerState<Form2Page> {
   Future<void> _goNext() async {
     final notifier = ref.read(formNotifierProvider.notifier);
 
-    if (!notifier.validateStep2()) {
+    final validationMessage = notifier.validateStep2Message();
+    if (validationMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lengkapi dulu data Form 2 ya')),
+        SnackBar(content: Text(validationMessage)),
       );
       return;
     }

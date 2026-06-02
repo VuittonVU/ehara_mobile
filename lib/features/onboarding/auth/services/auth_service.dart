@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/network/api_headers.dart';
 import '../models/app_user_model.dart';
 
 class AuthService {
@@ -15,7 +16,7 @@ class AuthService {
 
   static const String _tokenKey = 'ehara_auth_token';
   static const String _userKey = 'ehara_user';
-  static const String _apiKey = 'ppks2020';
+  static const String _apiKey = ApiHeaders.apiKey;
 
   static const String baseUrl = 'https://ehara.iopri.co.id';
 
@@ -30,8 +31,7 @@ class AuthService {
       Uri.parse('$baseUrl/api/auth/sign-in'),
     );
 
-    request.headers['x-api-key'] = _apiKey;
-    request.headers['Accept'] = 'application/json';
+    request.headers.addAll(ApiHeaders.noAuth());
     request.fields['email'] = identifier.trim();
     request.fields['password'] = password;
 
@@ -79,8 +79,7 @@ class AuthService {
       Uri.parse('$baseUrl/api/auth/google/mobile-callback'),
     );
 
-    request.headers['x-api-key'] = _apiKey;
-    request.headers['Accept'] = 'application/json';
+    request.headers.addAll(ApiHeaders.noAuth());
     request.fields['id_token'] = idToken;
 
     final streamedResponse = await request.send();
@@ -136,8 +135,7 @@ class AuthService {
       Uri.parse('$baseUrl/api/auth/sign-up'),
     );
 
-    request.headers['api-key'] = _apiKey;
-    request.headers['Accept'] = 'application/json';
+    request.headers.addAll(ApiHeaders.noAuth());
 
     request.fields['name'] = fullName.trim();
     request.fields['email'] = email.trim();
@@ -176,11 +174,7 @@ class AuthService {
 
     final response = await http.get(
       Uri.parse('$baseUrl/api/mobile/profile'),
-      headers: {
-        'x-api-key': _apiKey,
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: ApiHeaders.withToken(token),
     );
 
     final decoded = _safeDecode(response.body);
@@ -219,11 +213,7 @@ class AuthService {
 
     final response = await http.get(
       Uri.parse('$baseUrl/api/mobile/datatable?query_name=$queryName'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'x-api-key': _apiKey,
-        'Accept': 'application/json',
-      },
+      headers: ApiHeaders.withToken(token),
     );
 
     final decoded = _safeDecode(response.body);
@@ -291,20 +281,11 @@ class AuthService {
   }) async {
     final token = await getToken();
 
-    final headers = <String, String>{
-      'Accept': 'application/json',
-    };
-
     if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
+      return ApiHeaders.withToken(token);
     }
 
-    if (withApiKey) {
-      headers['api-key'] = _apiKey;
-      headers['x-api-key'] = _apiKey;
-    }
-
-    return headers;
+    return ApiHeaders.noAuth();
   }
 
   String? _extractToken(Map<String, dynamic> json) {
