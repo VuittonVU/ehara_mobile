@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1088379536347-v0nkf090ghsma4v8ig6jgiqp75igps3n.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1088379536347-v0nkf090ghsma4v8ig6jgiqp75igps3n</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1088379536347-186knrm1kk48bf49fgmoj72anfqrb39k.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBsJE7Wluu_rqEmH8wKqZ1kfwqUPbwuV2o</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1088379536347</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.ppks.eharaMobile</string>
+	<key>PROJECT_ID</key>
+	<string>ehara-2f659</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ehara-2f659.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1088379536347:ios:b984f2a000777fc2f2ddfe</string>
+</dict>
+</plist>
