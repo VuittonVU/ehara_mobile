@@ -121,6 +121,59 @@ class AuthService {
     );
   }
 
+  Future<Map<String, dynamic>> loginWithFirebaseIdToken({
+    required String provider,
+    required String idToken,
+  }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/api/auth/firebase/mobile-callback'),
+    );
+
+    request.headers.addAll(ApiHeaders.noAuth());
+    request.fields['provider'] = provider;
+    request.fields['id_token'] = idToken;
+
+    final streamedResponse = await request.send();
+    final body = await streamedResponse.stream.bytesToString();
+
+    debugPrint('FIREBASE CALLBACK PROVIDER: $provider');
+    debugPrint('FIREBASE CALLBACK STATUS: ${streamedResponse.statusCode}');
+    debugPrint('FIREBASE CALLBACK BODY: $body');
+
+    final decoded = _safeDecode(body);
+
+    if (streamedResponse.statusCode >= 200 &&
+        streamedResponse.statusCode < 300) {
+      final token = _extractToken(decoded);
+
+      if (token == null || token.isEmpty) {
+        throw Exception('Token tidak ditemukan pada response Firebase login.');
+      }
+
+      await _storage.delete(key: _userKey);
+      await saveToken(token);
+
+      final userMap = _extractUserMap(decoded);
+      if (userMap != null) {
+        await saveUser(userMap);
+      }
+
+      return {
+        'success': true,
+        'message': _extractMessage(decoded) ?? 'Login Firebase berhasil',
+        'token': token,
+        'user': userMap != null ? AppUserModel.fromMap(userMap) : null,
+        'raw': decoded,
+      };
+    }
+
+    throw Exception(
+      _extractMessage(decoded) ??
+          'Login Firebase gagal (${streamedResponse.statusCode})',
+    );
+  }
+
   Future<Map<String, dynamic>> register({
     required String fullName,
     required String username,

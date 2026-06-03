@@ -19,6 +19,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   void _showSnackBar(
       String message, {
@@ -122,6 +123,84 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleAppleLoginTest() async {
+    if (_isAppleLoading) return;
+
+    setState(() => _isAppleLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      final appleProvider = AppleAuthProvider()
+        ..addScope('email')
+        ..addScope('name');
+
+      final userCredential =
+          await FirebaseAuth.instance.signInWithProvider(appleProvider);
+
+      final user = userCredential.user;
+      final firebaseIdToken = await user?.getIdToken(true);
+
+      if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
+        throw Exception('Firebase ID Token Apple tidak ditemukan.');
+      }
+
+      debugPrint('APPLE FIREBASE UID: ${user?.uid}');
+      debugPrint('APPLE EMAIL: ${user?.email}');
+      debugPrint('APPLE DISPLAY NAME: ${user?.displayName}');
+      debugPrint('APPLE FIREBASE ID TOKEN: $firebaseIdToken');
+
+      try {
+        final result = await AuthService().loginWithFirebaseIdToken(
+          provider: 'apple',
+          idToken: firebaseIdToken,
+        );
+
+        if (!mounted) return;
+
+        _showSnackBar(
+          result['message']?.toString() ?? 'Login Apple berhasil',
+          backgroundColor: Colors.green,
+          seconds: 2,
+        );
+
+        await Future.delayed(const Duration(milliseconds: 400));
+
+        if (!mounted) return;
+        context.go(AppRoutes.dashboard);
+      } catch (apiError, apiStackTrace) {
+        debugPrint('APPLE CALLBACK API ERROR TYPE: ${apiError.runtimeType}');
+        debugPrint('APPLE CALLBACK API ERROR: $apiError');
+        debugPrint('APPLE CALLBACK API STACK: $apiStackTrace');
+
+        if (!mounted) return;
+
+        _showSnackBar(
+          'Apple/Firebase sudah aktif. API E-Hara masih gagal: '
+          '${apiError.toString().replaceFirst('Exception: ', '')}',
+          backgroundColor: Colors.orange,
+          seconds: 7,
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('APPLE ERROR TYPE: ${e.runtimeType}');
+      debugPrint('APPLE ERROR: $e');
+      debugPrint('APPLE STACK: $stackTrace');
+
+      if (!mounted) return;
+
+      _showSnackBar(
+        e.toString().replaceFirst('Exception: ', ''),
+        backgroundColor: Colors.red,
+        seconds: 6,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isAppleLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -171,13 +250,43 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 42),
                           AbsorbPointer(
-                            absorbing: _isGoogleLoading,
+                            absorbing: _isGoogleLoading || _isAppleLoading,
                             child: SocialLoginButton(
                               text: _isGoogleLoading
                                   ? 'Sedang masuk...'
                                   : 'Sign in dengan Google',
                               iconPath: 'assets/icons/google.png',
                               onTap: _handleGoogleLogin,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          AbsorbPointer(
+                            absorbing: _isGoogleLoading || _isAppleLoading,
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 48,
+                              child: OutlinedButton.icon(
+                                onPressed: _handleAppleLoginTest,
+                                icon: const Icon(Icons.apple, size: 22),
+                                label: Text(
+                                  _isAppleLoading
+                                      ? 'Mengecek Apple...'
+                                      : 'Sign in dengan Apple',
+                                  style: AppTextStyles.semiBold(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                  side: BorderSide(
+                                    color: Colors.black.withOpacity(0.25),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 30),
