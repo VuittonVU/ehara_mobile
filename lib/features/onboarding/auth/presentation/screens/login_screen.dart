@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -259,36 +262,38 @@ class _LoginScreenState extends State<LoginScreen> {
                               onTap: _handleGoogleLogin,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          AbsorbPointer(
-                            absorbing: _isGoogleLoading || _isAppleLoading,
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: OutlinedButton.icon(
-                                onPressed: _handleAppleLoginTest,
-                                icon: const Icon(Icons.apple, size: 22),
-                                label: Text(
-                                  _isAppleLoading
-                                      ? 'Mengecek Apple...'
-                                      : 'Sign in dengan Apple',
-                                  style: AppTextStyles.semiBold(
-                                    fontSize: 15,
-                                    color: Colors.black,
+                          if (!kIsWeb && Platform.isIOS) ...[
+                            const SizedBox(height: 12),
+                            AbsorbPointer(
+                              absorbing: _isGoogleLoading || _isAppleLoading,
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: OutlinedButton.icon(
+                                  onPressed: _handleAppleLoginTest,
+                                  icon: const Icon(Icons.apple, size: 22),
+                                  label: Text(
+                                    _isAppleLoading
+                                        ? 'Mengecek Apple...'
+                                        : 'Sign in dengan Apple',
+                                    style: AppTextStyles.semiBold(
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black,
-                                  side: BorderSide(
-                                    color: Colors.black.withOpacity(0.25),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.black,
+                                    side: BorderSide(
+                                      color: Colors.black.withOpacity(0.25),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                           const SizedBox(height: 30),
                           Row(
                             children: [
