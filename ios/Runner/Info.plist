@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>GIDClientID</key>
+	<string>1088379536347-v0nkf090ghsma4v8ig6jgiqp75igps3n.apps.googleusercontent.com</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Aplikasi membutuhkan akses kamera untuk mengambil foto profil</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -54,6 +56,15 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1088379536347-v0nkf090ghsma4v8ig6jgiqp75igps3n</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>
