@@ -12,6 +12,8 @@ class HitungPohonService {
     this.userId = 'anonymous',
   });
 
+  static const Duration _requestTimeout = Duration(seconds: 10);
+
   final String baseUrl;
   final String apiKey;
   final String userId;
@@ -28,7 +30,7 @@ class HitungPohonService {
       };
 
   Future<Map<String, dynamic>> checkConnection() async {
-    final response = await http.get(_uri('/health'));
+    final response = await http.get(_uri('/health')).timeout(_requestTimeout);
     return _extractMap(response, 'health');
   }
 
@@ -37,14 +39,14 @@ class HitungPohonService {
     request.headers.addAll(_headers);
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
-    final streamed = await request.send();
+    final streamed = await request.send().timeout(_requestTimeout);
     final response = await http.Response.fromStream(streamed);
     final json = _extractMap(response, 'detect/tif');
     return HitungPohonJobModel.fromJson(json);
   }
 
   Future<List<HitungPohonJobModel>> getHistory() async {
-    final response = await http.get(_uri('/jobs'), headers: _headers);
+    final response = await http.get(_uri('/jobs'), headers: _headers).timeout(_requestTimeout);
     final json = _extractMap(response, 'jobs');
     final data = json['data'];
 
@@ -56,7 +58,7 @@ class HitungPohonService {
   }
 
   Future<HitungPohonJobModel> getJob(String id) async {
-    final response = await http.get(_uri('/jobs/$id'), headers: _headers);
+    final response = await http.get(_uri('/jobs/$id'), headers: _headers).timeout(_requestTimeout);
     final json = _extractMap(response, 'jobs/$id');
     return HitungPohonJobModel.fromJson(json);
   }

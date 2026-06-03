@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       debugPrint('FIREBASE ID TOKEN: $firebaseIdToken');
 
-      final result = await AuthService().loginWithGoogleIdToken(
+      final result = await AuthService().loginWithFirebaseIdToken(
         idToken: firebaseIdToken,
       );
 
@@ -155,7 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       try {
         final result = await AuthService().loginWithFirebaseIdToken(
-          provider: 'apple',
           idToken: firebaseIdToken,
         );
 

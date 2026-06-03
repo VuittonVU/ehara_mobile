@@ -19,6 +19,7 @@ class AuthService {
   static const String _apiKey = ApiHeaders.apiKey;
 
   static const String baseUrl = 'https://ehara.iopri.co.id';
+  static const Duration _requestTimeout = Duration(seconds: 25);
 
   static String get apiKey => _apiKey;
 
@@ -35,7 +36,7 @@ class AuthService {
     request.fields['email'] = identifier.trim();
     request.fields['password'] = password;
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(_requestTimeout);
     final body = await streamedResponse.stream.bytesToString();
 
     final decoded = _safeDecode(body);
@@ -73,56 +74,11 @@ class AuthService {
 
   Future<Map<String, dynamic>> loginWithGoogleIdToken({
     required String idToken,
-  }) async {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('$baseUrl/api/auth/google/mobile-callback'),
-    );
-
-    request.headers.addAll(ApiHeaders.noAuth());
-    request.fields['id_token'] = idToken;
-
-    final streamedResponse = await request.send();
-    final body = await streamedResponse.stream.bytesToString();
-
-    debugPrint('GOOGLE CALLBACK STATUS: ${streamedResponse.statusCode}');
-    debugPrint('GOOGLE CALLBACK BODY: $body');
-
-    final decoded = _safeDecode(body);
-
-    if (streamedResponse.statusCode >= 200 &&
-        streamedResponse.statusCode < 300) {
-      final token = _extractToken(decoded);
-
-      if (token == null || token.isEmpty) {
-        throw Exception('Token tidak ditemukan pada response Google login.');
-      }
-
-      await _storage.delete(key: _userKey);
-      await saveToken(token);
-
-      final userMap = _extractUserMap(decoded);
-      if (userMap != null) {
-        await saveUser(userMap);
-      }
-
-      return {
-        'success': true,
-        'message': _extractMessage(decoded) ?? 'Login Google berhasil',
-        'token': token,
-        'user': userMap != null ? AppUserModel.fromMap(userMap) : null,
-        'raw': decoded,
-      };
-    }
-
-    throw Exception(
-      _extractMessage(decoded) ??
-          'Login Google gagal (${streamedResponse.statusCode})',
-    );
+  }) {
+    return loginWithFirebaseIdToken(idToken: idToken);
   }
 
   Future<Map<String, dynamic>> loginWithFirebaseIdToken({
-    required String provider,
     required String idToken,
   }) async {
     final request = http.MultipartRequest(
@@ -131,13 +87,11 @@ class AuthService {
     );
 
     request.headers.addAll(ApiHeaders.noAuth());
-    request.fields['provider'] = provider;
     request.fields['id_token'] = idToken;
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(_requestTimeout);
     final body = await streamedResponse.stream.bytesToString();
 
-    debugPrint('FIREBASE CALLBACK PROVIDER: $provider');
     debugPrint('FIREBASE CALLBACK STATUS: ${streamedResponse.statusCode}');
     debugPrint('FIREBASE CALLBACK BODY: $body');
 
@@ -161,7 +115,7 @@ class AuthService {
 
       return {
         'success': true,
-        'message': _extractMessage(decoded) ?? 'Login Firebase berhasil',
+        'message': _extractMessage(decoded) ?? 'Login berhasil',
         'token': token,
         'user': userMap != null ? AppUserModel.fromMap(userMap) : null,
         'raw': decoded,
@@ -170,7 +124,7 @@ class AuthService {
 
     throw Exception(
       _extractMessage(decoded) ??
-          'Login Firebase gagal (${streamedResponse.statusCode})',
+          'Login gagal (${streamedResponse.statusCode})',
     );
   }
 
@@ -192,13 +146,26 @@ class AuthService {
 
     request.fields['name'] = fullName.trim();
     request.fields['email'] = email.trim();
-    request.fields['whatsapp_no'] = whatsapp.trim();
     request.fields['username'] = username.trim();
     request.fields['password'] = password;
     request.fields['confirm_password'] = password;
     request.fields['role'] = 'user';
 
-    final streamedResponse = await request.send();
+    final cleanAddress = address.trim();
+    final cleanPhone = phone.trim();
+    final cleanWhatsapp = whatsapp.trim();
+
+    if (cleanAddress.isNotEmpty) {
+      request.fields['address'] = cleanAddress;
+    }
+    if (cleanPhone.isNotEmpty) {
+      request.fields['handphone_no'] = cleanPhone;
+    }
+    if (cleanWhatsapp.isNotEmpty) {
+      request.fields['whatsapp_no'] = cleanWhatsapp;
+    }
+
+    final streamedResponse = await request.send().timeout(_requestTimeout);
     final body = await streamedResponse.stream.bytesToString();
 
     final decoded = _safeDecode(body);
@@ -228,7 +195,7 @@ class AuthService {
     final response = await http.get(
       Uri.parse('$baseUrl/api/mobile/profile'),
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(_requestTimeout);
 
     final decoded = _safeDecode(response.body);
 
@@ -267,7 +234,7 @@ class AuthService {
     final response = await http.get(
       Uri.parse('$baseUrl/api/mobile/datatable?query_name=$queryName'),
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(_requestTimeout);
 
     final decoded = _safeDecode(response.body);
 

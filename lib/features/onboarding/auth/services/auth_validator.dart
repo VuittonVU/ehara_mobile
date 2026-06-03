@@ -84,11 +84,35 @@ class AuthValidator {
     return null;
   }
 
+  static String? validateOptionalAddress(String value) {
+    final trimmed = value.trim();
+
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    if (trimmed.length < 5) {
+      return 'Alamat terlalu pendek.';
+    }
+
+    return null;
+  }
+
   static String? validatePhoneNumber(String value, String fieldName) {
     final trimmed = value.trim();
 
     if (trimmed.isEmpty) {
       return '$fieldName wajib diisi.';
+    }
+
+    return validateOptionalPhoneNumber(trimmed, fieldName);
+  }
+
+  static String? validateOptionalPhoneNumber(String value, String fieldName) {
+    final trimmed = value.trim();
+
+    if (trimmed.isEmpty) {
+      return null;
     }
 
     final numberRegex = RegExp(r'^[0-9]+$');

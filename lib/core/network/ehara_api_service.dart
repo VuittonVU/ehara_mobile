@@ -58,7 +58,7 @@ class EharaApiService {
     final response = await http.get(
       uri,
       headers: await headers(),
-    );
+    ).timeout(const Duration(seconds: 25));
 
     return _extractListResponse(response, endpointName: 'datatable:$queryName');
   }
@@ -118,7 +118,7 @@ class EharaApiService {
     _logRequest(name, uri, request.headers, request.fields, filePaths);
 
     try {
-      final streamed = await request.send();
+      final streamed = await request.send().timeout(const Duration(seconds: 25));
       final response = await http.Response.fromStream(streamed);
       _logResponse(name, response);
       return _extractMapResponse(response, endpointName: name);

@@ -28,7 +28,7 @@ class GanodermaService {
     request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
-    final response = await request.send();
+    final response = await request.send().timeout(const Duration(seconds: 25));
     final body = await response.stream.bytesToString();
 
     debugPrint('=== GANODERMA STATUS: ${response.statusCode} ===');
@@ -63,7 +63,7 @@ class GanodermaService {
     request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
-    final response = await request.send();
+    final response = await request.send().timeout(const Duration(seconds: 25));
     final body = await response.stream.bytesToString();
 
     debugPrint('=== GANODERMA META STATUS: ${response.statusCode} ===');
@@ -97,7 +97,7 @@ class GanodermaService {
     final response = await http.get(
       uri,
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(const Duration(seconds: 25));
 
     debugPrint('=== EHARA DATATABLE STATUS: ${response.statusCode} ===');
 

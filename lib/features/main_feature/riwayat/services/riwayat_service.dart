@@ -26,7 +26,7 @@ class RiwayatService {
         '${AuthService.baseUrl}/api/mobile/datatable?query_name=e_hara_2',
       ),
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(const Duration(seconds: 25));
 
     debugPrint('=== RIWAYAT STATUS: ${response.statusCode} ===');
     debugPrint('=== RIWAYAT BODY: ${response.body} ===');

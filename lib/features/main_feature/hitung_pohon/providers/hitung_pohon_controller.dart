@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,19 +21,34 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
 
   final HitungPohonService _service;
 
+  static const Duration _pageLoadingTimeout = Duration(seconds: 10);
+
   static const String _serverErrorMessage =
-      'Server sedang mengalami gangguan.\nSilahkan coba beberapa saat lagi.';
+      'Fitur Hitung Pohon belum dapat dimuat saat ini.\nSilakan coba beberapa saat lagi.';
+
+  static const String _timeoutPageMessage =
+      'Fitur Hitung Pohon membutuhkan waktu terlalu lama untuk memuat data.\nServer sedang bermasalah, silakan coba lagi beberapa saat lagi.';
+
+  static const String _timeoutProcessingMessage =
+      'Proses hitung pohon belum selesai dalam batas waktu aplikasi.\nSilakan cek kembali melalui Riwayat Hitung Pohon beberapa saat lagi.';
+
+  String _messageFromError(Object error) {
+    if (error is TimeoutException) return _timeoutPageMessage;
+    return _serverErrorMessage;
+  }
 
   Future<void> checkBackendConnection() async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      await _service.checkConnection();
+      await _service.checkConnection().timeout(_pageLoadingTimeout);
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _serverErrorMessage,
+        errorMessage: _messageFromError(e),
       );
     }
   }
@@ -41,12 +57,14 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final history = await _service.getHistory();
-      state = state.copyWith(isLoading: false, history: history);
+      final history = await _service.getHistory().timeout(_pageLoadingTimeout);
+      if (!mounted) return;
+      state = state.copyWith(isLoading: false, history: history, clearError: true);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _serverErrorMessage,
+        errorMessage: _messageFromError(e),
       );
     }
   }
@@ -55,13 +73,15 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final job = await _service.getJob(id);
-      state = state.copyWith(isLoading: false, currentJob: job);
+      final job = await _service.getJob(id).timeout(_pageLoadingTimeout);
+      if (!mounted) return null;
+      state = state.copyWith(isLoading: false, currentJob: job, clearError: true);
       return job;
     } catch (e) {
+      if (!mounted) return null;
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _serverErrorMessage,
+        errorMessage: _messageFromError(e),
       );
       return null;
     }
@@ -75,31 +95,50 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
     );
 
     try {
-      var job = await _service.uploadTif(file);
+      var job = await _service.uploadTif(file).timeout(_pageLoadingTimeout);
+      if (!mounted) return null;
       state = state.copyWith(currentJob: job);
 
-      for (var i = 0; i < 60; i++) {
+      for (var i = 0; i < 5; i++) {
         if (!job.isProcessing) break;
 
         await Future.delayed(const Duration(seconds: 2));
 
-        job = await _service.getJob(job.id);
+        job = await _service.getJob(job.id).timeout(_pageLoadingTimeout);
+        if (!mounted) return null;
         state = state.copyWith(currentJob: job);
       }
 
-      final history = await _service.getHistory();
+      List<HitungPohonJobModel> history = state.history;
+      try {
+        history = await _service.getHistory().timeout(_pageLoadingTimeout);
+      } catch (_) {
+        // Riwayat tidak wajib berhasil setelah upload. Jangan biarkan ini bikin loading lagi.
+      }
+
+      if (job.isProcessing) {
+        state = state.copyWith(
+          isUploading: false,
+          currentJob: job,
+          history: history,
+          errorMessage: _timeoutProcessingMessage,
+        );
+        return null;
+      }
 
       state = state.copyWith(
         isUploading: false,
         currentJob: job,
         history: history,
+        clearError: true,
       );
 
       return job;
     } catch (e) {
+      if (!mounted) return null;
       state = state.copyWith(
         isUploading: false,
-        errorMessage: _serverErrorMessage,
+        errorMessage: _messageFromError(e),
       );
       return null;
     }

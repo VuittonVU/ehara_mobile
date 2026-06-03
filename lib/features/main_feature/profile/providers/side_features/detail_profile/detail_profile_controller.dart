@@ -10,6 +10,7 @@ StateNotifierProvider.autoDispose<DetailProfileController, DetailProfileState>(
     final profile = profileState.profile;
 
     return DetailProfileController(
+      ref,
       DetailProfileState(
         fullName: profile?.name ?? '',
         username: profile?.username ?? '',
@@ -24,7 +25,9 @@ StateNotifierProvider.autoDispose<DetailProfileController, DetailProfileState>(
 );
 
 class DetailProfileController extends StateNotifier<DetailProfileState> {
-  DetailProfileController(super.state);
+  DetailProfileController(this._ref, super.state);
+
+  final Ref _ref;
 
   void updateFullName(String value) {
     state = state.copyWith(fullName: value);
@@ -52,7 +55,17 @@ class DetailProfileController extends StateNotifier<DetailProfileState> {
 
   Future<void> saveChanges() async {
     state = state.copyWith(isSaving: true);
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 350));
+
+    _ref.read(profileControllerProvider.notifier).updateLocalProfile(
+      name: state.fullName,
+      username: state.username,
+      address: state.address,
+      email: state.email,
+      phoneNumber: state.phoneNumber,
+      whatsappNumber: state.whatsappNumber,
+    );
+
     state = state.copyWith(isSaving: false);
   }
 }

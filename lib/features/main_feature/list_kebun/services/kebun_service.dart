@@ -25,7 +25,7 @@ class KebunService {
         '${AuthService.baseUrl}/api/mobile/datatable?query_name=e_hara_2',
       ),
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(const Duration(seconds: 25));
 
     debugPrint('=== KEBUN STATUS: ${response.statusCode} ===');
     debugPrint('=== KEBUN BODY: ${response.body} ===');

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/theme/app_text_styles.dart';
-import '../../../../../core/widgets/app_background.dart';
+import '../../../../../../../core/constants/app_colors.dart';
+import '../../../../../../../core/theme/app_text_styles.dart';
+import '../../../../../../../core/widgets/app_background.dart';
+import '../../../../../../../core/widgets/app_state_view.dart';
 import '../../models/hitung_pohon_job_model.dart';
 import '../../providers/hitung_pohon_controller.dart';
 
@@ -57,7 +58,16 @@ class _HitungPohonResultPageState extends ConsumerState<HitungPohonResultPage> {
                   child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
                 )
               else if (state.errorMessage != null)
-                Center(child: Text(state.errorMessage!, style: AppTextStyles.medium(color: AppColors.error)))
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.68,
+                  child: AppStateView(
+                    type: AppStateType.backendError,
+                    description: state.errorMessage,
+                    onRetry: () => ref
+                        .read(hitungPohonControllerProvider.notifier)
+                        .loadJob(widget.jobId),
+                  ),
+                )
               else if (job != null)
                 _ResultContent(job: job),
             ],

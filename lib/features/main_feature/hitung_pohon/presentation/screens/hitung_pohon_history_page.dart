@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../app/routes/app_routes.dart';
-import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/theme/app_text_styles.dart';
-import '../../../../../core/widgets/app_background.dart';
-import '../../../../../core/widgets/app_state_view.dart';
+import '../../../../../../../app/routes/app_routes.dart';
+import '../../../../../../../core/constants/app_colors.dart';
+import '../../../../../../../core/theme/app_text_styles.dart';
+import '../../../../../../../core/widgets/app_background.dart';
+import '../../../../../../../core/widgets/app_state_view.dart';
 import '../../providers/hitung_pohon_controller.dart';
 import '../widgets/hitung_pohon_job_card.dart';
 
@@ -82,8 +82,9 @@ class _HitungPohonHistoryPageState extends ConsumerState<HitungPohonHistoryPage>
                 else if (state.errorMessage != null)
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.68,
-                    child: AppStateView.fromError(
-                      message: state.errorMessage,
+                    child: AppStateView(
+                      type: AppStateType.backendError,
+                      description: state.errorMessage,
                       onRetry: _refreshHistory,
                     ),
                   )

@@ -35,7 +35,7 @@ class RekomendasiPemupukanService {
     request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
-    final response = await request.send();
+    final response = await request.send().timeout(const Duration(seconds: 25));
     final body = await response.stream.bytesToString();
     final decoded = _safeDecode(body);
 
@@ -74,7 +74,7 @@ class RekomendasiPemupukanService {
     request.headers.addAll(ApiHeaders.withToken(token));
     request.fields['e_hara_uuid'] = eHaraUuid;
 
-    final response = await request.send();
+    final response = await request.send().timeout(const Duration(seconds: 25));
     final body = await response.stream.bytesToString();
     final decoded = _safeDecode(body);
 

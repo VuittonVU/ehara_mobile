@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -101,9 +102,46 @@ class _DetailProfilePageState extends ConsumerState<DetailProfilePage> {
     );
   }
 
-  Future<void> _showAvatarOptions() async {
-    final picker = ImagePicker();
 
+  void _showSnack(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<void> _pickAndSaveLocalAvatar(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+
+      if (file == null || !mounted) return;
+
+      ref.read(profileControllerProvider.notifier).updateProfilePhoto(file.path);
+      _showSnack('Foto profil berhasil disimpan secara lokal.');
+    } on PlatformException catch (e) {
+      debugPrint('IMAGE PICKER PLATFORM ERROR: ${e.code} | ${e.message}');
+      _showSnack(
+        source == ImageSource.camera
+            ? 'Kamera belum dapat digunakan. Silakan pilih foto dari galeri.'
+            : 'Galeri belum dapat dibuka. Silakan coba lagi.',
+      );
+    } catch (e, stackTrace) {
+      debugPrint('IMAGE PICKER ERROR: $e');
+      debugPrint('IMAGE PICKER STACK: $stackTrace');
+      _showSnack('Foto profil belum dapat dipilih. Silakan coba lagi.');
+    }
+  }
+
+  Future<void> _showAvatarOptions() async {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -133,17 +171,7 @@ class _DetailProfilePageState extends ConsumerState<DetailProfilePage> {
                   title: const Text('Pilih dari Galeri'),
                   onTap: () async {
                     Navigator.of(sheetContext).pop();
-
-                    final XFile? file = await picker.pickImage(
-                      source: ImageSource.gallery,
-                      imageQuality: 85,
-                    );
-
-                    if (file != null && mounted) {
-                      ref
-                          .read(profileControllerProvider.notifier)
-                          .updateProfilePhoto(file.path);
-                    }
+                    await _pickAndSaveLocalAvatar(ImageSource.gallery);
                   },
                 ),
                 ListTile(
@@ -151,17 +179,7 @@ class _DetailProfilePageState extends ConsumerState<DetailProfilePage> {
                   title: const Text('Ambil Foto'),
                   onTap: () async {
                     Navigator.of(sheetContext).pop();
-
-                    final XFile? file = await picker.pickImage(
-                      source: ImageSource.camera,
-                      imageQuality: 85,
-                    );
-
-                    if (file != null && mounted) {
-                      ref
-                          .read(profileControllerProvider.notifier)
-                          .updateProfilePhoto(file.path);
-                    }
+                    await _pickAndSaveLocalAvatar(ImageSource.camera);
                   },
                 ),
                 ListTile(
@@ -173,6 +191,7 @@ class _DetailProfilePageState extends ConsumerState<DetailProfilePage> {
                   onTap: () {
                     Navigator.of(sheetContext).pop();
                     ref.read(profileControllerProvider.notifier).removeProfilePhoto();
+                    _showSnack('Foto profil lokal berhasil dihapus.');
                   },
                 ),
               ],

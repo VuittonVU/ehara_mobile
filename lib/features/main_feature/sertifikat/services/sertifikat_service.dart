@@ -28,7 +28,7 @@ class SertifikatService {
         '${AuthService.baseUrl}/api/mobile/datatable?query_name=e_hara_certificate',
       ),
       headers: ApiHeaders.withToken(token),
-    );
+    ).timeout(const Duration(seconds: 25));
 
     debugPrint('=== SERTIFIKAT STATUS: ${response.statusCode} ===');
     debugPrint('=== SERTIFIKAT BODY: ${response.body} ===');

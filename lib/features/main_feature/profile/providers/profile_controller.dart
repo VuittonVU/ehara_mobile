@@ -57,6 +57,30 @@ class ProfileController extends StateNotifier<ProfileState> {
     await loadProfile();
   }
 
+  void updateLocalProfile({
+    required String name,
+    required String username,
+    required String address,
+    required String email,
+    required String phoneNumber,
+    required String whatsappNumber,
+  }) {
+    if (state.profile == null) return;
+
+    state = state.copyWith(
+      profile: state.profile!.copyWith(
+        name: name.trim().isEmpty ? state.profile!.name : name.trim(),
+        username: username.trim().isEmpty ? state.profile!.username : username.trim(),
+        address: address.trim(),
+        email: email.trim().isEmpty ? state.profile!.email : email.trim(),
+        phoneNumber: phoneNumber.trim(),
+        whatsappNumber: whatsappNumber.trim(),
+      ),
+      viewState: ProfileViewState.success,
+      clearErrorMessage: true,
+    );
+  }
+
   void updateProfilePhoto(String photoPath) {
     if (state.profile == null) return;
 

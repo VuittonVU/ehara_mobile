@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -101,7 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _validateAddress(String value) {
     setState(() {
-      _addressError = AuthValidator.validateAddress(value);
+      _addressError = AuthValidator.validateOptionalAddress(value);
     });
   }
 
@@ -113,7 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _validatePhone(String value) {
     setState(() {
-      _phoneError = AuthValidator.validatePhoneNumber(
+      _phoneError = AuthValidator.validateOptionalPhoneNumber(
         value,
         'Nomor handphone',
       );
@@ -122,9 +124,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _validateWhatsapp(String value) {
     setState(() {
-      _whatsappError = AuthValidator.validatePhoneNumber(
+      _whatsappError = AuthValidator.validateOptionalPhoneNumber(
         value,
-        'Nomor WhatsApp',
+        'Nomor WhatsApp (Opsional)',
       );
     });
   }
@@ -154,14 +156,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool get _isFormValid {
     return AuthValidator.validateFullName(fullNameController.text) == null &&
         AuthValidator.validateUsername(usernameController.text) == null &&
-        AuthValidator.validateAddress(addressController.text) == null &&
+        AuthValidator.validateOptionalAddress(addressController.text) == null &&
         AuthValidator.validateGmail(emailController.text) == null &&
-        AuthValidator.validatePhoneNumber(
+        AuthValidator.validateOptionalPhoneNumber(
           phoneController.text,
           'Nomor handphone',
         ) ==
             null &&
-        AuthValidator.validatePhoneNumber(
+        AuthValidator.validateOptionalPhoneNumber(
           whatsappController.text,
           'Nomor WhatsApp',
         ) ==
@@ -189,7 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _validateAll();
 
     if (!_isFormValid) {
-      _showInfo('Mohon lengkapi data pendaftaran dengan benar.');
+      _showInfo('Mohon lengkapi data wajib pendaftaran dengan benar.');
       return;
     }
 
@@ -291,46 +293,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          AbsorbPointer(
-                            absorbing: _isGoogleLoading,
-                            child: SocialLoginButton(
-                              text: _isGoogleLoading
-                                  ? 'Sedang masuk...'
-                                  : 'Sign up dengan Google',
-                              iconPath: 'assets/icons/google.png',
-                              onTap: _handleGoogleSignUp,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  color: Colors.black.withOpacity(0.10),
-                                ),
+                          if (!Platform.isIOS) ...[
+                            AbsorbPointer(
+                              absorbing: _isGoogleLoading,
+                              child: SocialLoginButton(
+                                text: _isGoogleLoading
+                                    ? 'Sedang masuk...'
+                                    : 'Sign up dengan Google',
+                                iconPath: 'assets/icons/google.png',
+                                onTap: _handleGoogleSignUp,
                               ),
-                              Padding(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 14),
-                                child: Text(
-                                  'Atau menggunakan Email',
-                                  style: AppTextStyles.regular(
-                                    fontSize: 13,
-                                    color:
-                                    AppColors.textPrimary.withOpacity(0.62),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    color: Colors.black.withOpacity(0.10),
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  height: 1,
-                                  color: Colors.black.withOpacity(0.10),
+                                Padding(
+                                  padding:
+                                  const EdgeInsets.symmetric(horizontal: 14),
+                                  child: Text(
+                                    'Atau menggunakan Email',
+                                    style: AppTextStyles.regular(
+                                      fontSize: 13,
+                                      color:
+                                      AppColors.textPrimary.withOpacity(0.62),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    color: Colors.black.withOpacity(0.10),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                          ],
                           LoginTextField(
                             controller: fullNameController,
                             hintText: 'Nama Lengkap',
@@ -349,7 +353,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
                           LoginTextField(
                             controller: addressController,
-                            hintText: 'Alamat',
+                            hintText: 'Alamat (Opsional)',
                             iconPath: 'assets/icons/location.png',
                             errorText: _addressError,
                             onChanged: _validateAddress,
@@ -366,7 +370,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(height: 16),
                           LoginTextField(
                             controller: phoneController,
-                            hintText: 'Nomor Handphone',
+                            hintText: 'Nomor Handphone (Opsional)',
                             iconPath: 'assets/icons/phone.png',
                             keyboardType: TextInputType.number,
                             inputFormatters: [
@@ -623,7 +627,7 @@ class _WhatsappField extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Nomor WhatsApp',
+                  hintText: 'Nomor WhatsApp (Opsional)',
                   hintStyle: AppTextStyles.regular(
                     fontSize: 14,
                     color: AppColors.textPrimary.withOpacity(0.45),
