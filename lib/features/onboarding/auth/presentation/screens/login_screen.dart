@@ -230,7 +230,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _handleAppleLoginTest() async {
+  Future<void> _handleAppleLogin() async {
     if (_isAppleLoading) return;
 
     setState(() => _isAppleLoading = true);
@@ -386,7 +386,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 width: double.infinity,
                                 height: 48,
                                 child: OutlinedButton.icon(
-                                  onPressed: _handleAppleLoginTest,
+                                  onPressed: _handleAppleLogin,
                                   icon: const Icon(Icons.apple, size: 22),
                                   label: Text(
                                     _isAppleLoading
