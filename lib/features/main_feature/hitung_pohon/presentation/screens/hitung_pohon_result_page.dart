@@ -127,7 +127,7 @@ class _ResultContent extends StatelessWidget {
           _InfoTile(label: 'CRS', value: job.tifInfo.crs),
           _InfoTile(label: 'Ukuran Citra', value: '${job.tifInfo.width} x ${job.tifInfo.height}'),
           _InfoTile(label: 'Bands', value: '${job.tifInfo.bands} (${job.tifInfo.dtype})'),
-          _InfoTile(label: 'Ukuran File', value: '${job.tifInfo.fileSizeMb.toStringAsFixed(2)} MB'),
+          _InfoTile(label: 'Ukuran File', value: job.formattedFileSize),
         ],
       ),
     );

@@ -5,6 +5,7 @@ class AppRoutes {
   static const String emailLogin = '/email-login';
   static const String signup = '/signup';
   static const privacyPolicy = '/privacy-policy';
+  static const termsAndConditions = '/terms-and-conditions';
 
   static const String dashboard = '/dashboard';
   static const String riwayat = '/riwayat';

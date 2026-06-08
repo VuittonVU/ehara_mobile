@@ -7,6 +7,7 @@ import '../features/onboarding/auth/presentation/screens/login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/email_login_screen.dart';
 import '../features/onboarding/auth/presentation/screens/signup_screen.dart';
 import '../features/onboarding/auth/presentation/screens/privacy_policy_page.dart';
+import '../features/onboarding/auth/presentation/screens/terms_and_conditions_page.dart';
 import '../features/onboarding/splash/presentation/screens/splash_screen.dart';
 import '../features/onboarding/walkthrough/presentation/screens/walkthrough_screen.dart';
 
@@ -111,6 +112,10 @@ class EHaraApp extends StatelessWidget {
       GoRoute(
         path: AppRoutes.privacyPolicy,
         builder: (context, state) => const PrivacyPolicyPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.termsAndConditions,
+        builder: (context, state) => const TermsAndConditionsPage(),
       ),
       ShellRoute(
         builder: (context, state, child) {
@@ -282,9 +287,7 @@ class EHaraApp extends StatelessWidget {
       GoRoute(
         path: AppRoutes.termsPlaceholder,
         name: 'termsPlaceholder',
-        builder: (context, state) => const LegalPlaceholderPage(
-          title: 'Syarat & Ketentuan',
-        ),
+        builder: (context, state) => const TermsAndConditionsPage(),
       ),
       GoRoute(
         path: AppRoutes.privacyPlaceholder,

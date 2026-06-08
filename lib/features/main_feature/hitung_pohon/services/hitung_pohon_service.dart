@@ -7,12 +7,12 @@ import '../models/hitung_pohon_job_model.dart';
 
 class HitungPohonService {
   HitungPohonService({
-    this.baseUrl = 'http://45.77.168.172:8000',
+    this.baseUrl = 'https://jubilant-knee-evergreen.ngrok-free.dev',
     this.apiKey = 'a',
     this.userId = 'anonymous',
   });
 
-  static const Duration _requestTimeout = Duration(seconds: 10);
+  static const Duration _requestTimeout = Duration(seconds: 25);
 
   final String baseUrl;
   final String apiKey;
@@ -35,18 +35,42 @@ class HitungPohonService {
   }
 
   Future<HitungPohonJobModel> uploadTif(File file) async {
-    final request = http.MultipartRequest('POST', _uri('/detect/tif'));
+    final request = http.MultipartRequest('POST', _uri('/detect'));
     request.headers.addAll(_headers);
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
     final streamed = await request.send().timeout(_requestTimeout);
     final response = await http.Response.fromStream(streamed);
-    final json = _extractMap(response, 'detect/tif');
+    final json = _extractMap(response, 'detect');
     return HitungPohonJobModel.fromJson(json);
   }
 
-  Future<List<HitungPohonJobModel>> getHistory() async {
-    final response = await http.get(_uri('/jobs'), headers: _headers).timeout(_requestTimeout);
+  Future<List<HitungPohonJobModel>> getHistory({
+    String status = 'done',
+    String? dateFrom,
+    String? dateTo,
+    String sortBy = 'created_at',
+    String sortOrder = 'desc',
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final now = DateTime.now();
+    final defaultTo = dateTo ?? _dateOnly(now);
+    final defaultFrom = dateFrom ?? _dateOnly(now.subtract(const Duration(days: 90)));
+
+    final uri = _uri('/jobs').replace(
+      queryParameters: {
+        'status': status,
+        'date_from': defaultFrom,
+        'date_to': defaultTo,
+        'sort_by': sortBy,
+        'sort_order': sortOrder,
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      },
+    );
+
+    final response = await http.get(uri, headers: _headers).timeout(_requestTimeout);
     final json = _extractMap(response, 'jobs');
     final data = json['data'];
 
@@ -55,6 +79,12 @@ class HitungPohonService {
         .whereType<Map>()
         .map((e) => HitungPohonJobModel.fromJson(Map<String, dynamic>.from(e)))
         .toList();
+  }
+
+  String _dateOnly(DateTime date) {
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
   Future<HitungPohonJobModel> getJob(String id) async {

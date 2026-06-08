@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +11,6 @@ import '../../services/auth_error_mapper.dart';
 import '../../services/auth_service.dart';
 import '../../services/auth_validator.dart';
 import '../widgets/login_text_field.dart';
-import '../widgets/social_login_button.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -229,21 +227,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  bool _isGoogleLoading = false;
-
-  Future<void> _handleGoogleSignUp() async {
-    if (_isGoogleLoading) return;
-
-    setState(() => _isGoogleLoading = true);
-
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    if (!mounted) return;
-
-    setState(() => _isGoogleLoading = false);
-    _showInfo('Pendaftaran Google belum tersedia.');
-  }
-
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -293,48 +276,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          if (!Platform.isIOS) ...[
-                            AbsorbPointer(
-                              absorbing: _isGoogleLoading,
-                              child: SocialLoginButton(
-                                text: _isGoogleLoading
-                                    ? 'Sedang masuk...'
-                                    : 'Sign up dengan Google',
-                                iconPath: 'assets/icons/google.png',
-                                onTap: _handleGoogleSignUp,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    color: Colors.black.withOpacity(0.10),
-                                  ),
-                                ),
-                                Padding(
-                                  padding:
-                                  const EdgeInsets.symmetric(horizontal: 14),
-                                  child: Text(
-                                    'Atau menggunakan Email',
-                                    style: AppTextStyles.regular(
-                                      fontSize: 13,
-                                      color:
-                                      AppColors.textPrimary.withOpacity(0.62),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    color: Colors.black.withOpacity(0.10),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                          ],
                           LoginTextField(
                             controller: fullNameController,
                             hintText: 'Nama Lengkap',
@@ -454,6 +395,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     fontSize: 10,
                                     color: AppColors.primary,
                                   ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      context.push(AppRoutes.termsAndConditions);
+                                    },
                                 ),
                                 const TextSpan(text: ' kami'),
                               ],

@@ -34,6 +34,23 @@ class HitungPohonJobModel {
   bool get isDone => status.toLowerCase() == 'done';
   bool get isFailed => status.toLowerCase() == 'failed';
   bool get isProcessing => !isDone && !isFailed;
+  String get formattedFileSize {
+    final bytes = sizeBytes != null && sizeBytes! > 0
+        ? sizeBytes!
+        : tifInfo.fileSizeBytes;
+
+    if (bytes > 0) {
+      final mb = bytes / (1024 * 1024);
+      return '${mb.toStringAsFixed(2)} MB';
+    }
+
+    if (tifInfo.fileSizeMb > 0) {
+      return '${tifInfo.fileSizeMb.toStringAsFixed(2)} MB';
+    }
+
+    return '-';
+  }
+
 
   factory HitungPohonJobModel.fromJson(Map<String, dynamic> json) {
     return HitungPohonJobModel(
@@ -44,8 +61,8 @@ class HitungPohonJobModel {
       filename: json['filename']?.toString() ?? '-',
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? ''),
       updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? ''),
-      classCounts: ClassCounts.fromJson(_asMap(json['class_counts'])),
-      tifInfo: TifInfo.fromJson(_asMap(json['tif_info'])),
+      classCounts: ClassCounts.fromJson(_asMap(json['counts'] ?? json['class_counts'])),
+      tifInfo: TifInfo.fromJson(_asMap(json['image_info'] ?? json['tif_info'])),
       tilesProcessed: _toInt(json['tiles_processed']),
       totalGridTiles: _toInt(json['total_grid_tiles']),
       etaSeconds: json['eta_seconds'] == null ? null : _toInt(json['eta_seconds']),

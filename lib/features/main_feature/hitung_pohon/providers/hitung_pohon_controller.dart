@@ -21,7 +21,7 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
 
   final HitungPohonService _service;
 
-  static const Duration _pageLoadingTimeout = Duration(seconds: 10);
+  static const Duration _pageLoadingTimeout = Duration(seconds: 25);
 
   static const String _serverErrorMessage =
       'Fitur Hitung Pohon belum dapat dimuat saat ini.\nSilakan coba beberapa saat lagi.';
@@ -30,7 +30,7 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
       'Fitur Hitung Pohon membutuhkan waktu terlalu lama untuk memuat data.\nServer sedang bermasalah, silakan coba lagi beberapa saat lagi.';
 
   static const String _timeoutProcessingMessage =
-      'Proses hitung pohon belum selesai dalam batas waktu aplikasi.\nSilakan cek kembali melalui Riwayat Hitung Pohon beberapa saat lagi.';
+      'Proses hitung pohon sedang berjalan.\nSilakan cek kembali melalui Riwayat Hitung Pohon beberapa saat lagi.';
 
   String _messageFromError(Object error) {
     if (error is TimeoutException) return _timeoutPageMessage;
@@ -99,7 +99,7 @@ class HitungPohonController extends StateNotifier<HitungPohonState> {
       if (!mounted) return null;
       state = state.copyWith(currentJob: job);
 
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < 3; i++) {
         if (!job.isProcessing) break;
 
         await Future.delayed(const Duration(seconds: 2));

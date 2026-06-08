@@ -16,6 +16,10 @@ class AuthService {
 
   static const String _tokenKey = 'ehara_auth_token';
   static const String _userKey = 'ehara_user';
+  static const String _socialIdTokenKey = 'ehara_social_id_token';
+  static const String _socialEmailKey = 'ehara_social_email';
+  static const String _socialNameKey = 'ehara_social_name';
+  static const String _socialProviderKey = 'ehara_social_provider';
   static const String _apiKey = ApiHeaders.apiKey;
 
   static const String baseUrl = 'https://ehara.iopri.co.id';
@@ -74,16 +78,30 @@ class AuthService {
 
   Future<Map<String, dynamic>> loginWithGoogleIdToken({
     required String idToken,
-  }) {
+  }) async {
+    // Compatibility alias: this must receive a Firebase ID Token, not a raw
+    // Google ID Token. New code should call loginWithFirebaseIdToken().
     return loginWithFirebaseIdToken(idToken: idToken);
   }
 
   Future<Map<String, dynamic>> loginWithFirebaseIdToken({
     required String idToken,
+  }) {
+    // Backend currently uses /api/auth/google/mobile-callback for Firebase social callback.
+    // Body contains only: id_token (Firebase ID Token).
+    return _loginWithSocialIdToken(
+      idToken: idToken,
+      debugLabel: 'FIREBASE',
+    );
+  }
+
+  Future<Map<String, dynamic>> _loginWithSocialIdToken({
+    required String idToken,
+    required String debugLabel,
   }) async {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('$baseUrl/api/auth/firebase/mobile-callback'),
+      Uri.parse('$baseUrl/api/auth/google/mobile-callback'),
     );
 
     request.headers.addAll(ApiHeaders.noAuth());
@@ -92,8 +110,8 @@ class AuthService {
     final streamedResponse = await request.send().timeout(_requestTimeout);
     final body = await streamedResponse.stream.bytesToString();
 
-    debugPrint('FIREBASE CALLBACK STATUS: ${streamedResponse.statusCode}');
-    debugPrint('FIREBASE CALLBACK BODY: $body');
+    debugPrint('$debugLabel CALLBACK STATUS: ${streamedResponse.statusCode}');
+    debugPrint('$debugLabel CALLBACK BODY: $body');
 
     final decoded = _safeDecode(body);
 
@@ -102,7 +120,7 @@ class AuthService {
       final token = _extractToken(decoded);
 
       if (token == null || token.isEmpty) {
-        throw Exception('Token tidak ditemukan pada response Firebase login.');
+        throw Exception('Token tidak ditemukan pada response social login.');
       }
 
       await _storage.delete(key: _userKey);
@@ -115,7 +133,7 @@ class AuthService {
 
       return {
         'success': true,
-        'message': _extractMessage(decoded) ?? 'Login berhasil',
+        'message': _extractMessage(decoded) ?? 'Sign in berhasil',
         'token': token,
         'user': userMap != null ? AppUserModel.fromMap(userMap) : null,
         'raw': decoded,
@@ -257,6 +275,34 @@ class AuthService {
     return getAnalisisData(queryName: 'e_hara_certificate');
   }
 
+
+  Future<void> clearSocialSignInData() async {
+    await _storage.delete(key: _socialProviderKey);
+    await _storage.delete(key: _socialIdTokenKey);
+    await _storage.delete(key: _socialEmailKey);
+    await _storage.delete(key: _socialNameKey);
+  }
+
+  Future<void> saveSocialSignInData({
+    required String provider,
+    required String idToken,
+    String? email,
+    String? name,
+  }) async {
+    await _storage.write(key: _socialProviderKey, value: provider);
+    await _storage.write(key: _socialIdTokenKey, value: idToken);
+
+    final cleanEmail = email?.trim();
+    if (cleanEmail != null && cleanEmail.isNotEmpty) {
+      await _storage.write(key: _socialEmailKey, value: cleanEmail);
+    }
+
+    final cleanName = name?.trim();
+    if (cleanName != null && cleanName.isNotEmpty) {
+      await _storage.write(key: _socialNameKey, value: cleanName);
+    }
+  }
+
   Future<void> saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
   }
@@ -273,11 +319,21 @@ class AuthService {
   Future<void> logout() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _userKey);
+    await clearSocialSignInData();
+
+    try {
+      final googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+      await googleSignIn.disconnect();
+    } catch (e) {
+      debugPrint('GOOGLE LOGOUT CLEAR SESSION WARNING: $e');
+    }
 
     try {
       await FirebaseAuth.instance.signOut();
-      await GoogleSignIn().signOut();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('FIREBASE LOGOUT WARNING: $e');
+    }
   }
 
   Future<void> saveUser(Map<String, dynamic> user) async {
@@ -309,20 +365,72 @@ class AuthService {
   }
 
   String? _extractToken(Map<String, dynamic> json) {
-    final candidates = [
+    final directCandidates = [
       json['token'],
       json['access_token'],
       json['accessToken'],
-      (json['data'] is Map ? json['data']['token'] : null),
-      (json['data'] is Map ? json['data']['access_token'] : null),
-      (json['data'] is Map ? json['data']['accessToken'] : null),
+      json['jwt'],
+      json['jwt_token'],
+      json['auth_token'],
+      json['bearer_token'],
     ];
 
-    for (final item in candidates) {
-      if (item is String && item.isNotEmpty) return item;
+    for (final item in directCandidates) {
+      if (item is String && item.trim().isNotEmpty) {
+        return _cleanBearerToken(item);
+      }
+    }
+
+    final recursiveToken = _findTokenRecursively(json);
+    if (recursiveToken != null && recursiveToken.trim().isNotEmpty) {
+      return _cleanBearerToken(recursiveToken);
     }
 
     return null;
+  }
+
+  String? _findTokenRecursively(dynamic value) {
+    if (value is Map) {
+      const tokenKeys = {
+        'token',
+        'access_token',
+        'accessToken',
+        'jwt',
+        'jwt_token',
+        'auth_token',
+        'bearer_token',
+      };
+
+      for (final entry in value.entries) {
+        final key = entry.key.toString();
+        final item = entry.value;
+        if (tokenKeys.contains(key) && item is String && item.trim().isNotEmpty) {
+          return item;
+        }
+      }
+
+      for (final entry in value.entries) {
+        final found = _findTokenRecursively(entry.value);
+        if (found != null && found.trim().isNotEmpty) return found;
+      }
+    }
+
+    if (value is List) {
+      for (final item in value) {
+        final found = _findTokenRecursively(item);
+        if (found != null && found.trim().isNotEmpty) return found;
+      }
+    }
+
+    return null;
+  }
+
+  String _cleanBearerToken(String token) {
+    final clean = token.trim();
+    if (clean.toLowerCase().startsWith('bearer ')) {
+      return clean.substring(7).trim();
+    }
+    return clean;
   }
 
   Map<String, dynamic>? _extractUserMap(Map<String, dynamic> json) {

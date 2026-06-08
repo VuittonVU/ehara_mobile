@@ -4,23 +4,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../../app/routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../../core/widgets/app_background.dart';
+import '../../../../main_feature/profile/providers/profile_controller.dart';
 import '../../services/auth_service.dart';
 import '../widgets/social_login_button.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isGoogleLoading = false;
   bool _isAppleLoading = false;
 
@@ -42,20 +44,108 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _refreshProfileAfterSignIn() {
+    // Pastikan data profile tidak pakai state/cache user lama setelah social sign-in.
+    ref.invalidate(profileControllerProvider);
+    Future.microtask(() {
+      if (!mounted) return;
+      ref.read(profileControllerProvider.notifier).refreshProfile();
+    });
+  }
+
+  void _goToRegistrationFromSocial({
+    required String provider,
+    String? email,
+    String? name,
+  }) {
+    if (!mounted) return;
+
+    final providerLabel = provider == 'apple' ? 'Apple' : 'Google';
+    _showSnackBar(
+      'Akun $providerLabel belum terdaftar. Silakan lengkapi form pendaftaran.',
+      backgroundColor: Colors.orange,
+      seconds: 4,
+    );
+
+    context.go(
+      AppRoutes.signup,
+      extra: {
+        'provider': provider,
+        'email': email ?? '',
+        'name': name ?? '',
+      },
+    );
+  }
+
+
+  bool _shouldOpenRegistration(Object error) {
+    final message = error.toString().toLowerCase();
+
+    // Jangan arahkan user terdaftar ke register hanya karena callback API gagal.
+    // Register hanya dibuka kalau backend benar-benar bilang akun social/email belum ada.
+    return message.contains('belum terdaftar') ||
+        message.contains('not registered') ||
+        message.contains('not found') ||
+        message.contains('user not found') ||
+        message.contains('account not found') ||
+        message.contains('akun tidak ditemukan') ||
+        message.contains('email tidak ditemukan') ||
+        message.contains('404') ||
+        message.contains('token tidak ditemukan') ||
+        message.contains('token not found') ||
+        message.contains('social login') ||
+        message.contains('akun belum ada');
+  }
+
+  void _handleSocialLoginError({
+    required Object error,
+    required String provider,
+    String? email,
+    String? name,
+    int seconds = 6,
+  }) {
+    if (!mounted) return;
+
+    if (email != null && email.isNotEmpty && _shouldOpenRegistration(error)) {
+      _goToRegistrationFromSocial(
+        provider: provider,
+        email: email,
+        name: name,
+      );
+      return;
+    }
+
+    _showSnackBar(
+      error.toString().replaceFirst('Exception: ', ''),
+      backgroundColor: Colors.red,
+      seconds: seconds,
+    );
+  }
+
   Future<void> _handleGoogleLogin() async {
     if (_isGoogleLoading) return;
 
     setState(() => _isGoogleLoading = true);
 
+    String? socialEmail;
+    String? socialName;
+
     try {
       final googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
         serverClientId:
-        '1088379536347-upgn3p7fodrdnqh2cvd0rf6125ku1e0v.apps.googleusercontent.com',
+            '1088379536347-upgn3p7fodrdnqh2cvd0rf6125ku1e0v.apps.googleusercontent.com',
       );
 
-      await googleSignIn.signOut();
+      try {
+        await googleSignIn.signOut();
+        await googleSignIn.disconnect();
+      } catch (e) {
+        debugPrint('GOOGLE PRE-LOGIN SESSION CLEAR WARNING: $e');
+      }
+
       await FirebaseAuth.instance.signOut();
+      await AuthService().clearSocialSignInData();
 
       final googleUser = await googleSignIn.signIn();
 
@@ -69,6 +159,9 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
+      socialEmail = googleUser.email;
+      socialName = googleUser.displayName;
+
       final googleAuth = await googleUser.authentication;
 
       if (googleAuth.idToken == null || googleAuth.accessToken == null) {
@@ -81,24 +174,34 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final userCredential =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       final firebaseIdToken = await userCredential.user?.getIdToken(true);
 
       if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
-        throw Exception('Firebase ID Token tidak ditemukan.');
+        throw Exception('Firebase ID Token Google tidak ditemukan.');
       }
 
-      debugPrint('FIREBASE ID TOKEN: $firebaseIdToken');
+      debugPrint('GOOGLE EMAIL: $socialEmail');
+      debugPrint('GOOGLE FIREBASE UID: ${userCredential.user?.uid}');
+      debugPrint('GOOGLE FIREBASE ID TOKEN: $firebaseIdToken');
 
-      final result = await AuthService().loginWithFirebaseIdToken(
+      final authService = AuthService();
+      await authService.saveSocialSignInData(
+        provider: 'google',
+        idToken: firebaseIdToken,
+        email: socialEmail,
+        name: socialName,
+      );
+
+      final result = await authService.loginWithFirebaseIdToken(
         idToken: firebaseIdToken,
       );
 
       if (!mounted) return;
 
       _showSnackBar(
-        result['message']?.toString() ?? 'Login Google berhasil',
+        'Sign in berhasil',
         backgroundColor: Colors.green,
         seconds: 2,
       );
@@ -106,17 +209,18 @@ class _LoginScreenState extends State<LoginScreen> {
       await Future.delayed(const Duration(milliseconds: 400));
 
       if (!mounted) return;
+      _refreshProfileAfterSignIn();
       context.go(AppRoutes.dashboard);
     } catch (e, stackTrace) {
       debugPrint('GOOGLE ERROR TYPE: ${e.runtimeType}');
       debugPrint('GOOGLE ERROR: $e');
       debugPrint('GOOGLE STACK: $stackTrace');
 
-      if (!mounted) return;
-
-      _showSnackBar(
-        e.toString().replaceFirst('Exception: ', ''),
-        backgroundColor: Colors.red,
+      _handleSocialLoginError(
+        error: e,
+        provider: 'google',
+        email: socialEmail,
+        name: socialName,
         seconds: 5,
       );
     } finally {
@@ -131,6 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isAppleLoading = true);
 
+    String? socialEmail;
+    String? socialName;
+
     try {
       await FirebaseAuth.instance.signOut();
 
@@ -142,6 +249,8 @@ class _LoginScreenState extends State<LoginScreen> {
           await FirebaseAuth.instance.signInWithProvider(appleProvider);
 
       final user = userCredential.user;
+      socialEmail = user?.email;
+      socialName = user?.displayName;
       final firebaseIdToken = await user?.getIdToken(true);
 
       if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
@@ -151,17 +260,25 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('APPLE FIREBASE UID: ${user?.uid}');
       debugPrint('APPLE EMAIL: ${user?.email}');
       debugPrint('APPLE DISPLAY NAME: ${user?.displayName}');
-      debugPrint('APPLE FIREBASE ID TOKEN: $firebaseIdToken');
+      debugPrint('APPLE ID TOKEN: $firebaseIdToken');
 
       try {
-        final result = await AuthService().loginWithFirebaseIdToken(
+        final authService = AuthService();
+        await authService.saveSocialSignInData(
+          provider: 'apple',
+          idToken: firebaseIdToken,
+          email: socialEmail,
+          name: socialName,
+        );
+
+        final result = await authService.loginWithFirebaseIdToken(
           idToken: firebaseIdToken,
         );
 
         if (!mounted) return;
 
         _showSnackBar(
-          result['message']?.toString() ?? 'Login Apple berhasil',
+          'Sign in berhasil',
           backgroundColor: Colors.green,
           seconds: 2,
         );
@@ -169,18 +286,18 @@ class _LoginScreenState extends State<LoginScreen> {
         await Future.delayed(const Duration(milliseconds: 400));
 
         if (!mounted) return;
+        _refreshProfileAfterSignIn();
         context.go(AppRoutes.dashboard);
       } catch (apiError, apiStackTrace) {
         debugPrint('APPLE CALLBACK API ERROR TYPE: ${apiError.runtimeType}');
         debugPrint('APPLE CALLBACK API ERROR: $apiError');
         debugPrint('APPLE CALLBACK API STACK: $apiStackTrace');
 
-        if (!mounted) return;
-
-        _showSnackBar(
-          'Apple/Firebase sudah aktif. API E-Hara masih gagal: '
-          '${apiError.toString().replaceFirst('Exception: ', '')}',
-          backgroundColor: Colors.orange,
+        _handleSocialLoginError(
+          error: apiError,
+          provider: 'apple',
+          email: socialEmail,
+          name: socialName,
           seconds: 7,
         );
       }
@@ -189,11 +306,11 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('APPLE ERROR: $e');
       debugPrint('APPLE STACK: $stackTrace');
 
-      if (!mounted) return;
-
-      _showSnackBar(
-        e.toString().replaceFirst('Exception: ', ''),
-        backgroundColor: Colors.red,
+      _handleSocialLoginError(
+        error: e,
+        provider: 'apple',
+        email: socialEmail,
+        name: socialName,
         seconds: 6,
       );
     } finally {
@@ -277,11 +394,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                         : 'Sign in dengan Apple',
                                     style: AppTextStyles.semiBold(
                                       fontSize: 15,
-                                      color: Colors.black,
+                                      color: Colors.black.withOpacity(0.70),
                                     ),
                                   ),
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.black,
+                                    foregroundColor: Colors.black.withOpacity(0.70),
                                     side: BorderSide(
                                       color: Colors.black.withOpacity(0.25),
                                     ),

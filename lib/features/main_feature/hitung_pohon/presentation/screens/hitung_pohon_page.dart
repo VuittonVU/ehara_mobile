@@ -35,7 +35,7 @@ class _HitungPohonPageState extends ConsumerState<HitungPohonPage> {
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['tif', 'tiff'],
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'tif', 'tiff'],
       allowMultiple: false,
     );
 
@@ -50,7 +50,7 @@ class _HitungPohonPageState extends ConsumerState<HitungPohonPage> {
 
   Future<void> _upload() async {
     if (_selectedFile == null) {
-      _showSnack('Pilih file .tif / .tiff dulu ya.');
+      _showSnack('Pilih file gambar dulu ya.');
       return;
     }
 
@@ -177,7 +177,7 @@ class _HitungPohonPageState extends ConsumerState<HitungPohonPage> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Unggah file citra drone yang sudah memiliki metadata NIR (Near-Infrared) untuk akurasi deteksi pohon. Gunakan file berformat .tif atau .tiff.',
+                                  'Unggah file citra drone untuk menghitung jumlah pohon. Format yang didukung: JPG, JPEG, PNG, TIF, atau TIFF.',
                                   style: AppTextStyles.regular(
                                     fontSize: 13,
                                     color: AppColors.textPrimary.withOpacity(0.72),
@@ -240,7 +240,7 @@ class _HitungPohonPageState extends ConsumerState<HitungPohonPage> {
                                                       ),
                                                       const SizedBox(height: 4),
                                                       Text(
-                                                        'TIF',
+                                                        'IMG',
                                                         style: AppTextStyles.bold(
                                                           fontSize: 11,
                                                           color: AppColors.primary,
@@ -300,7 +300,7 @@ class _HitungPohonPageState extends ConsumerState<HitungPohonPage> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'File yang dipilih harus berformat .tif/.tiff',
+                                  'File yang dipilih harus berformat .jpg/.jpeg/.png/.tif/.tiff',
                                   style: AppTextStyles.regular(
                                     fontSize: 12,
                                     color: AppColors.textPrimary.withOpacity(0.7),
