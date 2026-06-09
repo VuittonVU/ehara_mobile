@@ -79,16 +79,13 @@ class AuthService {
   Future<Map<String, dynamic>> loginWithGoogleIdToken({
     required String idToken,
   }) async {
-    // Compatibility alias: this must receive a Firebase ID Token, not a raw
-    // Google ID Token. New code should call loginWithFirebaseIdToken().
     return loginWithFirebaseIdToken(idToken: idToken);
   }
 
   Future<Map<String, dynamic>> loginWithFirebaseIdToken({
     required String idToken,
   }) {
-    // Backend currently uses /api/auth/google/mobile-callback for Firebase social callback.
-    // Body contains only: id_token (Firebase ID Token).
+
     return _loginWithSocialIdToken(
       idToken: idToken,
       debugLabel: 'FIREBASE',

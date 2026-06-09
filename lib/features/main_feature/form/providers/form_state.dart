@@ -143,7 +143,7 @@ class TambahFormState {
       detailLokasi: '',
       tanggalPengambilan: '',
       tanggalAnalisis: '',
-      sensor: 'Micasense',
+      sensor: 'MicaSense',
       ganodermaStep1: 'Ya',
       provinsiList: [],
       kabupatenList: [],

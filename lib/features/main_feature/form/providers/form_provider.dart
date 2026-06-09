@@ -635,7 +635,7 @@ class FormNotifier extends Notifier<TambahFormState> {
       detailLokasi: (draft['detailLokasi'] ?? '').toString(),
       tanggalPengambilan: (draft['tanggalPengambilan'] ?? '').toString(),
       tanggalAnalisis: (draft['tanggalAnalisis'] ?? '').toString(),
-      sensor: (draft['sensor'] ?? 'Micasense').toString(),
+      sensor: (draft['sensor'] ?? 'MicaSense').toString(),
       ganodermaStep1: (draft['ganodermaStep1'] ?? 'Ya').toString(),
       selectedProvinsi: (provCode.isNotEmpty || provName.isNotEmpty)
           ? WilayahItem(code: provCode, name: provName)

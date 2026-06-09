@@ -522,9 +522,9 @@ class _Form1PageState extends ConsumerState<Form1Page> {
                             const FormLabel(text: 'Sensor'),
                             const SizedBox(height: 8),
                             FormDropdownField<String>(
-                              value: formState.sensor.isEmpty
-                                  ? null
-                                  : formState.sensor,
+                              value: SensorOptions.items.contains(formState.sensor)
+                                  ? formState.sensor
+                                  : null,
                               hintText: 'Pilih sensor',
                               items: SensorOptions.items
                                   .map(

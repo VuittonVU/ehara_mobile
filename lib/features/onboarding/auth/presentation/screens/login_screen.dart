@@ -81,8 +81,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _shouldOpenRegistration(Object error) {
     final message = error.toString().toLowerCase();
 
-    // Jangan arahkan user terdaftar ke register hanya karena callback API gagal.
-    // Register hanya dibuka kalau backend benar-benar bilang akun social/email belum ada.
     return message.contains('belum terdaftar') ||
         message.contains('not registered') ||
         message.contains('not found') ||
