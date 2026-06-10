@@ -43,6 +43,7 @@ class DashboardController {
         iconPath: 'assets/icons/badge_check.png',
         onTap: onSertifikasiTap,
       ),
+      /*Menu Hitung Pohon dan Riwayat Karena API belum up
       DashboardMenuModel(
         title: 'Hitung Pohon',
         iconPath: 'assets/icons/pohon2.png',
@@ -53,6 +54,7 @@ class DashboardController {
         iconPath: 'assets/icons/riwayat.png',
         onTap: onRiwayatHitungTap,
       ),
+       */
     ];
   }
 }

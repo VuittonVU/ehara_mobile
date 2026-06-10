@@ -20,9 +20,9 @@ import '../features/main_feature/dashboard/presentation/screens/article/article_
 
 import '../features/main_feature/notifikasi/presentation/screens/notifikasi_page.dart';
 import '../features/main_feature/sertifikat/presentation/screens/sertifikat_page.dart';
-import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_page.dart';
-import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_history_page.dart';
-import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_result_page.dart';
+//import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_page.dart';
+//import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_history_page.dart';
+//import '../features/main_feature/hitung_pohon/presentation/screens/hitung_pohon_result_page.dart';
 import '../features/main_feature/list_kebun/presentation/screens/list_kebun_page.dart';
 
 import '../features/main_feature/riwayat/presentation/screens/riwayat_page.dart';
@@ -154,7 +154,7 @@ class EHaraApp extends StatelessWidget {
         name: 'sertifikat',
         builder: (context, state) => const SertifikatPage(),
       ),
-      GoRoute(
+      /*GoRoute(
         path: AppRoutes.hitungPohon,
         builder: (context, state) => const HitungPohonPage(),
       ),
@@ -169,6 +169,7 @@ class EHaraApp extends StatelessWidget {
           return HitungPohonResultPage(jobId: id);
         },
       ),
+       */
       GoRoute(
         path: AppRoutes.listKebun,
         name: 'listKebun',
